@@ -1,0 +1,28 @@
+<nav class="navbar">
+
+    <div class="logo">Samkelo</div>
+
+    <div class="menu-toggle" (click)="toggleMenu()">
+        ☰
+    </div>
+
+    <div class="links" [class.open]="isMenuOpen">
+
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+            Home
+        </a>
+
+        <a routerLink="/projects" routerLinkActive="active">
+            Projects
+        </a>
+
+        <a routerLink="/contact" routerLinkActive="active">
+            Contact
+        </a>
+
+        <div class="theme-toggle" [class.active]="isLightMode" (click)="toggleTheme()">
+        </div>
+
+    </div>
+
+</nav>
