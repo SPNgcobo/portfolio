@@ -1,0 +1,19 @@
+<div class="login">
+
+    <h2>Login</h2>
+
+    <form [formGroup]="form" (ngSubmit)="login()">
+
+        <input formControlName="email" placeholder="Email" />
+
+        <input formControlName="password" type="password" placeholder="Password" />
+
+        <button type="submit" [disabled]="loading">
+
+            {{ loading ? 'Logging in...' : 'Login' }}
+
+        </button>
+
+    </form>
+
+</div>

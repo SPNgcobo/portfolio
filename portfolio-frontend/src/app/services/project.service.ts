@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+
 import { Project } from '../models/project.model';
 import { ApiResponse } from '../models/api-response.model';
 
@@ -11,7 +12,7 @@ export class ProjectService {
 
   private baseUrl = 'http://localhost:8080/api/projects';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getAll(): Observable<ApiResponse<Project[]>> {
     return this.http.get<ApiResponse<Project[]>>(this.baseUrl);

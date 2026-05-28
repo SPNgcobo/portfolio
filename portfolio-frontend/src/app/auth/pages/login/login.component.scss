@@ -1,0 +1,38 @@
+.login {
+    max-width: 400px;
+    margin: 80px auto;
+    padding: 2rem;
+    background: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: var(--shadow-soft);
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-main);
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary);
+    color: white;
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
