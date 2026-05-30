@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/media")
-@CrossOrigin(origins = "*")
 public class MediaController {
 
     private final MediaService service;

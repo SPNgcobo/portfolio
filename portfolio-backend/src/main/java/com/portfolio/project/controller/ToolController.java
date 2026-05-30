@@ -9,7 +9,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/tools")
-@CrossOrigin(origins = "*")
 public class ToolController {
 
     private final ToolService service;

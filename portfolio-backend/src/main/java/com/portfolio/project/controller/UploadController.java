@@ -11,7 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/uploads")
-@CrossOrigin(origins = "*")
 public class UploadController {
 
     private final CloudinaryService service;

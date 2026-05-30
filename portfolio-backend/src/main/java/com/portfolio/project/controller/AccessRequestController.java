@@ -10,7 +10,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/access-requests")
-@CrossOrigin(origins = "*")
 public class AccessRequestController {
 
     private final AccessRequestService service;

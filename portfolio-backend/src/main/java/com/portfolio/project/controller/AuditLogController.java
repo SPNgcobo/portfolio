@@ -9,7 +9,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/audit-logs")
-@CrossOrigin(origins = "*")
 public class AuditLogController {
 
     private final AuditLogService service;

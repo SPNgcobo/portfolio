@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/projects")
-@CrossOrigin(origins = "*")
 public class AdminProjectController {
 
     private final ProjectService service;

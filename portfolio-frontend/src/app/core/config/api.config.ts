@@ -4,5 +4,5 @@ export const API_CONFIG = {
 
     apiUrl: environment.apiUrl,
 
-    wsUrl: environment.wsUrl
+    wsUrl: environment.socketUrl
 };

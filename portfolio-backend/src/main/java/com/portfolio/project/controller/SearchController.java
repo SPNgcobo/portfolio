@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/search")
-@CrossOrigin(origins = "*")
 public class SearchController {
 
     private final ProjectService projectService;

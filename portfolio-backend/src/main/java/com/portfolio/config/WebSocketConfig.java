@@ -25,7 +25,11 @@ public class WebSocketConfig
     ) {
 
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*")
+                .setAllowedOriginPatterns(
+                        "http://localhost:4200",
+                        "https://samkelongcobo.is-a.dev",
+                        "https://www.samkelongcobo.is-a.dev"
+                )
                 .withSockJS();
     }
 }
