@@ -1,8 +1,7 @@
 export const environment = {
-
     production: true,
 
-    apiUrl: 'https://MY-RENDER-BACKEND.onrender.com/api', //Coming
+    apiUrl: 'https://portfolio-backend-b93o.onrender.com/api',
 
-    socketUrl: 'https://MY-RENDER-BACKEND.onrender.com/ws' //Coming
+    socketUrl: 'https://portfolio-backend-b93o.onrender.com/ws'
 };
