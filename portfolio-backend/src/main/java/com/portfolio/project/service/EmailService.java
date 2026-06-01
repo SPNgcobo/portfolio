@@ -184,7 +184,7 @@ public class EmailService {
         try {
 
             String resetUrl =
-                    "http://localhost:3000/reset-password?token="
+                    "https://samkelongcobo.is-a.dev/reset-password?token="
                             + resetToken;
 
             CreateEmailOptions params =

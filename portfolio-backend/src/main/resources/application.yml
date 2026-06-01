@@ -30,4 +30,4 @@ admin:
 
 app:
   cookie:
-    secure: false
+    secure: ${APP_COOKIE_SECURE:false}

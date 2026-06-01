@@ -1,5 +1,7 @@
 package com.portfolio.auth.controller;
 
+import com.portfolio.auth.dto.ForgotPasswordRequest;
+import com.portfolio.auth.dto.ResetPasswordRequest;
 import com.portfolio.auth.dto.*;
 import com.portfolio.auth.service.AuthService;
 import com.portfolio.common.ApiResponse;
@@ -118,6 +120,40 @@ public class AuthController {
         clearCookies(response);
 
         return new ApiResponse<>(true, "Logged out successfully", null);
+    }
+
+    /*
+     * FORGOT PASSWORD
+     */
+    @PostMapping("/forgot-password")
+    public ApiResponse<Object> forgotPassword(
+            @RequestBody ForgotPasswordRequest request
+    ) {
+
+        authService.forgotPassword(request);
+
+        return new ApiResponse<>(
+                true,
+                "Password reset email sent",
+                null
+        );
+    }
+
+    /*
+     * RESET PASSWORD
+     */
+    @PostMapping("/reset-password")
+    public ApiResponse<Object> resetPassword(
+            @RequestBody ResetPasswordRequest request
+    ) {
+
+        authService.resetPassword(request);
+
+        return new ApiResponse<>(
+                true,
+                "Password reset successful",
+                null
+        );
     }
 
     // ================= COOKIE HELPERS =================
