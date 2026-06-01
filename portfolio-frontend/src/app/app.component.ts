@@ -1,12 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-
 import { RouterOutlet } from '@angular/router';
 
-import { NavbarComponent }
-from './layout/navbar/navbar.component';
-
-import { DashboardSocketService }
-from './services/dashboard-socket.service';
+import { NavbarComponent } from './layout/navbar/navbar.component';
+import { DashboardSocketService } from './services/dashboard-socket.service';
+import { AuthService } from './auth/services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -17,16 +14,17 @@ from './services/dashboard-socket.service';
   ],
   templateUrl: './app.component.html'
 })
-export class AppComponent
-implements OnInit {
+export class AppComponent implements OnInit {
 
   constructor(
-    private socketService:
-    DashboardSocketService
-  ) {}
+    private socketService: DashboardSocketService,
+    private auth: AuthService
+  ) { }
 
   ngOnInit(): void {
 
     this.socketService.connect();
+
+    this.auth.loadUser();
   }
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Client, IMessage } from '@stomp/stompjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,8 @@ export class DashboardSocketService {
 
     this.client = new Client({
 
-      brokerURL: 'ws://localhost:8080/ws/websocket',
+      brokerURL:
+      `${environment.socketUrl}/websocket`,
 
       reconnectDelay: 5000,
 

@@ -6,7 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
-
+import org.springframework.beans.factory.annotation.Value;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -14,8 +14,8 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    private static final String SECRET =
-            "SUPER_SECRET_PORTFOLIO_JWT_KEY_2026_SUPER_SECURE_KEY";
+    @Value("${jwt.secret}")
+    private String secret;
 
     /*
      * 15 MINUTES
@@ -29,7 +29,7 @@ public class JwtService {
     public void init() {
 
         key = Keys.hmacShaKeyFor(
-                SECRET.getBytes(StandardCharsets.UTF_8)
+                secret.getBytes(StandardCharsets.UTF_8)
         );
     }
 

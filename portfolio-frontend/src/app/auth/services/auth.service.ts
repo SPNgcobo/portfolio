@@ -1,16 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-
-import { Observable, tap } from 'rxjs';
-
-import { jwtDecode } from 'jwt-decode';
-
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-import { LoginRequest } from '../models/login-request.model';
-import { LoginApiResponse } from '../models/login-api-response.model';
-
-import { JwtPayload } from '../../core/models/jwt-payload.model';
+export interface CurrentUser {
+  email: string;
+  role: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -19,87 +15,55 @@ export class AuthService {
 
   private api = `${environment.apiUrl}/auth`;
 
+  private currentUser: CurrentUser | null = null;
+
   constructor(private http: HttpClient) { }
 
-  login(request: LoginRequest): Observable<LoginApiResponse> {
+  login(request: any): Observable<any> {
 
-    return this.http.post<LoginApiResponse>(
+    return this.http.post(
       `${this.api}/login`,
-      request
-    ).pipe(
-      tap((res) => {
-
-        const data = res.data;
-
-        localStorage.setItem('token', data.token);
-
-        localStorage.setItem(
-          'refreshToken',
-          data.refreshToken
-        );
-
-        localStorage.setItem(
-          'role',
-          data.role
-        );
-      })
+      request,
+      { withCredentials: true }
     );
   }
 
-  getToken(): string | null {
+  logout(): Observable<any> {
 
-    return localStorage.getItem('token');
+    return this.http.post(
+      `${this.api}/logout`,
+      {},
+      { withCredentials: true }
+    );
   }
 
-  getRefreshToken(): string | null {
+  getMe(): Observable<CurrentUser> {
 
-    return localStorage.getItem('refreshToken');
+    return this.http.get<any>(
+      `${this.api}/me`,
+      { withCredentials: true }
+    ).pipe(
+      map(res => res.data as CurrentUser)
+    );
+  }
+
+  loadUser(): void {
+
+    this.getMe().subscribe({
+      next: (user) => {
+        this.currentUser = user;
+      },
+      error: () => {
+        this.currentUser = null;
+      }
+    });
   }
 
   getRole(): string | null {
-
-    return localStorage.getItem('role');
+    return this.currentUser?.role || null;
   }
 
-  isLoggedIn(): boolean {
-
-    return !!this.getToken();
-  }
-
-  logout(): void {
-
-    localStorage.removeItem('token');
-
-    localStorage.removeItem('refreshToken');
-
-    localStorage.removeItem('role');
-  }
-
-  getDecodedToken(): JwtPayload | null {
-
-    const token = this.getToken();
-
-    if (!token) return null;
-
-    try {
-
-      return jwtDecode<JwtPayload>(token);
-
-    } catch {
-
-      return null;
-    }
-  }
-
-  getUserRole(): string | null {
-
-    const decoded = this.getDecodedToken();
-
-    return decoded?.role || null;
-  }
-
-  isAdmin(): boolean {
-
-    return this.getUserRole() === 'ADMIN';
+  isAdminSync(): boolean {
+    return this.currentUser?.role === 'ROLE_ADMIN';
   }
 }

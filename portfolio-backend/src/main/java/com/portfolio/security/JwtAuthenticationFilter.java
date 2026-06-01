@@ -3,6 +3,7 @@ package com.portfolio.security;
 import com.portfolio.auth.model.User;
 import com.portfolio.auth.repository.UserRepository;
 import com.portfolio.config.JwtService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,18 +40,27 @@ public class JwtAuthenticationFilter
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        final String authHeader =
-                request.getHeader("Authorization");
+        String token = null;
 
-        if (authHeader == null
-                || !authHeader.startsWith("Bearer ")) {
+        if (request.getCookies() != null) {
 
-            filterChain.doFilter(request, response);
-            return;
+            for (Cookie cookie : request.getCookies()) {
+
+                if ("access_token".equals(cookie.getName())) {
+
+                    token = cookie.getValue();
+
+                    break;
+                }
+            }
         }
 
-        String token =
-                authHeader.substring(7);
+        if (token == null) {
+
+            filterChain.doFilter(request, response);
+
+            return;
+        }
 
         if (!jwtService.isValid(token)) {
 

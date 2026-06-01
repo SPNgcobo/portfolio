@@ -19,13 +19,11 @@ public class CorsConfig {
 
         config.setAllowCredentials(true);
 
-        config.setAllowedOrigins(
-                List.of(
-                        "http://localhost:4200",
-                        "https://samkelongcobo.is-a.dev",
-                        "https://www.samkelongcobo.is-a.dev"
-                )
-        );
+        config.setAllowedOrigins(List.of(
+                "http://localhost:4200",
+                "https://samkelongcobo.is-a.dev",
+                "https://www.samkelongcobo.is-a.dev"
+        ));
 
         config.setAllowedHeaders(
                 List.of("*")

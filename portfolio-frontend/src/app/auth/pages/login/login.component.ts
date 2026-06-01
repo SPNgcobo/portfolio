@@ -10,12 +10,11 @@ import { AuthService } from '../../services/auth.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']   
+  styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
 
   loading = false;
-
   form;
 
   constructor(
@@ -38,9 +37,9 @@ export class LoginComponent {
 
     this.authService.login(this.form.value as any)
       .subscribe({
-        next: (res) => {
+        next: () => {
 
-          console.log('LOGIN SUCCESS:', res);
+          console.log('LOGIN SUCCESS');
 
           this.router.navigate(['/projects']);
 

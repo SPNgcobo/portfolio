@@ -1,10 +1,6 @@
 import { Injectable } from '@angular/core';
-
-import {
-  CanActivate,
-  Router
-} from '@angular/router';
-
+import { CanActivate, Router } from '@angular/router';
+import { Observable, map, catchError, of } from 'rxjs';
 import { AuthService } from '../../auth/services/auth.service';
 
 @Injectable({
@@ -17,15 +13,24 @@ export class AdminGuard implements CanActivate {
     private router: Router
   ) { }
 
-  canActivate(): boolean {
+  canActivate(): Observable<boolean> {
 
-    if (this.auth.isAdmin()) {
+    return this.auth.getMe().pipe(
 
-      return true;
-    }
+      map(user => {
 
-    this.router.navigate(['/']);
+        if (user.role === 'ROLE_ADMIN') {
+          return true;
+        }
 
-    return false;
+        this.router.navigate(['/']);
+        return false;
+      }),
+
+      catchError(() => {
+        this.router.navigate(['/']);
+        return of(false);
+      })
+    );
   }
 }
