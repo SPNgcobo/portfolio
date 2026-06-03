@@ -10,7 +10,7 @@ import java.util.Date;
 @Data
 @Document(collection = "project_engagements")
 @CompoundIndex(
-        def = "{'projectId':1,'ipAddress':1,'type':1}",
+        def = "{'projectId':1,'fingerprint':1,'type':1}",
         unique = true
 )
 public class ProjectEngagement {
@@ -28,7 +28,7 @@ public class ProjectEngagement {
      */
     private String type;
 
-    private String ipAddress;
+    private String fingerprint;
 
     private Date createdAt;
 }

@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 
 import { Project } from '../models/project.model';
 import { ApiResponse } from '../models/api-response.model';
+import { PageResponse } from '../models/page-response.model';
+
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -13,25 +15,84 @@ export class ProjectService {
 
   private baseUrl = `${environment.apiUrl}/projects`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  getAll(): Observable<ApiResponse<Project[]>> {
-    return this.http.get<ApiResponse<Project[]>>(this.baseUrl);
+  getAll(
+    page = 0,
+    size = 10
+  ): Observable<ApiResponse<PageResponse<Project>>> {
+
+    return this.http.get<ApiResponse<PageResponse<Project>>>(
+      `${this.baseUrl}?page=${page}&size=${size}`
+    );
+
   }
 
-  getById(id: string): Observable<ApiResponse<Project>> {
-    return this.http.get<ApiResponse<Project>>(`${this.baseUrl}/${id}`);
+  getById(
+    id: string
+  ): Observable<ApiResponse<Project>> {
+
+    return this.http.get<ApiResponse<Project>>(
+      `${this.baseUrl}/${id}`
+    );
+
+
   }
 
-  create(project: Project): Observable<ApiResponse<Project>> {
-    return this.http.post<ApiResponse<Project>>(this.baseUrl, project);
+  incrementView(
+    id: string
+  ): Observable<ApiResponse<Project>> {
+
+    return this.http.post<ApiResponse<Project>>(
+      `${this.baseUrl}/${id}/view`,
+      {}
+    );
+
+
   }
 
-  update(id: string, project: Project): Observable<ApiResponse<Project>> {
-    return this.http.put<ApiResponse<Project>>(`${this.baseUrl}/${id}`, project);
+  toggleLike(
+    id: string
+  ): Observable<ApiResponse<Project>> {
+
+    return this.http.post<ApiResponse<Project>>(
+      `${this.baseUrl}/${id}/like`,
+      {}
+    );
+
   }
 
-  delete(id: string): Observable<ApiResponse<void>> {
-    return this.http.delete<ApiResponse<void>>(`${this.baseUrl}/${id}`);
+  create(
+    project: Project
+  ): Observable<ApiResponse<Project>> {
+
+    return this.http.post<ApiResponse<Project>>(
+      this.baseUrl,
+      project
+    );
+
+  }
+
+  update(
+    id: string,
+    project: Project
+  ): Observable<ApiResponse<Project>> {
+
+    return this.http.put<ApiResponse<Project>>(
+      `${this.baseUrl}/${id}`,
+      project
+    );
+
+
+  }
+
+  delete(
+    id: string
+  ): Observable<ApiResponse<void>> {
+
+    return this.http.delete<ApiResponse<void>>(
+      `${this.baseUrl}/${id}`
+    );
+
   }
 }

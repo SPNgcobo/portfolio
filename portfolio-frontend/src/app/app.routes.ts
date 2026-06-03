@@ -1,36 +1,36 @@
 import { Routes } from '@angular/router';
 
-import { HomeComponent }
-    from './pages/home/home.component';
+import { HomeComponent } from './pages/home/home.component';
+import { ProjectsComponent } from './pages/projects/projects.component';
+import { LoginComponent } from './auth/pages/login/login.component';
 
-import { ProjectsComponent }
-    from './pages/projects/projects.component';
-
-import { LoginComponent }
-    from './auth/pages/login/login.component';
-
-import { AuthGuard }
-    from './auth/guards/auth.guard';
+import { ProjectDetailComponent } from './pages/project-detail/project-detail.component';
 
 export const routes: Routes = [
 
-    {
-        path: '',
-        component: HomeComponent
-    },
+{
+    path: '',
+    component: HomeComponent
+},
 
-    {
-        path: 'projects',
-        component: ProjectsComponent
-    },
+{
+    path: 'projects',
+    component: ProjectsComponent
+},
 
-    {
-        path: 'login',
-        component: LoginComponent
-    },
+{
+    path: 'projects/:id',
+    component: ProjectDetailComponent
+},
 
-    {
-        path: '**',
-        redirectTo: ''
-    }
+{
+    path: 'login',
+    component: LoginComponent
+},
+
+{
+    path: '**',
+    redirectTo: ''
+}
+
 ];

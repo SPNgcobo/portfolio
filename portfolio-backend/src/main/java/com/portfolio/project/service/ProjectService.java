@@ -51,8 +51,7 @@ public class ProjectService {
      */
     public Project getById(String id) {
 
-        return repository
-                .findByIdAndPublishedTrue(id)
+        return repository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Project not found"
@@ -584,5 +583,32 @@ public class ProjectService {
                 totalDemoClicks,
                 totalDetailClicks
         );
+    }
+
+    public Project decrementLike(String id) {
+
+        Project project =
+                getAdminProjectById(id);
+
+        project.setLikes(
+                Math.max(0, project.getLikes() - 1)
+        );
+
+        return repository.save(project);
+    }
+
+    public Project updateLikeCount(String id, boolean liked) {
+
+        Project project = getAdminProjectById(id);
+
+        long likes = project.getLikes();
+
+        if (liked) {
+            project.setLikes(likes + 1);
+        } else {
+            project.setLikes(Math.max(0L, likes - 1));
+        }
+
+        return repository.save(project);
     }
 }

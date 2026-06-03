@@ -53,7 +53,7 @@ export class ProjectsComponent implements OnInit {
       next: (res) => {
         console.log('API RESPONSE:', res);
 
-        this.projects = res?.data || [];
+        this.projects = res.data.content || [];
         this.loading = false;
       },
       error: (err) => {
