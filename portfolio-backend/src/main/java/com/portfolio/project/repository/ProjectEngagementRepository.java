@@ -3,7 +3,7 @@ package com.portfolio.project.repository;
 import com.portfolio.project.model.ProjectEngagement;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import java.util.Optional;
+import java.util.List;
 
 public interface ProjectEngagementRepository
         extends MongoRepository<ProjectEngagement, String> {
@@ -14,7 +14,7 @@ public interface ProjectEngagementRepository
             String type
     );
 
-    Optional<ProjectEngagement> findByProjectIdAndFingerprintAndType(
+    List<ProjectEngagement> findAllByProjectIdAndFingerprintAndType(
             String projectId,
             String fingerprint,
             String type

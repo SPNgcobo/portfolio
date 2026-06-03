@@ -1,1 +1,129 @@
-<p>project-detail works!</p>
+<section class="project-detail">
+
+    <button class="back-btn" (click)="goBack()">
+        ← Back
+    </button>
+
+    <div *ngIf="loading" class="loading">
+        Loading project...
+    </div>
+
+    <div *ngIf="!loading && project">
+
+        <img class="hero-image" [src]="project.thumbnail || project.images?.[0]" [alt]="project.title">
+
+        <h1>
+            {{ project.title }}
+        </h1>
+
+        <p class="description">
+            {{ project.description }}
+        </p>
+
+        <div class="stats">
+
+            <span>
+                👁 {{ project.viewCount || 0 }}
+            </span>
+
+            <span>
+                ❤️ {{ project.likes || 0 }}
+            </span>
+
+        </div>
+
+        <div class="buttons">
+
+            <button (click)="likeProject()">
+                ❤️ Like
+            </button>
+
+            <a *ngIf="project.github" [href]="project.github" target="_blank" (click)="githubClick()">
+
+                GitHub
+
+            </a>
+
+            <a *ngIf="project.liveDemoUrl" [href]="project.liveDemoUrl" target="_blank" (click)="demoClick()">
+
+                Live Demo
+
+            </a>
+
+        </div>
+
+        <div class="section" *ngIf="project.problem">
+
+            <h2>Problem</h2>
+
+            <p>
+                {{ project.problem }}
+            </p>
+
+        </div>
+
+        <div class="section" *ngIf="project.solution">
+
+            <h2>Solution</h2>
+
+            <p>
+                {{ project.solution }}
+            </p>
+
+        </div>
+
+        <div class="section" *ngIf="project.architecture">
+
+            <h2>Architecture</h2>
+
+            <p>
+                {{ project.architecture }}
+            </p>
+
+        </div>
+
+        <div class="section" *ngIf="project.challenges">
+
+            <h2>Challenges</h2>
+
+            <p>
+                {{ project.challenges }}
+            </p>
+
+        </div>
+
+        <div class="section" *ngIf="project.techStack?.length">
+
+            <h2>Tech Stack</h2>
+
+            <div class="tech">
+
+                <span *ngFor="let tech of project.techStack">
+
+                    {{ tech }}
+
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="related" *ngIf="relatedProjects.length">
+
+            <h2>Related Projects</h2>
+
+            <div class="related-grid">
+
+                <a *ngFor="let item of relatedProjects" [routerLink]="['/projects', item.id]">
+
+                    {{ item.title }}
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>

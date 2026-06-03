@@ -1,0 +1,151 @@
+.back-btn {
+
+    margin-bottom: 2rem;
+
+    padding: .75rem 1.25rem;
+
+    border: 1px solid var(--border);
+
+    background: transparent;
+
+    color: var(--text);
+
+    border-radius: var(--radius-sm);
+
+    cursor: pointer;
+
+    transition: var(--transition);
+}
+
+.back-btn:hover {
+
+    border-color: var(--primary);
+
+    color: var(--primary);
+}
+
+.project-detail {
+
+    max-width: 1100px;
+
+    margin: 0 auto;
+
+    padding: 3rem 1rem;
+}
+
+.loading {
+
+    text-align: center;
+
+    padding: 3rem;
+}
+
+.hero-image {
+
+    width: 100%;
+
+    max-height: 500px;
+
+    object-fit: cover;
+
+    border-radius: var(--radius);
+
+    margin-bottom: 2rem;
+}
+
+h1 {
+
+    margin-bottom: 1rem;
+}
+
+.description {
+
+    color: var(--text-muted);
+
+    margin-bottom: 2rem;
+}
+
+.stats {
+
+    display: flex;
+
+    gap: 2rem;
+
+    margin-bottom: 2rem;
+}
+
+.buttons {
+
+    display: flex;
+
+    gap: 1rem;
+
+    flex-wrap: wrap;
+
+    margin-bottom: 3rem;
+}
+
+.buttons button,
+.buttons a {
+
+    padding: 0.75rem 1.25rem;
+
+    border-radius: var(--radius-sm);
+
+    border: 1px solid var(--primary);
+
+    background: transparent;
+
+    color: var(--primary);
+
+    text-decoration: none;
+
+    cursor: pointer;
+}
+
+.buttons button:hover,
+.buttons a:hover {
+
+    background: var(--primary);
+
+    color: white;
+}
+
+.section {
+
+    margin-bottom: 3rem;
+}
+
+.tech {
+
+    display: flex;
+
+    gap: 0.75rem;
+
+    flex-wrap: wrap;
+}
+
+.tech span {
+
+    padding: 0.5rem 0.8rem;
+
+    border-radius: 999px;
+
+    background: rgba(99, 102, 241, .15);
+}
+
+.related-grid {
+
+    display: flex;
+
+    gap: 1rem;
+
+    flex-wrap: wrap;
+}
+
+.related-grid a {
+
+    text-decoration: none;
+
+    color: var(--primary);
+}

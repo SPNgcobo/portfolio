@@ -5,7 +5,7 @@ import com.portfolio.project.repository.ProjectEngagementRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.Optional;
+import java.util.List;
 
 @Service
 public class ProjectEngagementService {
@@ -17,7 +17,7 @@ public class ProjectEngagementService {
     }
 
     /*
-     * TRACK (VIEW / CLICK = ONCE ONLY)
+     * TRACK (VIEW / CLICK = ONCE ONLY OR COOLDOWN BASED)
      */
     public void track(
             String projectId,
@@ -25,8 +25,8 @@ public class ProjectEngagementService {
             String type
     ) {
 
-        Optional<ProjectEngagement> existing =
-                repository.findByProjectIdAndFingerprintAndType(
+        List<ProjectEngagement> existing =
+                repository.findAllByProjectIdAndFingerprintAndType(
                         projectId,
                         fingerprint,
                         type
@@ -34,17 +34,30 @@ public class ProjectEngagementService {
 
         Date now = new Date();
 
-        if (existing.isPresent()) {
+        /*
+         * CASE 1: Already exists
+         */
+        if (!existing.isEmpty()) {
 
-            long diff =
-                    now.getTime() - existing.get().getCreatedAt().getTime();
+            ProjectEngagement last = existing.get(0);
 
-            // 10 second cooldown protection
-            if (diff < 10000) {
+            long diff = now.getTime() - last.getCreatedAt().getTime();
+
+            long oneDay = 24 * 60 * 60 * 1000;
+
+            if (diff < oneDay) {
                 return;
             }
+
+            /*
+             * CLEAN OLD RECORDS BEFORE INSERTING NEW ONE
+             */
+            repository.deleteAll(existing);
         }
 
+        /*
+         * CREATE NEW ENGAGEMENT
+         */
         ProjectEngagement engagement = new ProjectEngagement();
 
         engagement.setProjectId(projectId);
@@ -63,16 +76,16 @@ public class ProjectEngagementService {
             String fingerprint
     ) {
 
-        Optional<ProjectEngagement> existing =
-                repository.findByProjectIdAndFingerprintAndType(
+        List<ProjectEngagement> existing =
+                repository.findAllByProjectIdAndFingerprintAndType(
                         projectId,
                         fingerprint,
                         "LIKE"
                 );
 
-        if (existing.isPresent()) {
+        if (!existing.isEmpty()) {
 
-            repository.delete(existing.get());
+            repository.deleteAll(existing);
             return false;
         }
 
