@@ -1,0 +1,233 @@
+<div class="admin-dashboard">
+
+    <!-- Header -->
+    <div class="dashboard-header">
+        <h1>Admin Dashboard</h1>
+        <div class="header-actions">
+            <button class="refresh-btn" (click)="loadAllData()" [disabled]="loading">
+                🔄 Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading dashboard data...</p>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div *ngIf="!loading && stats">
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+
+            <!-- Quick Action Cards -->
+            <a routerLink="/admin/projects" class="stat-card action-card">
+                <span class="stat-icon">📁</span>
+                <span class="stat-label">Manage Projects</span>
+            </a>
+
+            <a routerLink="/admin/projects/new" class="stat-card action-card">
+                <span class="stat-icon">➕</span>
+                <span class="stat-label">New Project</span>
+            </a>
+
+            <a routerLink="/admin/blogs/new" class="stat-card action-card">
+                <span class="stat-icon">✍️</span>
+                <span class="stat-label">New Blog</span>
+            </a>
+
+            <a routerLink="/admin/comments" class="stat-card action-card">
+                <span class="stat-icon">💬</span>
+                <span class="stat-label">Moderate Comments</span>
+            </a>
+
+            <!-- Statistics Cards -->
+            <div class="stat-card">
+                <span class="stat-icon">📊</span>
+                <span class="stat-value">{{ stats.totalProjects }}</span>
+                <span class="stat-label">Total Projects</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-icon">📝</span>
+                <span class="stat-value">{{ stats.totalBlogs }}</span>
+                <span class="stat-label">Total Blogs</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-icon">👁️</span>
+                <span class="stat-value">{{ stats.totalProjectViews | number }}</span>
+                <span class="stat-label">Total Views</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-icon">❤️</span>
+                <span class="stat-value">{{ stats.totalProjectLikes | number }}</span>
+                <span class="stat-label">Total Likes</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-icon">⭐</span>
+                <span class="stat-value">{{ stats.featuredProjects }}</span>
+                <span class="stat-label">Featured Projects</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-icon">📰</span>
+                <span class="stat-value">{{ stats.publishedBlogs }}</span>
+                <span class="stat-label">Published Blogs</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-icon">💬</span>
+                <span class="stat-value">{{ stats.totalComments | number }}</span>
+                <span class="stat-label">Total Comments</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-icon">👥</span>
+                <span class="stat-value">{{ stats.totalVisitors | number }}</span>
+                <span class="stat-label">Unique Visitors</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-icon">🐙</span>
+                <span class="stat-value">{{ stats.totalGithubClicks | number }}</span>
+                <span class="stat-label">GitHub Clicks</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-icon">🚀</span>
+                <span class="stat-value">{{ stats.totalDemoClicks | number }}</span>
+                <span class="stat-label">Demo Clicks</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-icon">📄</span>
+                <span class="stat-value">{{ stats.totalDetailClicks | number }}</span>
+                <span class="stat-label">Detail Clicks</span>
+            </div>
+
+        </div>
+
+        <!-- Analytics Charts Section -->
+        <div class="charts-section" *ngIf="charts">
+            <h2>📈 Analytics</h2>
+
+            <div class="charts-grid">
+
+                <!-- Top Viewed Projects -->
+                <div class="chart-card">
+                    <h3>Top Viewed Projects</h3>
+                    <div class="chart-bars">
+                        <div class="chart-bar-item" *ngFor="let item of charts.topViewedProjects">
+                            <span class="chart-label">{{ item.label | slice:0:20 }}{{ item.label.length > 20 ? '...' :
+                                '' }}</span>
+                            <div class="bar-container">
+                                <div class="bar"
+                                    [style.width.%]="getBarWidth(item.value, getMaxChartValue(charts.topViewedProjects))">
+                                    <span class="bar-value">{{ item.value }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Liked Projects -->
+                <div class="chart-card">
+                    <h3>Most Liked Projects</h3>
+                    <div class="chart-bars">
+                        <div class="chart-bar-item" *ngFor="let item of charts.topLikedProjects">
+                            <span class="chart-label">{{ item.label | slice:0:20 }}{{ item.label.length > 20 ? '...' :
+                                '' }}</span>
+                            <div class="bar-container">
+                                <div class="bar"
+                                    [style.width.%]="getBarWidth(item.value, getMaxChartValue(charts.topLikedProjects))">
+                                    <span class="bar-value">{{ item.value }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top GitHub Clicked Projects -->
+                <div class="chart-card">
+                    <h3>Most GitHub Clicked</h3>
+                    <div class="chart-bars">
+                        <div class="chart-bar-item" *ngFor="let item of charts.topGithubProjects">
+                            <span class="chart-label">{{ item.label | slice:0:20 }}{{ item.label.length > 20 ? '...' :
+                                '' }}</span>
+                            <div class="bar-container">
+                                <div class="bar"
+                                    [style.width.%]="getBarWidth(item.value, getMaxChartValue(charts.topGithubProjects))">
+                                    <span class="bar-value">{{ item.value }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Demo Clicked Projects -->
+                <div class="chart-card">
+                    <h3>Most Demo Clicked</h3>
+                    <div class="chart-bars">
+                        <div class="chart-bar-item" *ngFor="let item of charts.topDemoProjects">
+                            <span class="chart-label">{{ item.label | slice:0:20 }}{{ item.label.length > 20 ? '...' :
+                                '' }}</span>
+                            <div class="bar-container">
+                                <div class="bar"
+                                    [style.width.%]="getBarWidth(item.value, getMaxChartValue(charts.topDemoProjects))">
+                                    <span class="bar-value">{{ item.value }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Recent Activity Section -->
+        <div class="recent-section" *ngIf="overview">
+            <h2>🔄 Recent Activity</h2>
+
+            <div class="recent-grid">
+
+                <!-- Recent Projects -->
+                <div class="recent-card">
+                    <h3>Recent Projects</h3>
+                    <div class="recent-list">
+                        <div class="recent-item" *ngFor="let project of overview.recentProjects">
+                            <span class="recent-title">{{ project.title }}</span>
+                            <span class="recent-date">{{ project.createdAt | date:'MMM d, yyyy' }}</span>
+                        </div>
+                        <div class="recent-item empty" *ngIf="overview.recentProjects.length === 0">
+                            No projects yet
+                        </div>
+                    </div>
+                    <a routerLink="/admin/projects" class="view-all">View All Projects →</a>
+                </div>
+
+                <!-- Recent Blogs -->
+                <div class="recent-card">
+                    <h3>Recent Blogs</h3>
+                    <div class="recent-list">
+                        <div class="recent-item" *ngFor="let blog of overview.recentBlogs">
+                            <span class="recent-title">{{ blog.title }}</span>
+                            <span class="recent-date">{{ blog.createdAt | date:'MMM d, yyyy' }}</span>
+                        </div>
+                        <div class="recent-item empty" *ngIf="overview.recentBlogs.length === 0">
+                            No blogs yet
+                        </div>
+                    </div>
+                    <a routerLink="/admin/blogs" class="view-all">View All Blogs →</a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>

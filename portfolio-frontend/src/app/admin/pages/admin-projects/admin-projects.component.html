@@ -1,0 +1,88 @@
+<div class="admin-projects">
+
+    <!-- Header -->
+    <div class="page-header">
+        <h1>Manage Projects</h1>
+        <a routerLink="/admin/projects/new" class="btn-primary">
+            <span>➕</span> Create New Project
+        </a>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading projects...</p>
+    </div>
+
+    <!-- Projects Table -->
+    <div class="projects-table-container" *ngIf="!loading">
+        <table class="projects-table" *ngIf="projects.length > 0">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Tech Stack</th>
+                    <th>Views</th>
+                    <th>Likes</th>
+                    <th>Comments</th>
+                    <th>Status</th>
+                    <th>Featured</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let project of projects">
+                    <td class="project-title">
+                        <span class="title-text">{{ project.title }}</span>
+                        <span class="project-id">ID: {{ project.id }}</span>
+                    </td>
+                    <td class="tech-stack">
+                        <span class="tech-badge" *ngFor="let tech of project.techStack | slice:0:2">
+                            {{ tech }}
+                        </span>
+                        <span class="tech-more" *ngIf="(project.techStack?.length || 0) > 2">
+                            +{{ (project.techStack?.length || 0) - 2 }}
+                        </span>
+                    </td>
+                    <td class="stat">{{ project.viewCount || 0 }}</td>
+                    <td class="stat">{{ project.likes || 0 }}</td>
+                    <td class="stat">{{ project.commentsCount || 0 }}</td>
+                    <td class="status">
+                        <button class="status-badge" [class.published]="project.published"
+                            [class.draft]="!project.published" (click)="togglePublish(project)"
+                            [disabled]="updatingId === project.id">
+                            {{ updatingId === project.id ? '...' : (project.published ? 'Published' : 'Draft') }}
+                        </button>
+                    </td>
+                    <td class="featured">
+                        <button class="featured-star" [class.active]="project.featured"
+                            (click)="toggleFeatured(project)" [disabled]="updatingId === project.id">
+                            {{ project.featured ? '★' : '☆' }}
+                        </button>
+                    </td>
+                    <td class="actions">
+                        <a [routerLink]="['/admin/projects/edit', project.id]" class="action-btn edit">
+                            ✏️ Edit
+                        </a>
+                        <button class="action-btn delete" (click)="openDeleteDialog(project.id!, project.title!)">
+                            🗑️ Delete
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="empty-state" *ngIf="projects.length === 0">
+            <span class="empty-icon">📂</span>
+            <h3>No Projects Yet</h3>
+            <p>Create your first project to showcase your work.</p>
+            <a routerLink="/admin/projects/new" class="btn-primary">Create Project</a>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Dialog - FIXED: Use double quotes for the attribute -->
+    <app-confirm-dialog [open]="showDeleteDialog" title="Delete Project"
+        [message]="'Are you sure you want to delete &quot;' + selectedProjectTitle + '&quot;? This action cannot be undone.'"
+        confirmText="Delete" cancelText="Cancel" (confirm)="confirmDelete()" (cancel)="cancelDelete()">
+    </app-confirm-dialog>
+
+</div>

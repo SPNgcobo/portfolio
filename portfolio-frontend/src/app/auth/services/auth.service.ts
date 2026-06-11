@@ -6,7 +6,7 @@ import { LoginResponse } from '../models/login-response';
 import { UserInfo } from '../models/user-info';
 import { ForgotPasswordRequest } from '../models/forgot-password';
 import { ResetPasswordRequest } from '../models/reset-password';
-import type { ApiResponse } from '../../models/api-response';
+import type { ApiResponse } from '../../models/api-response.model';
 import { environment } from '../../../environments/environment';
 
 

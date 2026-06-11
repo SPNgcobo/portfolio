@@ -99,7 +99,9 @@ public class CommentService {
         );
 
         emailService.sendModerationAlert(
-                comment.getContent()
+                comment.getContent(),
+                comment.getEmail(),
+                "Project ID: " + comment.getProjectId()
         );
 
         auditLogService.log(

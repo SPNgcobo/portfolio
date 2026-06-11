@@ -1,0 +1,166 @@
+<div class="project-form-container">
+
+    <div class="form-header">
+        <h1>{{ isEdit ? 'Edit Project' : 'Create New Project' }}</h1>
+        <a routerLink="/admin/projects" class="btn-secondary">← Back to Projects</a>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading project...</p>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" *ngIf="!loading" class="project-form">
+
+        <!-- Basic Information -->
+        <div class="form-section">
+            <h2>Basic Information</h2>
+
+            <div class="form-group">
+                <label for="title">Project Title *</label>
+                <input id="title" type="text" formControlName="title" placeholder="e.g., E-Commerce Platform">
+                <small class="error" *ngIf="projectForm.get('title')?.touched && projectForm.get('title')?.invalid">
+                    Title is required (minimum 3 characters)
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="shortDescription">Short Description (Max 160 characters)</label>
+                <textarea id="shortDescription" formControlName="shortDescription" rows="2"
+                    placeholder="Brief summary of the project"></textarea>
+                <small class="hint">{{ projectForm.get('shortDescription')?.value?.length || 0 }}/160</small>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Full Description *</label>
+                <textarea id="description" formControlName="description" rows="5"
+                    placeholder="Detailed description of the project"></textarea>
+                <small class="error"
+                    *ngIf="projectForm.get('description')?.touched && projectForm.get('description')?.invalid">
+                    Description is required (minimum 20 characters)
+                </small>
+            </div>
+        </div>
+
+        <!-- Project Details -->
+        <div class="form-section">
+            <h2>Project Details</h2>
+
+            <div class="form-group">
+                <label for="problem">Problem Statement</label>
+                <textarea id="problem" formControlName="problem" rows="3"
+                    placeholder="What problem does this project solve?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="solution">Solution</label>
+                <textarea id="solution" formControlName="solution" rows="3"
+                    placeholder="How does your project solve the problem?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="architecture">Architecture</label>
+                <textarea id="architecture" formControlName="architecture" rows="3"
+                    placeholder="Technical architecture and design decisions"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="challenges">Challenges Faced</label>
+                <textarea id="challenges" formControlName="challenges" rows="3"
+                    placeholder="Key challenges and how you overcame them"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="infoNote">Info Note (Displayed on project card)</label>
+                <input type="text" formControlName="infoNote" placeholder="e.g., Private repo - contact for access">
+            </div>
+        </div>
+
+        <!-- Links -->
+        <div class="form-section">
+            <h2>Links</h2>
+
+            <div class="form-group">
+                <label for="github">GitHub Repository URL</label>
+                <input id="github" type="url" formControlName="github" placeholder="https://github.com/username/repo">
+            </div>
+
+            <div class="form-group checkbox">
+                <label>
+                    <input type="checkbox" formControlName="githubVisible">
+                    Make GitHub repository publicly visible
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label for="liveDemoUrl">Live Demo URL</label>
+                <input id="liveDemoUrl" type="url" formControlName="liveDemoUrl"
+                    placeholder="https://your-project-demo.com">
+            </div>
+
+            <div class="form-group">
+                <label for="thumbnail">Thumbnail Image URL</label>
+                <input id="thumbnail" type="url" formControlName="thumbnail"
+                    placeholder="https://example.com/image.jpg">
+            </div>
+        </div>
+
+        <!-- Technology Stack -->
+        <div class="form-section">
+            <h2>Technology Stack</h2>
+
+            <div class="form-group">
+                <label for="techStack">Tech Stack (comma-separated)</label>
+                <input id="techStack" type="text" formControlName="techStack"
+                    placeholder="e.g., Angular, Spring Boot, MongoDB">
+                <small class="hint">Separate technologies with commas</small>
+            </div>
+
+            <div class="form-group">
+                <label for="tools">Tools (comma-separated)</label>
+                <input id="tools" type="text" formControlName="tools" placeholder="e.g., Git, Docker, VS Code">
+                <small class="hint">Separate tools with commas</small>
+            </div>
+
+            <div class="form-group">
+                <label for="features">Key Features (comma-separated)</label>
+                <input id="features" type="text" formControlName="features"
+                    placeholder="e.g., User Authentication, Real-time Chat, Payment Integration">
+                <small class="hint">Separate features with commas</small>
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div class="form-section">
+            <h2>Status & Visibility</h2>
+
+            <div class="form-group checkbox">
+                <label>
+                    <input type="checkbox" formControlName="published">
+                    Publish Project (visible to public)
+                </label>
+            </div>
+
+            <div class="form-group checkbox">
+                <label>
+                    <input type="checkbox" formControlName="featured">
+                    Feature this Project (shown on homepage)
+                </label>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="button" class="btn-secondary" (click)="goBack()">
+                Cancel
+            </button>
+            <button type="submit" class="btn-primary" [disabled]="submitting || projectForm.invalid">
+                {{ submitting ? 'Saving...' : (isEdit ? 'Update Project' : 'Create Project') }}
+            </button>
+        </div>
+
+    </form>
+
+</div>

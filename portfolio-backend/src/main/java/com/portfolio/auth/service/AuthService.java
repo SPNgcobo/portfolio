@@ -180,6 +180,8 @@ public class AuthService {
 
         userRepository.save(user);
 
+        emailService.sendWelcomeEmail(user.getEmail(), user.getUsername());
+
         String jwt =
                 jwtService.generateToken(
                         user.getEmail(),
