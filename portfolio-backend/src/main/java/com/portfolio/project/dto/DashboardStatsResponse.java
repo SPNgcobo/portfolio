@@ -18,4 +18,14 @@ public class DashboardStatsResponse {
     private long publishedBlogs;
 
     private long featuredProjects;
+
+    private long totalGithubClicks;
+
+    private long totalDemoClicks;
+
+    private long totalDetailClicks;
+
+    private long totalComments;
+
+    private long totalVisitors;
 }

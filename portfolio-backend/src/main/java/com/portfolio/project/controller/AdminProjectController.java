@@ -7,6 +7,8 @@ import com.portfolio.project.service.ProjectService;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/admin/projects")
 public class AdminProjectController {
@@ -16,8 +18,20 @@ public class AdminProjectController {
     public AdminProjectController(
             ProjectService service
     ) {
-
         this.service = service;
+    }
+
+    /*
+     * ALL PROJECTS FOR ADMIN
+     */
+    @GetMapping
+    public ApiResponse<List<Project>> getAllProjects() {
+
+        return new ApiResponse<>(
+                true,
+                "Projects fetched",
+                service.getAdminProjects()
+        );
     }
 
     /*

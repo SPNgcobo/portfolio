@@ -5,41 +5,42 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-forgot-password',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  templateUrl: './forgot-password.component.html',
+  styleUrls: ['./forgot-password.component.scss']
 })
-export class LoginComponent {
+export class ForgotPasswordComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
 
   loading = false;
   errorMessage = '';
+  successMessage = '';
 
   form = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]]
+    email: ['', [Validators.required, Validators.email]]
   });
 
-  login(): void {
+  onSubmit(): void {
     if (this.form.invalid) return;
 
     this.loading = true;
     this.errorMessage = '';
+    this.successMessage = '';
 
-    this.authService.login(this.form.value as { email: string; password: string })
+    this.authService.forgotPassword({ email: this.form.value.email! })
       .subscribe({
         next: () => {
-          this.authService.loadUser();
-          this.router.navigate(['/admin']);
+          this.successMessage = 'Password reset email sent! Check your inbox.';
           this.loading = false;
+          this.form.reset();
         },
         error: (err) => {
-          console.error('Login error:', err);
-          this.errorMessage = err.error?.message || 'Login failed. Please try again.';
+          console.error('Forgot password error:', err);
+          this.errorMessage = err.error?.message || 'Failed to send reset email. Please try again.';
           this.loading = false;
         }
       });

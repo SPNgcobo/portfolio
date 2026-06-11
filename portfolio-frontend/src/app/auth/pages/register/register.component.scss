@@ -1,4 +1,4 @@
-.login-container {
+.register-container {
     min-height: calc(100vh - 70px);
     display: flex;
     align-items: center;
@@ -6,8 +6,8 @@
     padding: 2rem;
 }
 
-.login-card {
-    max-width: 420px;
+.register-card {
+    max-width: 460px;
     width: 100%;
     padding: 2rem;
     background: var(--bg-card);
@@ -78,6 +78,17 @@ input {
     text-align: center;
 }
 
+.success-message {
+    padding: 0.75rem;
+    margin-bottom: 1.5rem;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid var(--success-color);
+    border-radius: var(--radius-sm);
+    color: var(--success-color);
+    font-size: 0.875rem;
+    text-align: center;
+}
+
 button {
     width: 100%;
     padding: 0.75rem;
@@ -102,8 +113,7 @@ button {
 }
 
 .links {
-    display: flex;
-    justify-content: space-between;
+    text-align: center;
     margin-top: 1.5rem;
 
     a {

@@ -1,13 +1,13 @@
 <nav class="navbar">
-
-    <div class="logo">Samkelo</div>
+    <div class="logo">
+        <a routerLink="/">Samkelo Ngcobo</a>
+    </div>
 
     <div class="menu-toggle" (click)="toggleMenu()">
         ☰
     </div>
 
     <div class="links" [class.open]="isMenuOpen">
-
         <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
             Home
         </a>
@@ -16,17 +16,40 @@
             Projects
         </a>
 
+        <a routerLink="/blogs" routerLinkActive="active">
+            Blogs
+        </a>
+
         <a routerLink="/contact" routerLinkActive="active">
             Contact
         </a>
 
-        <a routerLink="/login" routerLinkActive="active">
-            Login
+        <a routerLink="/about" routerLinkActive="active">
+            About
         </a>
 
-        <div class="theme-toggle" [class.active]="isLightMode" (click)="toggleTheme()">
+        <div class="dropdown" *ngIf="isAdmin()">
+            <span class="dropdown-toggle">Admin ▼</span>
+            <div class="dropdown-menu">
+                <a routerLink="/admin">Dashboard</a>
+                <a routerLink="/admin/projects">Projects</a>
+                <a routerLink="/admin/blogs">Blogs</a>
+                <a routerLink="/admin/skills">Skills</a>
+                <a routerLink="/admin/tools">Tools</a>
+                <a routerLink="/admin/comments">Comments</a>
+                <a routerLink="/admin/access-requests">Access Requests</a>
+            </div>
         </div>
 
-    </div>
+        <ng-container *ngIf="!isLoggedIn()">
+            <a routerLink="/login" routerLinkActive="active">Login</a>
+            <a routerLink="/register" routerLinkActive="active">Register</a>
+        </ng-container>
 
+        <a *ngIf="isLoggedIn()" (click)="logout()" class="logout-link">Logout</a>
+
+        <div class="theme-toggle" [class.active]="isLightMode" (click)="toggleTheme()">
+            <span class="theme-icon">{{ isLightMode ? '☀️' : '🌙' }}</span>
+        </div>
+    </div>
 </nav>

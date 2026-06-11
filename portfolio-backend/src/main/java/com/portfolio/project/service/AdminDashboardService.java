@@ -39,24 +39,34 @@ public class AdminDashboardService {
     /*
      * DASHBOARD STATS
      */
-    public DashboardStatsResponse
-    getStats() {
+    public DashboardStatsResponse getStats() {
 
         List<Project> projects =
                 projectRepository.findAll();
 
         long totalViews = 0;
-
         long totalLikes = 0;
+
+        long totalGithubClicks = 0;
+        long totalDemoClicks = 0;
+        long totalDetailClicks = 0;
 
         for (Project project : projects) {
 
-            totalViews +=
-                    project.getViewCount();
+            totalViews += project.getViewCount();
 
-            totalLikes +=
-                    project.getLikes();
+            totalLikes += project.getLikes();
+
+            totalGithubClicks += project.getGithubClicks();
+
+            totalDemoClicks += project.getDemoClicks();
+
+            totalDetailClicks += project.getDetailClicks();
         }
+
+        long totalComments = 0;
+
+        long totalVisitors = totalViews;
 
         return new DashboardStatsResponse(
 
@@ -73,7 +83,17 @@ public class AdminDashboardService {
                 ),
 
                 projectRepository
-                        .countByFeaturedTrue()
+                        .countByFeaturedTrue(),
+
+                totalGithubClicks,
+
+                totalDemoClicks,
+
+                totalDetailClicks,
+
+                totalComments,
+
+                totalVisitors
         );
     }
 

@@ -5,10 +5,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
-
 import { authInterceptor } from './app/interceptors/auth.interceptor';
-
-(window as any).global = window;
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -18,4 +15,4 @@ bootstrapApplication(AppComponent, {
       withInterceptors([authInterceptor])
     )
   ]
-});
+}).catch(err => console.error(err));

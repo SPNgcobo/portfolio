@@ -1,30 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-
 import { NavbarComponent } from './layout/navbar/navbar.component';
-import { DashboardSocketService } from './services/dashboard-socket.service';
 import { AuthService } from './auth/services/auth.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    RouterOutlet,
-    NavbarComponent
-  ],
-  templateUrl: './app.component.html'
+  imports: [RouterOutlet, NavbarComponent],
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-
-  constructor(
-    private socketService: DashboardSocketService,
-    private auth: AuthService
-  ) { }
+  private auth = inject(AuthService);
 
   ngOnInit(): void {
-
-    this.socketService.connect();
-
     this.auth.loadUser();
   }
 }
