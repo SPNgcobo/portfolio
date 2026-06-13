@@ -17,14 +17,12 @@ import java.util.List;
 public class BlogService {
 
     private final BlogRepository repository;
-
     private final DashboardActivityPublisher publisher;
 
     public BlogService(
             BlogRepository repository,
             DashboardActivityPublisher publisher
     ) {
-
         this.repository = repository;
         this.publisher = publisher;
     }
@@ -32,53 +30,25 @@ public class BlogService {
     /*
      * CREATE
      */
-    public Blog create(
-            Blog blog
-    ) {
-
+    public Blog create(Blog blog) {
         blog.setCreatedAt(new Date());
-
         blog.setUpdatedAt(new Date());
 
-        /*
-         * AUTO SLUG
-         */
-        if (blog.getSlug() == null
-                || blog.getSlug().isBlank()) {
-
-            blog.setSlug(
-                    generateSlug(
-                            blog.getTitle()
-                    )
-            );
+        // AUTO SLUG
+        if (blog.getSlug() == null || blog.getSlug().isBlank()) {
+            blog.setSlug(generateSlug(blog.getTitle()));
         }
 
-        /*
-         * READ TIME
-         */
-        blog.setReadTime(
-                calculateReadTime(
-                        blog.getContent()
-                )
-        );
+        // READ TIME
+        blog.setReadTime(calculateReadTime(blog.getContent()));
 
-        /*
-         * PUBLISH DATE
-         */
-        if (
-                blog.getStatus()
-                        == BlogStatus.PUBLISHED
-        ) {
-
+        // PUBLISH DATE
+        if (blog.getStatus() == BlogStatus.PUBLISHED) {
             blog.setPublishedAt(new Date());
         }
 
         Blog saved = repository.save(blog);
-
-        publisher.publish(
-                "BLOG_CREATED",
-                saved.getTitle() + " published"
-        );
+        publisher.publish("BLOG_CREATED", saved.getTitle() + " created");
 
         return saved;
     }
@@ -86,82 +56,32 @@ public class BlogService {
     /*
      * UPDATE
      */
-    public Blog update(
-            String id,
-            Blog updated
-    ) {
-
-        Blog existing =
-                getById(id);
+    public Blog update(String id, Blog updated) {
+        Blog existing = getById(id);
 
         existing.setTitle(updated.getTitle());
-
         existing.setExcerpt(updated.getExcerpt());
-
         existing.setContent(updated.getContent());
-
         existing.setSeoTitle(updated.getSeoTitle());
-
-        existing.setSeoDescription(
-                updated.getSeoDescription()
-        );
-
+        existing.setSeoDescription(updated.getSeoDescription());
         existing.setKeywords(updated.getKeywords());
-
-        existing.setThumbnailUrl(
-                updated.getThumbnailUrl()
-        );
-
-        existing.setThumbnailPublicId(
-                updated.getThumbnailPublicId()
-        );
-
+        existing.setThumbnailUrl(updated.getThumbnailUrl());
+        existing.setThumbnailPublicId(updated.getThumbnailPublicId());
         existing.setTags(updated.getTags());
-
-        existing.setCategories(
-                updated.getCategories()
-        );
-
-        existing.setFeatured(
-                updated.isFeatured()
-        );
-
-        existing.setStatus(
-                updated.getStatus()
-        );
-
+        existing.setCategories(updated.getCategories());
+        existing.setFeatured(updated.isFeatured());
+        existing.setStatus(updated.getStatus());
         existing.setUpdatedAt(new Date());
 
-        /*
-         * SLUG
-         */
-        existing.setSlug(
-                generateSlug(
-                        updated.getTitle()
-                )
-        );
+        // SLUG
+        existing.setSlug(generateSlug(updated.getTitle()));
 
-        /*
-         * READ TIME
-         */
-        existing.setReadTime(
-                calculateReadTime(
-                        updated.getContent()
-                )
-        );
+        // READ TIME
+        existing.setReadTime(calculateReadTime(updated.getContent()));
 
-        /*
-         * PUBLISH DATE
-         */
-        if (
-                updated.getStatus()
-                        == BlogStatus.PUBLISHED
-                        && existing.getPublishedAt() == null
-        ) {
-
-            existing.setPublishedAt(
-                    new Date()
-            );
+        // PUBLISH DATE
+        if (updated.getStatus() == BlogStatus.PUBLISHED && existing.getPublishedAt() == null) {
+            existing.setPublishedAt(new Date());
         }
 
         return repository.save(existing);
@@ -170,108 +90,115 @@ public class BlogService {
     /*
      * GET BY SLUG
      */
-    public Blog getBySlug(
-            String slug
-    ) {
-
+    public Blog getBySlug(String slug) {
         return repository.findBySlug(slug)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Blog not found"
-                        )
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Blog not found"));
     }
 
     /*
      * GET BY ID
      */
-    public Blog getById(
-            String id
-    ) {
-
+    public Blog getById(String id) {
         return repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Blog not found"
-                        )
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Blog not found"));
     }
 
     /*
-     * PAGINATED BLOGS
+     * GET ALL BLOGS FOR ADMIN (Includes drafts)
      */
-    public Page<Blog> getBlogs(
-            int page,
-            int size
-    ) {
+    public List<Blog> getAllBlogsForAdmin() {
+        return repository.findAll();
+    }
 
-        Pageable pageable =
-                PageRequest.of(page, size);
-
-        return repository
-                .findByStatusOrderByPublishedAtDesc(
-                        BlogStatus.PUBLISHED,
-                        pageable
-                );
+    /*
+     * PAGINATED BLOGS (Public - only published)
+     */
+    public Page<Blog> getBlogs(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return repository.findByStatusOrderByPublishedAtDesc(BlogStatus.PUBLISHED, pageable);
     }
 
     /*
      * SEARCH
      */
-    public Page<Blog> search(
-            String keyword,
-            int page,
-            int size
-    ) {
-
-        Pageable pageable =
-                PageRequest.of(page, size);
-
-        return repository.searchBlogs(
-                keyword,
-                pageable
-        );
+    public Page<Blog> search(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return repository.searchBlogs(keyword, pageable);
     }
 
     /*
      * RELATED BLOGS
      */
-    public List<Blog> getRelatedBlogs(
-            String slug
-    ) {
-
+    public List<Blog> getRelatedBlogs(String slug) {
         Blog blog = getBySlug(slug);
-
         if (blog.getTags() == null) {
-
             return List.of();
         }
-
-        return repository.findTop4ByTagsInAndIdNot(
-                blog.getTags(),
-                blog.getId()
-        );
+        return repository.findTop4ByTagsInAndIdNot(blog.getTags(), blog.getId());
     }
 
     /*
      * DELETE
      */
-    public void delete(
-            String id
-    ) {
-
+    public void delete(String id) {
         Blog blog = getById(id);
-
         repository.delete(blog);
+        publisher.publish("BLOG_DELETED", blog.getTitle() + " deleted");
+    }
+
+    /*
+     * PUBLISH BLOG
+     */
+    public Blog publishBlog(String id) {
+        Blog blog = getById(id);
+        blog.setStatus(BlogStatus.PUBLISHED);
+        blog.setPublishedAt(new Date());
+        blog.setUpdatedAt(new Date());
+        Blog saved = repository.save(blog);
+        publisher.publish("BLOG_PUBLISHED", saved.getTitle() + " published");
+        return saved;
+    }
+
+    /*
+     * UNPUBLISH BLOG
+     */
+    public Blog unpublishBlog(String id) {
+        Blog blog = getById(id);
+        blog.setStatus(BlogStatus.DRAFT);
+        blog.setUpdatedAt(new Date());
+        Blog saved = repository.save(blog);
+        publisher.publish("BLOG_UNPUBLISHED", saved.getTitle() + " unpublished");
+        return saved;
+    }
+
+    /*
+     * FEATURE BLOG
+     */
+    public Blog featureBlog(String id) {
+        Blog blog = getById(id);
+        blog.setFeatured(true);
+        blog.setUpdatedAt(new Date());
+        Blog saved = repository.save(blog);
+        publisher.publish("BLOG_FEATURED", saved.getTitle() + " featured");
+        return saved;
+    }
+
+    /*
+     * UNFEATURE BLOG
+     */
+    public Blog unfeatureBlog(String id) {
+        Blog blog = getById(id);
+        blog.setFeatured(false);
+        blog.setUpdatedAt(new Date());
+        Blog saved = repository.save(blog);
+        publisher.publish("BLOG_UNFEATURED", saved.getTitle() + " unfeatured");
+        return saved;
     }
 
     /*
      * SLUG GENERATOR
      */
-    private String generateSlug(
-            String title
-    ) {
-
+    private String generateSlug(String title) {
         return title
                 .toLowerCase()
                 .replaceAll("[^a-z0-9\\s]", "")
@@ -281,22 +208,11 @@ public class BlogService {
     /*
      * READ TIME
      */
-    private int calculateReadTime(
-            String content
-    ) {
-
-        if (content == null
-                || content.isBlank()) {
-
+    private int calculateReadTime(String content) {
+        if (content == null || content.isBlank()) {
             return 1;
         }
-
-        int words =
-                content.split("\\s+").length;
-
-        return Math.max(
-                1,
-                words / 200
-        );
+        int words = content.split("\\s+").length;
+        return Math.max(1, words / 200);
     }
 }

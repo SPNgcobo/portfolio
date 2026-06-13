@@ -163,6 +163,29 @@ public class SecurityConfig {
                         ).permitAll()
 
                         /*
+                         * ADMIN BLOG MANAGEMENT
+                         */
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/blogs/admin/blogs/**"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/blogs/admin/blogs/**"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/api/blogs/admin/blogs/**"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/blogs/admin/blogs/**"
+                        ).hasRole("ADMIN")
+
+                        /*
                          * GLOBAL SEARCH
                          */
                         .requestMatchers(
@@ -223,9 +246,19 @@ public class SecurityConfig {
                         ).hasRole("ADMIN")
 
                         .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/comments/*/reply"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
                                 HttpMethod.DELETE,
                                 "/api/comments/**"
                         ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/comments"
+                        ).authenticated()
 
                         /*
                          * ADMIN NOTIFICATIONS

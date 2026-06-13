@@ -4,12 +4,14 @@ import com.portfolio.common.exceptions.ResourceNotFoundException;
 import com.portfolio.project.model.Comment;
 import com.portfolio.project.repository.CommentRepository;
 import com.portfolio.security.SpamProtectionService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
 
+@Slf4j
 @Service
 public class CommentService {
 
@@ -59,58 +61,32 @@ public class CommentService {
     /*
      * CREATE COMMENT
      */
-    public Comment create(
-            Comment comment,
-            String ip
-    ) {
-
-        boolean spam =
-                spamProtectionService.isSpam(
-                        ip,
-                        comment.getContent()
-                );
-
+    public Comment create(Comment comment, String ip) {
+        boolean spam = spamProtectionService.isSpam(ip, comment.getContent());
         if (spam) {
-
-            throw new RuntimeException(
-                    "Duplicate/spam comment detected"
-            );
+            throw new RuntimeException("Duplicate/spam comment detected");
         }
 
         comment.setApproved(false);
-
         comment.setCreatedAt(new Date());
+        Comment saved = repository.save(comment);
+        projectService.incrementComments(comment.getProjectId());
 
-        Comment saved =
-                repository.save(comment);
+        messagingTemplate.convertAndSend("/topic/comments", saved);
+        notificationEventService.broadcast("NEW_COMMENT", "New comment awaiting moderation");
 
-        projectService.incrementComments(
-                comment.getProjectId()
-        );
+        // Wrap email in try-catch so it doesn't break the comment submission
+        try {
+            emailService.sendModerationAlert(
+                    comment.getContent(),
+                    comment.getEmail(),
+                    "Project ID: " + comment.getProjectId()
+            );
+        } catch (Exception e) {
+            log.error("Failed to send moderation alert email: {}", e.getMessage());
+        }
 
-        messagingTemplate.convertAndSend(
-                "/topic/comments",
-                saved
-        );
-
-        notificationEventService.broadcast(
-                "NEW_COMMENT",
-                "New comment awaiting moderation"
-        );
-
-        emailService.sendModerationAlert(
-                comment.getContent(),
-                comment.getEmail(),
-                "Project ID: " + comment.getProjectId()
-        );
-
-        auditLogService.log(
-                "COMMENT_CREATED",
-                comment.getUsername(),
-                "Comment submitted",
-                ip
-        );
-
+        auditLogService.log("COMMENT_CREATED", comment.getUsername(), "Comment submitted", ip);
         return saved;
     }
 

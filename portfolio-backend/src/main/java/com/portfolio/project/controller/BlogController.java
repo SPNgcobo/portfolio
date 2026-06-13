@@ -17,99 +17,33 @@ public class BlogController {
     public BlogController(
             BlogService service
     ) {
-
         this.service = service;
     }
 
-    /*
-     * CREATE
-     */
-    @PostMapping
-    public ApiResponse<Blog> create(
-            @RequestBody Blog blog
-    ) {
-
-        return new ApiResponse<>(
-                true,
-                "Blog created",
-                service.create(blog)
-        );
-    }
+    // ============ PUBLIC ENDPOINTS ============
 
     /*
-     * UPDATE
-     */
-    @PutMapping("/{id}")
-    public ApiResponse<Blog> update(
-            @PathVariable String id,
-            @RequestBody Blog blog
-    ) {
-
-        return new ApiResponse<>(
-                true,
-                "Blog updated",
-                service.update(id, blog)
-        );
-    }
-
-    /*
-     * GET BLOGS
+     * GET BLOGS (PUBLIC) - Only published blogs
      */
     @GetMapping
-    public ApiResponse<Page<Blog>>
-    getBlogs(
-
-            @RequestParam(defaultValue = "0")
-            int page,
-
-            @RequestParam(defaultValue = "10")
-            int size
+    public ApiResponse<Page<Blog>> getBlogs(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
-
         return new ApiResponse<>(
                 true,
                 "Blogs fetched",
-                service.getBlogs(
-                        page,
-                        size
-                )
+                service.getBlogs(page, size)
         );
     }
 
     /*
-     * SEARCH
-     */
-    @GetMapping("/search")
-    public ApiResponse<Page<Blog>> search(
-
-            @RequestParam String q,
-
-            @RequestParam(defaultValue = "0")
-            int page,
-
-            @RequestParam(defaultValue = "10")
-            int size
-    ) {
-
-        return new ApiResponse<>(
-                true,
-                "Blogs fetched",
-                service.search(
-                        q,
-                        page,
-                        size
-                )
-        );
-    }
-
-    /*
-     * GET BY SLUG
+     * GET BY SLUG (PUBLIC)
      */
     @GetMapping("/{slug}")
     public ApiResponse<Blog> getBySlug(
             @PathVariable String slug
     ) {
-
         return new ApiResponse<>(
                 true,
                 "Blog fetched",
@@ -118,14 +52,28 @@ public class BlogController {
     }
 
     /*
-     * RELATED BLOGS
+     * SEARCH (PUBLIC)
+     */
+    @GetMapping("/search")
+    public ApiResponse<Page<Blog>> search(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return new ApiResponse<>(
+                true,
+                "Blogs fetched",
+                service.search(q, page, size)
+        );
+    }
+
+    /*
+     * RELATED BLOGS (PUBLIC)
      */
     @GetMapping("/{slug}/related")
-    public ApiResponse<List<Blog>>
-    relatedBlogs(
+    public ApiResponse<List<Blog>> relatedBlogs(
             @PathVariable String slug
     ) {
-
         return new ApiResponse<>(
                 true,
                 "Related blogs fetched",
@@ -133,20 +81,131 @@ public class BlogController {
         );
     }
 
+    // ============ ADMIN ENDPOINTS ============
+
     /*
-     * DELETE
+     * GET ALL BLOGS FOR ADMIN (Includes drafts)
      */
-    @DeleteMapping("/{id}")
-    public ApiResponse<Void> delete(
+    @GetMapping("/admin/blogs")
+    public ApiResponse<List<Blog>> getAllBlogsForAdmin() {
+        return new ApiResponse<>(
+                true,
+                "All blogs fetched",
+                service.getAllBlogsForAdmin()
+        );
+    }
+
+    /*
+     * GET BLOG BY ID FOR ADMIN
+     */
+    @GetMapping("/admin/blogs/{id}")
+    public ApiResponse<Blog> getBlogByIdForAdmin(
             @PathVariable String id
     ) {
+        return new ApiResponse<>(
+                true,
+                "Blog fetched",
+                service.getById(id)
+        );
+    }
 
+    /*
+     * CREATE BLOG (ADMIN)
+     */
+    @PostMapping("/admin/blogs")
+    public ApiResponse<Blog> createBlog(
+            @RequestBody Blog blog
+    ) {
+        return new ApiResponse<>(
+                true,
+                "Blog created",
+                service.create(blog)
+        );
+    }
+
+    /*
+     * UPDATE BLOG (ADMIN)
+     */
+    @PutMapping("/admin/blogs/{id}")
+    public ApiResponse<Blog> updateBlog(
+            @PathVariable String id,
+            @RequestBody Blog blog
+    ) {
+        return new ApiResponse<>(
+                true,
+                "Blog updated",
+                service.update(id, blog)
+        );
+    }
+
+    /*
+     * DELETE BLOG (ADMIN)
+     */
+    @DeleteMapping("/admin/blogs/{id}")
+    public ApiResponse<Void> deleteBlog(
+            @PathVariable String id
+    ) {
         service.delete(id);
-
         return new ApiResponse<>(
                 true,
                 "Blog deleted",
                 null
+        );
+    }
+
+    /*
+     * PUBLISH BLOG (ADMIN)
+     */
+    @PutMapping("/admin/blogs/{id}/publish")
+    public ApiResponse<Blog> publishBlog(
+            @PathVariable String id
+    ) {
+        return new ApiResponse<>(
+                true,
+                "Blog published",
+                service.publishBlog(id)
+        );
+    }
+
+    /*
+     * UNPUBLISH BLOG (ADMIN)
+     */
+    @PutMapping("/admin/blogs/{id}/unpublish")
+    public ApiResponse<Blog> unpublishBlog(
+            @PathVariable String id
+    ) {
+        return new ApiResponse<>(
+                true,
+                "Blog unpublished",
+                service.unpublishBlog(id)
+        );
+    }
+
+    /*
+     * FEATURE BLOG (ADMIN)
+     */
+    @PutMapping("/admin/blogs/{id}/feature")
+    public ApiResponse<Blog> featureBlog(
+            @PathVariable String id
+    ) {
+        return new ApiResponse<>(
+                true,
+                "Blog featured",
+                service.featureBlog(id)
+        );
+    }
+
+    /*
+     * UNFEATURE BLOG (ADMIN)
+     */
+    @PutMapping("/admin/blogs/{id}/unfeature")
+    public ApiResponse<Blog> unfeatureBlog(
+            @PathVariable String id
+    ) {
+        return new ApiResponse<>(
+                true,
+                "Blog unfeatured",
+                service.unfeatureBlog(id)
         );
     }
 }
