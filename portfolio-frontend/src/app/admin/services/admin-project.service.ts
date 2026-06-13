@@ -13,7 +13,6 @@ export class AdminProjectService {
   private apiUrl = `${environment.apiUrl}/admin/projects`;
   private projectsApiUrl = `${environment.apiUrl}/projects`;
 
-  // Get all projects (admin view - includes unpublished)
   getProjects(): Observable<ApiResponse<Project[]>> {
     return this.http.get<ApiResponse<Project[]>>(
       `${this.apiUrl}`,
@@ -21,7 +20,6 @@ export class AdminProjectService {
     );
   }
 
-  // Get single project by ID (admin view)
   getProject(id: string): Observable<ApiResponse<Project>> {
     return this.http.get<ApiResponse<Project>>(
       `${this.apiUrl}/${id}`,
@@ -29,7 +27,6 @@ export class AdminProjectService {
     );
   }
 
-  // Create new project
   createProject(project: Partial<Project>): Observable<ApiResponse<Project>> {
     return this.http.post<ApiResponse<Project>>(
       `${this.projectsApiUrl}`,
@@ -38,7 +35,6 @@ export class AdminProjectService {
     );
   }
 
-  // Update existing project
   updateProject(id: string, project: Partial<Project>): Observable<ApiResponse<Project>> {
     return this.http.put<ApiResponse<Project>>(
       `${this.projectsApiUrl}/${id}`,
@@ -47,7 +43,6 @@ export class AdminProjectService {
     );
   }
 
-  // Delete project
   deleteProject(id: string): Observable<ApiResponse<void>> {
     return this.http.delete<ApiResponse<void>>(
       `${this.projectsApiUrl}/${id}`,
@@ -55,7 +50,6 @@ export class AdminProjectService {
     );
   }
 
-  // Publish project
   publishProject(id: string): Observable<ApiResponse<Project>> {
     return this.http.put<ApiResponse<Project>>(
       `${this.apiUrl}/${id}/publish`,
@@ -64,7 +58,6 @@ export class AdminProjectService {
     );
   }
 
-  // Unpublish project
   unpublishProject(id: string): Observable<ApiResponse<Project>> {
     return this.http.put<ApiResponse<Project>>(
       `${this.apiUrl}/${id}/unpublish`,
@@ -73,7 +66,6 @@ export class AdminProjectService {
     );
   }
 
-  // Feature project
   featureProject(id: string): Observable<ApiResponse<Project>> {
     return this.http.put<ApiResponse<Project>>(
       `${this.apiUrl}/${id}/feature`,
@@ -82,7 +74,6 @@ export class AdminProjectService {
     );
   }
 
-  // Unfeature project
   unfeatureProject(id: string): Observable<ApiResponse<Project>> {
     return this.http.put<ApiResponse<Project>>(
       `${this.apiUrl}/${id}/unfeature`,
@@ -91,7 +82,6 @@ export class AdminProjectService {
     );
   }
 
-  // Get unpublished projects
   getUnpublishedProjects(page = 0, size = 10): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.apiUrl}/unpublished?page=${page}&size=${size}`,
@@ -99,7 +89,6 @@ export class AdminProjectService {
     );
   }
 
-  // Get project analytics
   getProjectAnalytics(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(
       `${this.apiUrl}/analytics`,

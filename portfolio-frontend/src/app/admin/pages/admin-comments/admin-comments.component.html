@@ -1,0 +1,138 @@
+<div class="admin-comments">
+
+    <div class="page-header">
+        <h1>Comment Moderation</h1>
+        <p class="subtitle">Manage and moderate user comments on your projects</p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn" [class.active]="activeTab === 'pending'" (click)="activeTab = 'pending'">
+            Pending Approval
+            <span class="badge" *ngIf="pendingComments.length > 0">{{ pendingComments.length }}</span>
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'all'" (click)="activeTab = 'all'">
+            All Comments
+        </button>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading comments...</p>
+    </div>
+
+    <div class="comments-list" *ngIf="!loading && activeTab === 'pending'">
+        <div class="comments-header">
+            <h2>Comments Awaiting Moderation</h2>
+        </div>
+
+        <div class="comments-grid" *ngIf="pendingComments.length > 0">
+            <div class="comment-card pending" *ngFor="let comment of pendingComments">
+                <div class="comment-header">
+                    <div class="commenter-info">
+                        <strong class="commenter-name">{{ comment.username }}</strong>
+                        <span class="commenter-email">{{ comment.email }}</span>
+                    </div>
+                    <span class="comment-date">{{ formatDate(comment.createdAt) }}</span>
+                </div>
+
+                <div class="comment-project">
+                    <span class="project-label">Project:</span>
+                    <span class="project-name">{{ comment.projectTitle || 'Loading...' }}</span>
+                </div>
+
+                <div class="comment-content">
+                    {{ comment.content }}
+                </div>
+
+                <div class="comment-actions">
+                    <button class="action-btn approve" (click)="approveComment(comment.id!)">
+                        ✅ Approve
+                    </button>
+                    <button class="action-btn reply" (click)="openReplyModal(comment)">
+                        💬 Reply
+                    </button>
+                    <button class="action-btn delete" (click)="openDeleteDialog(comment.id!, comment.username)">
+                        🗑️ Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="empty-state" *ngIf="pendingComments.length === 0">
+            <span class="empty-icon">✅</span>
+            <h3>All Caught Up!</h3>
+            <p>No comments pending moderation.</p>
+        </div>
+    </div>
+
+    <div class="comments-list" *ngIf="!loading && activeTab === 'all'">
+        <div class="comments-header">
+            <h2>All Comments</h2>
+        </div>
+
+        <div class="comments-grid" *ngIf="allComments.length > 0">
+            <div class="comment-card" *ngFor="let comment of allComments">
+                <div class="comment-header">
+                    <div class="commenter-info">
+                        <strong class="commenter-name">{{ comment.username }}</strong>
+                        <span class="commenter-email">{{ comment.email }}</span>
+                    </div>
+                    <span class="comment-date">{{ formatDate(comment.createdAt) }}</span>
+                </div>
+
+                <div class="comment-badge" *ngIf="comment.approved">
+                    <span class="badge approved">Approved</span>
+                </div>
+
+                <div class="comment-content">
+                    {{ comment.content }}
+                </div>
+
+                <div class="comment-actions">
+                    <button class="action-btn delete" (click)="openDeleteDialog(comment.id!, comment.username)">
+                        🗑️ Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="empty-state" *ngIf="allComments.length === 0">
+            <span class="empty-icon">💬</span>
+            <h3>No Comments Yet</h3>
+            <p>Be the first to get a comment!</p>
+        </div>
+    </div>
+
+    <div class="modal-overlay" *ngIf="showReplyModal" (click)="closeReplyModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>Reply to Comment</h3>
+                <button class="close-btn" (click)="closeReplyModal()">✕</button>
+            </div>
+
+            <div class="original-comment" *ngIf="selectedComment">
+                <p class="original-author">{{ selectedComment.username }} wrote:</p>
+                <p class="original-text">"{{ selectedComment.content }}"</p>
+            </div>
+
+            <div class="form-group">
+                <label for="reply">Your Reply</label>
+                <textarea id="reply" [(ngModel)]="replyContent" rows="4" placeholder="Write your reply as admin..."
+                    class="reply-textarea"></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-secondary" (click)="closeReplyModal()">Cancel</button>
+                <button class="btn-primary" (click)="submitReply()" [disabled]="replying || !replyContent.trim()">
+                    {{ replying ? 'Sending...' : 'Send Reply' }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <app-confirm-dialog [open]="showDeleteDialog" title="Delete Comment"
+        [message]="'Are you sure you want to delete the comment by &quot;' + selectedCommentAuthor + '&quot;? This action cannot be undone.'"
+        confirmText="Delete" cancelText="Cancel" (confirm)="confirmDelete()" (cancel)="cancelDelete()">
+    </app-confirm-dialog>
+
+</div>

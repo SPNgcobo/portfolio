@@ -1,0 +1,75 @@
+<div class="comment-section">
+
+    <div class="comments-header">
+        <h3>Comments ({{ comments.length }})</h3>
+    </div>
+
+    <div class="comment-form" *ngIf="isLoggedIn(); else loginPrompt">
+        <div class="form-group">
+            <label for="comment">Leave a comment</label>
+            <textarea id="comment" [(ngModel)]="newComment" rows="3"
+                placeholder="Share your thoughts about this project..." [disabled]="submitting"></textarea>
+        </div>
+        <button class="submit-btn" (click)="submitComment()" [disabled]="submitting || !newComment.trim()">
+            {{ submitting ? 'Submitting...' : 'Submit Comment' }}
+        </button>
+    </div>
+
+    <ng-template #loginPrompt>
+        <div class="login-prompt">
+            <p>Please <a routerLink="/login">login</a> to leave a comment.</p>
+        </div>
+    </ng-template>
+
+    <div class="comments-list" *ngIf="!loading">
+        <div class="comment-card" *ngFor="let comment of comments">
+            <div class="comment">
+                <div class="comment-header">
+                    <strong class="comment-author">{{ comment.username }}</strong>
+                    <span class="comment-date">{{ formatDate(comment.createdAt) }}</span>
+                </div>
+                <div class="comment-content">{{ comment.content }}</div>
+                <button class="reply-btn" (click)="replyingTo = comment" *ngIf="isLoggedIn()">
+                    💬 Reply
+                </button>
+
+                <div class="admin-reply" *ngIf="comment.adminReply">
+                    <span class="admin-badge">Admin Response</span>
+                </div>
+            </div>
+
+            <div class="reply-form" *ngIf="replyingTo?.id === comment.id">
+                <textarea [(ngModel)]="replyContent" rows="2" placeholder="Write your reply..."
+                    [disabled]="submitting"></textarea>
+                <div class="reply-actions">
+                    <button class="cancel-btn" (click)="cancelReply()">Cancel</button>
+                    <button class="submit-reply-btn" (click)="submitReply()"
+                        [disabled]="submitting || !replyContent.trim()">
+                        {{ submitting ? 'Sending...' : 'Send Reply' }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="replies" *ngIf="comment.id">
+                <div class="reply-card" *ngFor="let reply of getReplies(comment.id)">
+                    <div class="reply-header">
+                        <strong class="reply-author">{{ reply.username }}</strong>
+                        <span class="reply-date">{{ formatDate(reply.createdAt) }}</span>
+                    </div>
+                    <div class="reply-content">{{ reply.content }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="empty-state" *ngIf="comments.length === 0">
+            <span class="empty-icon">💬</span>
+            <p>No comments yet. Be the first to share your thoughts!</p>
+        </div>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading comments...</p>
+    </div>
+
+</div>

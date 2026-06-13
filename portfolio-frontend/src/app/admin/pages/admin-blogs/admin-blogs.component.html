@@ -1,0 +1,77 @@
+<div class="admin-blogs">
+
+    <div class="page-header">
+        <h1>Manage Blog Posts</h1>
+        <a routerLink="/admin/blogs/new" class="btn-primary">
+            <span>✍️</span> Create New Blog
+        </a>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading blog posts...</p>
+    </div>
+
+    <div class="blogs-table-container" *ngIf="!loading">
+        <table class="blogs-table" *ngIf="blogs.length > 0">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Excerpt</th>
+                    <th>Read Time</th>
+                    <th>Status</th>
+                    <th>Featured</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let blog of blogs">
+                    <td class="blog-title">
+                        <span class="title-text">{{ blog.title }}</span>
+                        <span class="blog-slug">Slug: {{ blog.slug }}</span>
+                    </td>
+                    <td class="blog-excerpt">
+                        {{ blog.excerpt | slice:0:80 }}{{ (blog.excerpt?.length || 0) > 80 ? '...' : '' }}
+                    </td>
+                    <td class="read-time">{{ blog.readTime || 1 }} min</td>
+                    <td class="status">
+                        <button class="status-badge" [class.published]="blog.status === 'PUBLISHED'"
+                            [class.draft]="blog.status !== 'PUBLISHED'" (click)="togglePublish(blog)"
+                            [disabled]="updatingId === blog.id">
+                            {{ updatingId === blog.id ? '...' : getStatusText(blog.status) }}
+                        </button>
+                    </td>
+                    <td class="featured">
+                        <button class="featured-star" [class.active]="blog.featured" (click)="toggleFeatured(blog)"
+                            [disabled]="updatingId === blog.id">
+                            {{ blog.featured ? '★' : '☆' }}
+                        </button>
+                    </td>
+                    <td class="created-date">{{ blog.createdAt | date:'MMM d, yyyy' }}</td>
+                    <td class="actions">
+                        <a [routerLink]="['/admin/blogs/edit', blog.id]" class="action-btn edit">
+                            ✏️ Edit
+                        </a>
+                        <button class="action-btn delete" (click)="openDeleteDialog(blog.id!, blog.title!)">
+                            🗑️ Delete
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="empty-state" *ngIf="blogs.length === 0">
+            <span class="empty-icon">📝</span>
+            <h3>No Blog Posts Yet</h3>
+            <p>Create your first blog post to share your knowledge.</p>
+            <a routerLink="/admin/blogs/new" class="btn-primary">Create Blog</a>
+        </div>
+    </div>
+
+    <app-confirm-dialog [open]="showDeleteDialog" title="Delete Blog Post"
+        [message]="'Are you sure you want to delete &quot;' + selectedBlogTitle + '&quot;? This action cannot be undone.'"
+        confirmText="Delete" cancelText="Cancel" (confirm)="confirmDelete()" (cancel)="cancelDelete()">
+    </app-confirm-dialog>
+
+</div>

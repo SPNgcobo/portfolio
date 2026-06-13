@@ -1,6 +1,5 @@
 <div class="admin-projects">
 
-    <!-- Header -->
     <div class="page-header">
         <h1>Manage Projects</h1>
         <a routerLink="/admin/projects/new" class="btn-primary">
@@ -8,13 +7,11 @@
         </a>
     </div>
 
-    <!-- Loading State -->
     <div class="loading-state" *ngIf="loading">
         <div class="spinner"></div>
         <p>Loading projects...</p>
     </div>
 
-    <!-- Projects Table -->
     <div class="projects-table-container" *ngIf="!loading">
         <table class="projects-table" *ngIf="projects.length > 0">
             <thead>
@@ -79,7 +76,6 @@
         </div>
     </div>
 
-    <!-- Confirm Delete Dialog - FIXED: Use double quotes for the attribute -->
     <app-confirm-dialog [open]="showDeleteDialog" title="Delete Project"
         [message]="'Are you sure you want to delete &quot;' + selectedProjectTitle + '&quot;? This action cannot be undone.'"
         confirmText="Delete" cancelText="Cancel" (confirm)="confirmDelete()" (cancel)="cancelDelete()">

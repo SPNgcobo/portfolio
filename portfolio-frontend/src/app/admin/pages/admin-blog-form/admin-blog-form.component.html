@@ -1,0 +1,140 @@
+<div class="blog-form-container">
+
+    <div class="form-header">
+        <h1>{{ isEdit ? 'Edit Blog Post' : 'Create New Blog Post' }}</h1>
+        <a routerLink="/admin/blogs" class="btn-secondary">← Back to Blogs</a>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading blog post...</p>
+    </div>
+
+    <form [formGroup]="blogForm" (ngSubmit)="onSubmit()" *ngIf="!loading" class="blog-form">
+
+        <div class="form-section">
+            <h2>Basic Information</h2>
+
+            <div class="form-row">
+                <div class="form-group flex-2">
+                    <label for="title">Blog Title *</label>
+                    <input id="title" type="text" formControlName="title"
+                        placeholder="e.g., Building a Scalable Angular App" (blur)="generateSlug()">
+                    <small class="error" *ngIf="blogForm.get('title')?.touched && blogForm.get('title')?.invalid">
+                        Title is required (minimum 3 characters)
+                    </small>
+                </div>
+
+                <div class="form-group flex-1">
+                    <label for="slug">URL Slug *</label>
+                    <input id="slug" type="text" formControlName="slug" placeholder="building-scalable-angular-app">
+                    <small class="error" *ngIf="blogForm.get('slug')?.touched && blogForm.get('slug')?.invalid">
+                        Lowercase letters, numbers, and hyphens only
+                    </small>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="excerpt">Excerpt (Max 200 characters)</label>
+                <textarea id="excerpt" formControlName="excerpt" rows="2"
+                    placeholder="Brief summary of the blog post"></textarea>
+                <small class="hint">{{ blogForm.get('excerpt')?.value?.length || 0 }}/200</small>
+            </div>
+
+            <div class="form-group">
+                <label for="content">Content *</label>
+                <textarea id="content" formControlName="content" rows="12"
+                    placeholder="Write your blog content here... (Markdown supported)"></textarea>
+                <small class="error" *ngIf="blogForm.get('content')?.touched && blogForm.get('content')?.invalid">
+                    Content is required (minimum 50 characters)
+                </small>
+                <small class="hint">Markdown formatting is supported</small>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>SEO Settings</h2>
+
+            <div class="form-group">
+                <label for="seoTitle">SEO Title</label>
+                <input id="seoTitle" type="text" formControlName="seoTitle" placeholder="Leave blank to use blog title">
+                <small class="hint">Recommended: 50-60 characters</small>
+            </div>
+
+            <div class="form-group">
+                <label for="seoDescription">SEO Description</label>
+                <textarea id="seoDescription" formControlName="seoDescription" rows="2"
+                    placeholder="Brief description for search engines"></textarea>
+                <small class="hint">{{ blogForm.get('seoDescription')?.value?.length || 0 }}/160 characters</small>
+            </div>
+
+            <div class="form-group">
+                <label for="keywords">Keywords (comma-separated)</label>
+                <input id="keywords" type="text" formControlName="keywords"
+                    placeholder="e.g., Angular, Web Development, TypeScript">
+                <small class="hint">Separate keywords with commas</small>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Media</h2>
+
+            <div class="form-group">
+                <label for="thumbnailUrl">Thumbnail URL</label>
+                <input id="thumbnailUrl" type="url" formControlName="thumbnailUrl"
+                    placeholder="https://example.com/thumbnail.jpg">
+                <small class="hint">Recommended size: 1200x630 pixels</small>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Organization</h2>
+
+            <div class="form-row">
+                <div class="form-group flex-1">
+                    <label for="tags">Tags (comma-separated)</label>
+                    <input id="tags" type="text" formControlName="tags"
+                        placeholder="e.g., Angular, Tutorial, Best Practices">
+                </div>
+
+                <div class="form-group flex-1">
+                    <label for="categories">Categories (comma-separated)</label>
+                    <input id="categories" type="text" formControlName="categories"
+                        placeholder="e.g., Development, Architecture">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Status & Visibility</h2>
+
+            <div class="form-row">
+                <div class="form-group flex-1">
+                    <label for="status">Status</label>
+                    <select id="status" formControlName="status">
+                        <option value="DRAFT">Draft</option>
+                        <option value="PUBLISHED">Published</option>
+                    </select>
+                </div>
+
+                <div class="form-group checkbox flex-1">
+                    <label>
+                        <input type="checkbox" formControlName="featured">
+                        Feature this Blog Post (shown on homepage)
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn-secondary" (click)="goBack()">
+                Cancel
+            </button>
+            <button type="submit" class="btn-primary" [disabled]="submitting || blogForm.invalid">
+                {{ submitting ? 'Saving...' : (isEdit ? 'Update Blog' : 'Create Blog') }}
+            </button>
+        </div>
+
+    </form>
+
+</div>

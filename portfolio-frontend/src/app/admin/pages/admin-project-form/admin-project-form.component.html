@@ -5,16 +5,13 @@
         <a routerLink="/admin/projects" class="btn-secondary">← Back to Projects</a>
     </div>
 
-    <!-- Loading State -->
     <div class="loading-state" *ngIf="loading">
         <div class="spinner"></div>
         <p>Loading project...</p>
     </div>
 
-    <!-- Form -->
     <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" *ngIf="!loading" class="project-form">
 
-        <!-- Basic Information -->
         <div class="form-section">
             <h2>Basic Information</h2>
 
@@ -44,7 +41,6 @@
             </div>
         </div>
 
-        <!-- Project Details -->
         <div class="form-section">
             <h2>Project Details</h2>
 
@@ -78,7 +74,6 @@
             </div>
         </div>
 
-        <!-- Links -->
         <div class="form-section">
             <h2>Links</h2>
 
@@ -107,7 +102,6 @@
             </div>
         </div>
 
-        <!-- Technology Stack -->
         <div class="form-section">
             <h2>Technology Stack</h2>
 
@@ -132,7 +126,6 @@
             </div>
         </div>
 
-        <!-- Status -->
         <div class="form-section">
             <h2>Status & Visibility</h2>
 
@@ -151,7 +144,6 @@
             </div>
         </div>
 
-        <!-- Form Actions -->
         <div class="form-actions">
             <button type="button" class="btn-secondary" (click)="goBack()">
                 Cancel

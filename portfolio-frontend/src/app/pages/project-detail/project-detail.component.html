@@ -1,0 +1,96 @@
+<div class="project-detail">
+
+    <button class="back-btn" (click)="goBack()">← Back</button>
+
+    <div *ngIf="loading" class="loading">Loading project...</div>
+
+    <div *ngIf="!loading && project">
+
+        <img class="hero-image" [src]="project.thumbnail || project.images?.[0]" [alt]="project.title">
+
+        <h1>{{ project.title }}</h1>
+
+        <div class="featured-badge" *ngIf="project.featured">⭐ Featured Project</div>
+
+        <p class="short-description" *ngIf="project.shortDescription">{{ project.shortDescription }}</p>
+
+        <p class="description">{{ project.description }}</p>
+
+        <div class="project-note" *ngIf="project.infoNote">
+            <span class="note-icon">ℹ</span>
+            <span>{{ project.infoNote }}</span>
+        </div>
+
+        <div class="stats">
+            <span>👁 {{ project.viewCount || 0 }} views</span>
+            <span>❤️ {{ project.likes || 0 }} likes</span>
+            <span>🗨 {{ project.commentsCount || 0 }} comments</span>
+        </div>
+
+        <div class="buttons">
+            <button (click)="likeProject()">❤️ Like</button>
+            <a *ngIf="project.githubVisible && project.github" [href]="project.github" target="_blank"
+                (click)="githubClick()">GitHub ↗</a>
+            <a *ngIf="project.liveDemoUrl" [href]="project.liveDemoUrl" target="_blank" (click)="demoClick()">Live Demo
+                ↗</a>
+            <button (click)="shareProject()">🔗 Share</button>
+        </div>
+
+        <div class="section" *ngIf="project.problem">
+            <h2>Problem</h2>
+            <p>{{ project.problem }}</p>
+        </div>
+
+        <div class="section" *ngIf="project.solution">
+            <h2>Solution</h2>
+            <p>{{ project.solution }}</p>
+        </div>
+
+        <div class="section" *ngIf="project.architecture">
+            <h2>Architecture</h2>
+            <p>{{ project.architecture }}</p>
+        </div>
+
+        <div class="section" *ngIf="project.features?.length">
+            <h2>Features</h2>
+            <ul class="feature-list">
+                <li *ngFor="let feature of project.features">✓ {{ feature }}</li>
+            </ul>
+        </div>
+
+        <div class="section" *ngIf="project.techStack?.length">
+            <h2>Tech Stack</h2>
+            <div class="tech">
+                <span *ngFor="let tech of project.techStack">{{ tech }}</span>
+            </div>
+        </div>
+
+        <div class="section" *ngIf="project.images?.length">
+            <h2>Gallery</h2>
+            <div class="gallery">
+                <img *ngFor="let image of project.images" [src]="image" [alt]="project.title"
+                    (click)="openImage(image)">
+            </div>
+        </div>
+
+        <div class="lightbox" *ngIf="selectedImage" (click)="closeImage()">
+            <img [src]="selectedImage" />
+        </div>
+
+        <app-comment-section [projectId]="project.id!"></app-comment-section>
+
+        <div class="related" *ngIf="relatedProjects.length">
+            <h2>Related Projects</h2>
+            <div class="related-grid">
+                <a class="related-card" *ngFor="let item of relatedProjects" [routerLink]="['/projects', item.id]">
+                    <img [src]="item.thumbnail || item.images?.[0]" [alt]="item.title">
+                    <div class="related-content">
+                        <h3>{{ item.title }}</h3>
+                        <p>{{ item.shortDescription || item.description }}</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>

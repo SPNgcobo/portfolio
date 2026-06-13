@@ -1,0 +1,70 @@
+<div class="blogs-page">
+
+    <div class="page-header">
+        <h1>Blog Posts</h1>
+        <p class="subtitle">Insights, tutorials, and thoughts on software development</p>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading articles...</p>
+    </div>
+
+    <div class="blogs-grid" *ngIf="!loading && blogs.length > 0">
+        <article class="blog-card" *ngFor="let blog of blogs">
+            <a [routerLink]="['/blogs', blog.slug]" class="blog-link">
+
+                <div class="blog-thumbnail" *ngIf="blog.thumbnailUrl">
+                    <img [src]="blog.thumbnailUrl" [alt]="blog.title">
+                </div>
+                <div class="blog-thumbnail placeholder" *ngIf="!blog.thumbnailUrl">
+                    <span class="placeholder-icon">📝</span>
+                </div>
+
+                <div class="blog-content">
+                    <div class="blog-meta">
+                        <span class="blog-date">{{ blog.publishedAt | date:'MMMM d, yyyy' }}</span>
+                        <span class="blog-read-time">{{ blog.readTime || 1 }} min read</span>
+                    </div>
+
+                    <h2 class="blog-title">{{ blog.title }}</h2>
+
+                    <p class="blog-excerpt">{{ blog.excerpt || (blog.content | slice:0:150) + '...' }}</p>
+
+                    <div class="blog-tags" *ngIf="blog.tags?.length">
+                        <span class="tag" *ngFor="let tag of blog.tags | slice:0:3">
+                            #{{ tag }}
+                        </span>
+                    </div>
+
+                    <span class="read-more">Read More →</span>
+                </div>
+
+            </a>
+        </article>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && blogs.length === 0">
+        <span class="empty-icon">📝</span>
+        <h3>No Blog Posts Yet</h3>
+        <p>Check back soon for new articles and tutorials.</p>
+    </div>
+
+    <div class="pagination" *ngIf="!loading && totalPages > 1">
+        <button class="page-btn" (click)="previousPage()" [disabled]="currentPage === 0">
+            ← Previous
+        </button>
+
+        <div class="page-numbers">
+            <button *ngFor="let page of getPageNumbers()" class="page-number" [class.active]="page === currentPage"
+                (click)="goToPage(page)">
+                {{ page + 1 }}
+            </button>
+        </div>
+
+        <button class="page-btn" (click)="nextPage()" [disabled]="currentPage >= totalPages - 1">
+            Next →
+        </button>
+    </div>
+
+</div>

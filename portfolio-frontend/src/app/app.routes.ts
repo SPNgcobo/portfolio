@@ -8,25 +8,33 @@ import { AdminGuard } from './auth/guards/admin.guard';
 import { AuthGuard } from './auth/guards/auth.guard';
 
 export const routes: Routes = [
+  // Public Pages
   { path: '', component: HomeComponent },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
 
+  // Project Routes
+  { path: 'projects', loadComponent: () => import('./pages/projects/projects.component').then(m => m.ProjectsComponent) },
+  { path: 'projects/:id', loadComponent: () => import('./pages/project-detail/project-detail.component').then(m => m.ProjectDetailComponent) },
+
+  // Blog Routes
+  { path: 'blogs', loadComponent: () => import('./pages/blogs/blogs.component').then(m => m.BlogsComponent) },
+  { path: 'blogs/:slug', loadComponent: () => import('./pages/blog-detail/blog-detail.component').then(m => m.BlogDetailComponent) },
+
+  // // Contact & About Routes
+  // { path: 'contact', loadComponent: () => import('./pages/contact/contact.component').then(m => m.ContactComponent) },
+  // { path: 'about', loadComponent: () => import('./pages/about/about.component').then(m => m.AboutComponent) },
+  // { path: 'search', loadComponent: () => import('./pages/search/search.component').then(m => m.SearchComponent) },
+
+  // Admin Routes (Protected)
   {
     path: 'admin',
     canActivate: [AdminGuard],
     loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES)
   },
 
-  // { path: 'projects', loadComponent: () => import('./pages/projects/projects.component').then(m => m.ProjectsComponent) },
-  // { path: 'projects/:id', loadComponent: () => import('./pages/project-detail/project-detail.component').then(m => m.ProjectDetailComponent) },
-  // { path: 'blogs', loadComponent: () => import('./pages/blogs/blogs.component').then(m => m.BlogsComponent) },
-  // { path: 'blogs/:slug', loadComponent: () => import('./pages/blog-detail/blog-detail.component').then(m => m.BlogDetailComponent) },
-  // { path: 'contact', loadComponent: () => import('./pages/contact/contact.component').then(m => m.ContactComponent) },
-  // { path: 'about', loadComponent: () => import('./pages/about/about.component').then(m => m.AboutComponent) },
-  // { path: 'search', loadComponent: () => import('./pages/search/search.component').then(m => m.SearchComponent) },
-
+  // Fallback - redirect to home
   { path: '**', redirectTo: '' }
 ];

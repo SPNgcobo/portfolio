@@ -1,0 +1,74 @@
+<div class="projects-page">
+
+    <div class="page-header">
+        <h1>My Projects</h1>
+        <p class="subtitle">A collection of my work and side projects</p>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading projects...</p>
+    </div>
+
+    <div class="projects-grid" *ngIf="!loading && projects.length > 0">
+        <div class="project-card" *ngFor="let project of projects">
+            <a [routerLink]="['/projects', project.id]" class="project-link">
+
+                <div class="project-thumbnail" *ngIf="project.thumbnail">
+                    <img [src]="project.thumbnail" [alt]="project.title">
+                </div>
+                <div class="project-thumbnail placeholder" *ngIf="!project.thumbnail">
+                    <span class="placeholder-icon">📁</span>
+                </div>
+
+                <div class="project-content">
+                    <h2 class="project-title">{{ project.title }}</h2>
+
+                    <p class="project-description">
+                        {{ project.shortDescription || (project.description | slice:0:120) }}
+                        {{ (project.description && project.description.length > 120) ? '...' : '' }}
+                    </p>
+
+                    <div class="project-tech" *ngIf="project.techStack?.length">
+                        <span class="tech-tag" *ngFor="let tech of project.techStack | slice:0:3">
+                            {{ tech }}
+                        </span>
+                        <span class="tech-more" *ngIf="(project.techStack?.length || 0) > 3">
+                            +{{ (project.techStack?.length || 0) - 3 }}
+                        </span>
+                    </div>
+
+                    <div class="project-stats">
+                        <span class="stat">👁 {{ project.viewCount || 0 }}</span>
+                        <span class="stat">❤️ {{ project.likes || 0 }}</span>
+                    </div>
+                </div>
+
+            </a>
+        </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && projects.length === 0">
+        <span class="empty-icon">📂</span>
+        <h3>No Projects Yet</h3>
+        <p>Check back soon for new projects!</p>
+    </div>
+
+    <div class="pagination" *ngIf="!loading && totalPages > 1">
+        <button class="page-btn" (click)="previousPage()" [disabled]="currentPage === 0">
+            ← Previous
+        </button>
+
+        <div class="page-numbers">
+            <button *ngFor="let page of getPageNumbers()" class="page-number" [class.active]="page === currentPage"
+                (click)="goToPage(page)">
+                {{ page + 1 }}
+            </button>
+        </div>
+
+        <button class="page-btn" (click)="nextPage()" [disabled]="currentPage >= totalPages - 1">
+            Next →
+        </button>
+    </div>
+
+</div>

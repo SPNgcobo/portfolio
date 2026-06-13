@@ -26,7 +26,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadAllData();
 
-    // Auto-refresh every 30 seconds
     this.refreshInterval = setInterval(() => {
       this.loadStats();
       this.loadCharts();
@@ -39,7 +38,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Changed from private to public
   loadAllData(): void {
     this.loadStats();
     this.loadOverview();
@@ -77,14 +75,12 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Helper method to calculate max value for chart scaling (public)
   getMaxChartValue(points: AnalyticsChartPoint[] | undefined): number {
     if (!points || points.length === 0) return 100;
     const max = Math.max(...points.map(p => p.value));
     return max === 0 ? 100 : max;
   }
 
-  // Helper to get percentage width for chart bars (public)
   getBarWidth(value: number, max: number): string {
     return `${(value / max) * 100}%`;
   }

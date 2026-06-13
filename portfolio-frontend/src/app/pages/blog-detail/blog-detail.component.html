@@ -1,0 +1,93 @@
+<div class="blog-detail">
+
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading article...</p>
+    </div>
+
+    <div class="error-state" *ngIf="error && !loading">
+        <span class="error-icon">😕</span>
+        <h2>Blog Post Not Found</h2>
+        <p>The article you're looking for doesn't exist or has been removed.</p>
+        <a routerLink="/blogs" class="back-link">← Back to Blogs</a>
+    </div>
+
+    <div class="blog-content-wrapper" *ngIf="!loading && !error && blog">
+
+        <div class="back-nav">
+            <a routerLink="/blogs" class="back-link">← Back to Blogs</a>
+        </div>
+
+        <header class="blog-header">
+            <div class="featured-image" *ngIf="blog.thumbnailUrl">
+                <img [src]="blog.thumbnailUrl" [alt]="blog.title">
+            </div>
+            <div class="featured-image placeholder" *ngIf="!blog.thumbnailUrl">
+                <span class="placeholder-icon">📝</span>
+            </div>
+
+            <div class="blog-meta">
+                <span class="blog-date">
+                    📅 {{ blog.publishedAt | date:'MMMM d, yyyy' }}
+                </span>
+                <span class="blog-read-time">
+                    ⏱️ {{ blog.readTime || 1 }} min read
+                </span>
+            </div>
+
+            <h1 class="blog-title">{{ blog.title }}</h1>
+
+            <div class="blog-tags" *ngIf="blog.tags?.length">
+                <span class="tag" *ngFor="let tag of blog.tags">
+                    #{{ tag }}
+                </span>
+            </div>
+        </header>
+
+        <article class="blog-body">
+            <div class="blog-content">
+                <p *ngFor="let paragraph of formatContent(blog.content)">
+                    {{ paragraph }}
+                </p>
+            </div>
+        </article>
+
+        <div class="share-section">
+            <h3>Share this article</h3>
+            <div class="share-buttons">
+                <button class="share-btn copy" (click)="shareBlog()">
+                    📋 Copy Link
+                </button>
+                <a class="share-btn twitter"
+                    [href]="'https://twitter.com/intent/tweet?text=' + encodeURIComponent(blog.title || '') + '&url=' + encodeURIComponent(getCurrentUrl())"
+                    target="_blank" rel="noopener noreferrer">
+                    🐦 Twitter
+                </a>
+                <a class="share-btn linkedin"
+                    [href]="'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(getCurrentUrl())"
+                    target="_blank" rel="noopener noreferrer">
+                    🔗 LinkedIn
+                </a>
+            </div>
+        </div>
+
+        <div class="related-posts" *ngIf="relatedBlogs.length > 0">
+            <h2>Related Articles</h2>
+            <div class="related-grid">
+                <a *ngFor="let related of relatedBlogs" [routerLink]="['/blogs', related.slug]" class="related-card">
+                    <div class="related-thumbnail" *ngIf="related.thumbnailUrl">
+                        <img [src]="related.thumbnailUrl" [alt]="related.title">
+                    </div>
+                    <div class="related-content">
+                        <h3>{{ related.title }}</h3>
+                        <p>{{ (related.excerpt || related.content || '') | slice:0:100 }}{{ ((related.excerpt ||
+                            related.content || '').length > 100) ? '...' : '' }}</p>
+                        <span class="read-more">Read More →</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+</div>

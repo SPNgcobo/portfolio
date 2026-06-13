@@ -18,12 +18,10 @@ export class AdminProjectsComponent implements OnInit {
   projects: Project[] = [];
   loading = true;
 
-  // Delete dialog
   showDeleteDialog = false;
   selectedProjectId = '';
   selectedProjectTitle = '';
 
-  // Publish/Unpublish
   updatingId: string | null = null;
 
   ngOnInit(): void {

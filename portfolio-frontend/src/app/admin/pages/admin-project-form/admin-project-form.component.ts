@@ -16,7 +16,6 @@ export class AdminProjectFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private projectService = inject(AdminProjectService);
   private route = inject(ActivatedRoute);
-  // Make router public so it can be used in template
   public router = inject(Router);
 
   projectForm!: FormGroup;
@@ -149,7 +148,6 @@ export class AdminProjectFormComponent implements OnInit {
     }
   }
 
-  // Helper method to navigate back (alternative to using router in template)
   goBack(): void {
     this.router.navigate(['/admin/projects']);
   }

@@ -25,5 +25,29 @@ export const ADMIN_ROUTES: Routes = [
         canActivate: [AdminGuard],
         loadComponent: () => import('./pages/admin-project-form/admin-project-form.component')
             .then(m => m.AdminProjectFormComponent)
+    },
+    {
+        path: 'blogs',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/admin-blogs/admin-blogs.component')
+            .then(m => m.AdminBlogsComponent)
+    },
+    {
+        path: 'blogs/new',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/admin-blog-form/admin-blog-form.component')
+            .then(m => m.AdminBlogFormComponent)
+    },
+    {
+        path: 'blogs/edit/:id',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/admin-blog-form/admin-blog-form.component')
+            .then(m => m.AdminBlogFormComponent)
+    },
+    {
+        path: 'comments',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/admin-comments/admin-comments.component')
+            .then(m => m.AdminCommentsComponent)
     }
 ];
