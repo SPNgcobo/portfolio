@@ -51,6 +51,11 @@
             <p>{{ project.architecture }}</p>
         </div>
 
+        <div class="section" *ngIf="project.challenges">
+            <h2>Challenges</h2>
+            <p>{{ project.challenges }}</p>
+        </div>
+
         <div class="section" *ngIf="project.features?.length">
             <h2>Features</h2>
             <ul class="feature-list">
@@ -66,11 +71,97 @@
         </div>
 
         <div class="section" *ngIf="project.images?.length">
-            <h2>Gallery</h2>
+            <h2>Project Images</h2>
             <div class="gallery">
                 <img *ngFor="let image of project.images" [src]="image" [alt]="project.title"
                     (click)="openImage(image)">
             </div>
+        </div>
+
+        <div class="section" *ngIf="!loadingMedia && projectMedia.length > 0">
+            <h2>Media Gallery</h2>
+
+            <div *ngIf="getImages().length > 0" class="media-subsection">
+                <h3 class="subsection-title">📷 Images</h3>
+                <div class="media-gallery images-grid">
+                    <div class="media-item image-item" *ngFor="let media of getImages()">
+                        <div class="media-image" (click)="openImage(media.url)">
+                            <img [src]="media.url" [alt]="media.title">
+                            <div class="media-overlay">
+                                <span class="media-title">{{ media.title }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="getVideos().length > 0" class="media-subsection">
+                <h3 class="subsection-title">🎥 Videos</h3>
+                <div class="media-gallery videos-grid">
+                    <div class="media-item video-item" *ngFor="let media of getVideos()">
+                        <div class="media-video">
+                            <video controls preload="metadata">
+                                <source [src]="media.url" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <div class="media-caption">{{ media.title }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="getAudio().length > 0" class="media-subsection">
+                <h3 class="subsection-title">🎵 Audio</h3>
+                <div class="audio-grid">
+                    <div class="audio-item" *ngFor="let media of getAudio()">
+                        <div class="audio-player">
+                            <div class="audio-icon-large">🎵</div>
+                            <div class="audio-info">
+                                <span class="audio-title">{{ media.title }}</span>
+                                <span class="audio-size">{{ formatFileSize(media.size) }}</span>
+                            </div>
+                            <audio controls class="audio-controls">
+                                <source [src]="getSafeAudioUrl(media.url)" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="getDocuments().length > 0" class="media-subsection">
+                <h3 class="subsection-title">📄 Documents</h3>
+                <div class="documents-grid">
+                    <div class="document-item" *ngFor="let media of getDocuments()">
+                        <div class="document-preview">
+                            <div class="document-preview-icon">
+                                <ng-container [ngSwitch]="media.type">
+                                    <span *ngSwitchCase="'PDF'">📕</span>
+                                    <span *ngSwitchCase="'CERTIFICATE'">🏆</span>
+                                    <span *ngSwitchCase="'CV'">📋</span>
+                                    <span *ngSwitchDefault>📄</span>
+                                </ng-container>
+                            </div>
+                            <div class="document-preview-details">
+                                <span class="document-preview-name">{{ media.title }}</span>
+                                <div class="document-preview-meta">
+                                    <span class="document-preview-type">{{ media.type }}</span>
+                                    <span class="document-preview-size">{{ formatFileSize(media.size) }}</span>
+                                </div>
+                            </div>
+                            <a [href]="media.url" target="_blank" class="document-download-btn"
+                                rel="noopener noreferrer">
+                                <span>📥</span> Download
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading-media" *ngIf="loadingMedia">
+            <div class="spinner-small"></div>
+            <p>Loading media...</p>
         </div>
 
         <div class="lightbox" *ngIf="selectedImage" (click)="closeImage()">

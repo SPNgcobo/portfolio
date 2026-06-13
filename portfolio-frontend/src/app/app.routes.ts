@@ -25,7 +25,7 @@ export const routes: Routes = [
 
   // // Contact & About Routes
   // { path: 'contact', loadComponent: () => import('./pages/contact/contact.component').then(m => m.ContactComponent) },
-  // { path: 'about', loadComponent: () => import('./pages/about/about.component').then(m => m.AboutComponent) },
+  { path: 'about', loadComponent: () => import('./pages/about/about.component').then(m => m.AboutComponent) },
   // { path: 'search', loadComponent: () => import('./pages/search/search.component').then(m => m.SearchComponent) },
 
   // Admin Routes (Protected)

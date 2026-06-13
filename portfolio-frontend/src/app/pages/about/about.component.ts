@@ -7,13 +7,13 @@ import { Skill } from '../../models/skill.model';
 import { Tool } from '../../models/tool.model';
 
 @Component({
-  selector: 'app-home',
+  selector: 'app-about',
   standalone: true,
   imports: [CommonModule, RouterLink],
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss']
+  templateUrl: './about.component.html',
+  styleUrls: ['./about.component.scss']
 })
-export class HomeComponent implements OnInit {
+export class AboutComponent implements OnInit {
   private skillService = inject(SkillService);
   private toolService = inject(ToolService);
 
@@ -30,9 +30,7 @@ export class HomeComponent implements OnInit {
   private loadSkills(): void {
     this.skillService.getAllSkills().subscribe({
       next: (res) => {
-        this.skills = (res.data || [])
-          .sort((a, b) => (b.priority || 0) - (a.priority || 0))
-          .slice(0, 6);
+        this.skills = (res.data || []).sort((a, b) => (b.priority || 0) - (a.priority || 0));
         this.loadingSkills = false;
       },
       error: (err) => {
@@ -45,9 +43,7 @@ export class HomeComponent implements OnInit {
   private loadTools(): void {
     this.toolService.getAllTools().subscribe({
       next: (res) => {
-        this.tools = (res.data || [])
-          .sort((a, b) => (b.priority || 0) - (a.priority || 0))
-          .slice(0, 6);
+        this.tools = (res.data || []).sort((a, b) => (b.priority || 0) - (a.priority || 0));
         this.loadingTools = false;
       },
       error: (err) => {

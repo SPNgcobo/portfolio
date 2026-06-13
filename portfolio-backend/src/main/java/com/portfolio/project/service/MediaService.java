@@ -66,6 +66,13 @@ public class MediaService {
     }
 
     /*
+     * GET ALL MEDIA (ADMIN)
+     */
+    public List<Media> getAllMedia() {
+        return repository.findAll();
+    }
+
+    /*
      * GET SINGLE MEDIA
      */
     public Media getById(
@@ -138,5 +145,21 @@ public class MediaService {
                 media.getType(),
                 media.getVisibility()
         );
+    }
+
+    /*
+     * UPDATE MEDIA
+     */
+    public Media update(String id, Media updatedMedia) {
+        Media existing = getById(id);
+        existing.setTitle(updatedMedia.getTitle());
+        existing.setDescription(updatedMedia.getDescription());
+        existing.setUrl(updatedMedia.getUrl());
+        existing.setPublicId(updatedMedia.getPublicId());
+        existing.setType(updatedMedia.getType());
+        existing.setVisibility(updatedMedia.getVisibility());
+        existing.setSize(updatedMedia.getSize());
+        existing.setFormat(updatedMedia.getFormat());
+        return repository.save(existing);
     }
 }

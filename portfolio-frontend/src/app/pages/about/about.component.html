@@ -1,0 +1,95 @@
+<div class="about-page">
+
+    <section class="about-hero">
+        <div class="container">
+            <h1>About Me</h1>
+            <p class="hero-text">
+                I'm Samkelo Ngcobo, a passionate full-stack developer dedicated to building
+                modern, scalable web applications that solve real-world problems.
+            </p>
+        </div>
+    </section>
+
+    <section class="bio-section">
+        <div class="container">
+            <div class="bio-content">
+                <div class="bio-text">
+                    <h2>My Journey</h2>
+                    <p>
+                        I started my programming journey with a curiosity for how websites work.
+                        Over the years, I've developed a deep passion for creating efficient,
+                        user-friendly applications using modern technologies.
+                    </p>
+                    <p>
+                        Currently, I specialize in full-stack development with Angular on the frontend
+                        and Spring Boot on the backend. I believe in writing clean, maintainable code
+                        and continuously learning new technologies to stay current in this fast-paced
+                        industry.
+                    </p>
+                    <p>
+                        When I'm not coding, I enjoy contributing to open-source projects, mentoring
+                        aspiring developers, and exploring new technologies.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="skills-section">
+        <div class="container">
+            <h2>Technical Skills</h2>
+            <p class="section-subtitle">Technologies I specialize in</p>
+
+            <div class="loading-state" *ngIf="loadingSkills">
+                <div class="spinner"></div>
+                <p>Loading skills...</p>
+            </div>
+
+            <div class="skills-grid" *ngIf="!loadingSkills && skills.length > 0">
+                <div class="skill-card" *ngFor="let skill of skills">
+                    <div class="skill-icon">{{ getIconPreview(skill.icon) }}</div>
+                    <h3 class="skill-name">{{ skill.name }}</h3>
+                    <p class="skill-description">{{ skill.description }}</p>
+                    <div class="skill-priority-badge" *ngIf="skill.priority > 80">
+                        <span class="badge expert">Expert</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="tools-section">
+        <div class="container">
+            <h2>Tools & Technologies</h2>
+            <p class="section-subtitle">Development tools I work with daily</p>
+
+            <div class="loading-state" *ngIf="loadingTools">
+                <div class="spinner"></div>
+                <p>Loading tools...</p>
+            </div>
+
+            <div class="tools-grid" *ngIf="!loadingTools && tools.length > 0">
+                <div class="tool-card" *ngFor="let tool of tools">
+                    <div class="tool-icon">{{ getIconPreview(tool.icon) }}</div>
+                    <h3 class="tool-name">{{ tool.name }}</h3>
+                    <p class="tool-description">{{ tool.description || 'Essential development tool' }}</p>
+                </div>
+            </div>
+
+            <div class="empty-state" *ngIf="!loadingTools && tools.length === 0">
+                <span class="empty-icon">🛠️</span>
+                <h3>No Tools Added Yet</h3>
+                <p>Tools will be displayed here once added by the administrator.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to work together?</h2>
+            <p>Let's build something amazing together.</p>
+            <a routerLink="/contact" class="btn-primary">Get In Touch</a>
+        </div>
+    </section>
+
+</div>

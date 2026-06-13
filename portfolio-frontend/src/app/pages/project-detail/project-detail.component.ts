@@ -3,8 +3,11 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ProjectService } from '../../services/project.service';
+import { MediaService } from '../../services/media.service';
 import { Project } from '../../models/project.model';
+import { Media } from '../../models/media.model';
 import { CommentSectionComponent } from '../../shared/components/comment-section/comment-section.component';
 
 @Component({
@@ -16,12 +19,16 @@ import { CommentSectionComponent } from '../../shared/components/comment-section
 })
 export class ProjectDetailComponent implements OnInit {
   private projectService = inject(ProjectService);
+  private mediaService = inject(MediaService);
   private route = inject(ActivatedRoute);
   private location = inject(Location);
+  private sanitizer = inject(DomSanitizer);
 
   project?: Project;
   relatedProjects: Project[] = [];
+  projectMedia: Media[] = [];
   loading = true;
+  loadingMedia = true;
   selectedImage: string | null = null;
 
   ngOnInit(): void {
@@ -31,6 +38,7 @@ export class ProjectDetailComponent implements OnInit {
       return;
     }
     this.loadProject(id);
+    this.loadProjectMedia(id);
     this.projectService.trackView(id).subscribe();
   }
 
@@ -44,6 +52,20 @@ export class ProjectDetailComponent implements OnInit {
       error: (err) => {
         console.error('Failed to load project:', err);
         this.loading = false;
+      }
+    });
+  }
+
+  private loadProjectMedia(projectId: string): void {
+    this.loadingMedia = true;
+    this.mediaService.getProjectMedia(projectId).subscribe({
+      next: (res) => {
+        this.projectMedia = res.data || [];
+        this.loadingMedia = false;
+      },
+      error: (err) => {
+        console.error('Failed to load project media:', err);
+        this.loadingMedia = false;
       }
     });
   }
@@ -96,5 +118,43 @@ export class ProjectDetailComponent implements OnInit {
     }).catch(() => {
       console.error('Copy failed');
     });
+  }
+
+  formatFileSize(bytes: number): string {
+    if (!bytes) return '';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  getImages(): Media[] {
+    return this.projectMedia.filter(media => media.type === 'IMAGE');
+  }
+
+  getVideos(): Media[] {
+    return this.projectMedia.filter(media => media.type === 'VIDEO');
+  }
+
+  getAudio(): Media[] {
+    return this.projectMedia.filter(media => media.type === 'AUDIO');
+  }
+
+  getDocuments(): Media[] {
+    return this.projectMedia.filter(media =>
+      media.type === 'PDF' || media.type === 'CERTIFICATE' || media.type === 'CV'
+    );
+  }
+
+  getDocumentIcon(type: string): string {
+    switch (type) {
+      case 'PDF': return '📕';
+      case 'CERTIFICATE': return '🏆';
+      case 'CV': return '📋';
+      default: return '📄';
+    }
+  }
+
+  getSafeAudioUrl(url: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
 }

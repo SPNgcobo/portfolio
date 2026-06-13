@@ -15,14 +15,12 @@ import java.util.UUID;
 public class CloudinaryService {
 
     private final Cloudinary cloudinary;
-
     private final FileUploadValidator validator;
 
     public CloudinaryService(
             Cloudinary cloudinary,
             FileUploadValidator validator
     ) {
-
         this.cloudinary = cloudinary;
         this.validator = validator;
     }
@@ -30,91 +28,70 @@ public class CloudinaryService {
     /*
      * UPLOAD FILE
      */
-    public UploadResponse upload(
-            MultipartFile file
-    ) {
-
+    public UploadResponse upload(MultipartFile file) {
         validator.validate(file);
 
         try {
+            String folder = "portfolio/media";
+            String resourceType = "auto";
+            String publicId = UUID.randomUUID().toString();
 
-            boolean isVideo =
-                    validator.isVideo(file);
+            // Determine folder and resource type based on file type
+            if (validator.isImage(file)) {
+                folder = "portfolio/images";
+                resourceType = "image";
+            } else if (validator.isVideo(file)) {
+                folder = "portfolio/videos";
+                resourceType = "video";
+            } else if (validator.isAudio(file)) {
+                folder = "portfolio/audio";
+                resourceType = "video";
+            } else if (validator.isDocument(file)) {
+                folder = "portfolio/documents";
+                resourceType = "raw";
+            }
 
-            String resourceType =
-                    isVideo
-                            ? "video"
-                            : "image";
-
-            String folder =
-                    isVideo
-                            ? "portfolio/videos"
-                            : "portfolio/images";
-
-            String publicId =
-                    UUID.randomUUID().toString();
-
-            Map uploadResult =
-                    cloudinary.uploader().upload(
-                            file.getBytes(),
-                            ObjectUtils.asMap(
-                                    "folder", folder,
-                                    "resource_type", resourceType,
-                                    "public_id", publicId,
-                                    "overwrite", false
-                            )
-                    );
-
-            String url =
-                    uploadResult
-                            .get("secure_url")
-                            .toString();
-
-            String uploadedPublicId =
-                    uploadResult
-                            .get("public_id")
-                            .toString();
-
-            return new UploadResponse(
-                    url,
-                    uploadedPublicId
+            Map uploadResult = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    ObjectUtils.asMap(
+                            "folder", folder,
+                            "resource_type", resourceType,
+                            "public_id", publicId,
+                            "overwrite", false
+                    )
             );
+
+            String url = uploadResult.get("secure_url").toString();
+            String uploadedPublicId = uploadResult.get("public_id").toString();
+
+            return new UploadResponse(url, uploadedPublicId);
 
         } catch (IOException e) {
-
-            throw new IllegalStateException(
-                    "File upload failed"
-            );
+            throw new IllegalStateException("File upload failed: " + e.getMessage());
         }
     }
 
     /*
      * DELETE FILE
      */
-    public void delete(
-            String publicId
-    ) {
-
+    public void delete(String publicId) {
         try {
-
-            String resourceType =
-                    publicId.contains("/videos/")
-                            ? "video"
-                            : "image";
+            String resourceType = "image";
+            if (publicId.contains("/videos/")) {
+                resourceType = "video";
+            } else if (publicId.contains("/documents/")) {
+                resourceType = "raw";
+            } else if (publicId.contains("/audio/")) {
+                resourceType = "video";
+            }
 
             cloudinary.uploader().destroy(
                     publicId,
-                    ObjectUtils.asMap(
-                            "resource_type",
-                            resourceType
-                    )
+                    ObjectUtils.asMap("resource_type", resourceType)
             );
 
         } catch (Exception e) {
-
-            throw new IllegalStateException(
-                    "File delete failed"
-            );
+            throw new IllegalStateException("File delete failed: " + e.getMessage());
         }
     }
 }

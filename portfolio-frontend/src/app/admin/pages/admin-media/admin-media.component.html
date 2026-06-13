@@ -1,0 +1,208 @@
+<div class="admin-media">
+
+    <div class="page-header">
+        <div>
+            <h1>Media Management</h1>
+            <p class="subtitle">Manage images, videos, and documents for your projects</p>
+        </div>
+        <button class="btn-primary" (click)="openCreateModal()">
+            <span>📤</span> Upload Media
+        </button>
+    </div>
+
+    <div class="filters-bar">
+        <div class="filter-group">
+            <label>Filter by Project:</label>
+            <select [(ngModel)]="selectedProjectId" (change)="onFilterChange()">
+                <option value="">All Projects</option>
+                <option *ngFor="let project of projects" [value]="project.id">{{ project.title }}</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Filter by Type:</label>
+            <select [(ngModel)]="selectedType" (change)="onFilterChange()">
+                <option value="">All Types</option>
+                <option *ngFor="let type of mediaTypes" [value]="type">{{ type }}</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Filter by Visibility:</label>
+            <select [(ngModel)]="selectedVisibility" (change)="onFilterChange()">
+                <option value="">All</option>
+                <option *ngFor="let visibility of visibilityTypes" [value]="visibility">{{ visibility }}</option>
+            </select>
+        </div>
+
+        <button class="btn-clear" (click)="clearFilters()">Clear Filters</button>
+    </div>
+
+    <div class="stats-bar">
+        <span>Total Media: {{ mediaItems.length }}</span>
+        <span>Showing: {{ filteredMedia.length }}</span>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading media...</p>
+    </div>
+
+    <div class="media-grid" *ngIf="!loading && filteredMedia.length > 0">
+        <div class="media-card" *ngFor="let media of filteredMedia">
+
+            <div class="media-preview">
+                <div *ngIf="media.type === 'IMAGE'" class="preview-image">
+                    <img [src]="media.url" [alt]="media.title">
+                </div>
+                <div *ngIf="media.type !== 'IMAGE'" class="preview-icon">
+                    <span class="file-icon">{{ getFileIcon(media.type) }}</span>
+                </div>
+            </div>
+
+            <div class="media-info">
+                <h3 class="media-title">{{ media.title }}</h3>
+                <p class="media-description">{{ media.description || 'No description' }}</p>
+                <div class="media-meta">
+                    <span class="badge type" [class]="media.type.toLowerCase()">{{ media.type }}</span>
+                    <span class="badge visibility" [class]="media.visibility.toLowerCase()">{{ media.visibility
+                        }}</span>
+                    <span class="media-size">{{ formatFileSize(media.size) }}</span>
+                </div>
+                <div class="media-project">
+                    Project: {{ getProjectName(media.projectId) }}
+                </div>
+            </div>
+
+            <div class="media-actions">
+                <a [href]="media.url" target="_blank" class="action-btn view">👁️ View</a>
+                <button class="action-btn edit" (click)="openEditModal(media)">✏️ Edit</button>
+                <button class="action-btn delete" (click)="openDeleteDialog(media.id!, media.title)">🗑️ Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && filteredMedia.length === 0">
+        <span class="empty-icon">📁</span>
+        <h3>No Media Found</h3>
+        <p *ngIf="mediaItems.length === 0">Upload your first image or document to get started.</p>
+        <p *ngIf="mediaItems.length > 0">Try changing your filter criteria.</p>
+        <button class="btn-primary" (click)="openCreateModal()" *ngIf="mediaItems.length === 0">Upload Media</button>
+    </div>
+
+    <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+        <div class="modal-content modal-large" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>{{ isEditing ? 'Edit Media' : 'Upload New Media' }}</h3>
+                <button class="close-btn" (click)="closeModal()">✕</button>
+            </div>
+
+            <div class="upload-area" *ngIf="!isEditing">
+                <div class="drop-zone" (click)="fileInput.click()">
+                    <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none"
+                        accept="image/*,video/*,application/pdf,audio/*">
+
+                    <div *ngIf="uploadPreviewType === 'image' && uploadPreview && !uploading" class="preview-container">
+                        <img [src]="uploadPreview" class="upload-preview">
+                        <button class="remove-preview" (click)="removeSelectedFile($event)">✕</button>
+                    </div>
+
+                    <div *ngIf="uploadPreviewType === 'video' && videoPreviewUrl && !uploading"
+                        class="preview-container">
+                        <video [src]="videoPreviewUrl" controls class="upload-preview"></video>
+                        <button class="remove-preview" (click)="removeSelectedFile($event)">✕</button>
+                    </div>
+
+                    <div *ngIf="uploadPreviewType === 'audio' && audioPreviewUrl && !uploading"
+                        class="preview-container">
+                        <audio [src]="audioPreviewUrl" controls class="audio-preview"></audio>
+                        <div class="audio-info">
+                            <span class="audio-icon">🎵</span>
+                            <span class="audio-name">{{ selectedFile?.name }}</span>
+                        </div>
+                        <button class="remove-preview" (click)="removeSelectedFile($event)">✕</button>
+                    </div>
+
+                    <div *ngIf="(uploadPreviewType === 'pdf' || uploadPreviewType === 'document' || uploadPreviewType === 'file') && !uploading"
+                        class="preview-container">
+                        <div class="document-preview">
+                            <span class="document-preview-icon">{{ getPreviewIcon(uploadPreviewType) }}</span>
+                            <span class="document-preview-name">{{ selectedFile?.name }}</span>
+                            <span class="document-preview-size">{{ formatFileSize(selectedFile?.size || 0) }}</span>
+                        </div>
+                        <button class="remove-preview" (click)="removeSelectedFile($event)">✕</button>
+                    </div>
+
+                    <div *ngIf="!uploadPreview && !videoPreviewUrl && !audioPreviewUrl && !uploading">
+                        <span class="upload-icon">📤</span>
+                        <p>Click to select a file</p>
+                        <small>Supports images, videos, audio, PDFs (Max 10MB)</small>
+                    </div>
+
+                    <div *ngIf="uploading" class="uploading">
+                        <div class="spinner-small"></div>
+                        <p>Uploading...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="form-group">
+                    <label for="mediaProject">Project *</label>
+                    <select id="mediaProject" [(ngModel)]="formData.projectId">
+                        <option value="">Select a project</option>
+                        <option *ngFor="let project of projects" [value]="project.id">{{ project.title }}</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="mediaTitle">Title *</label>
+                    <input id="mediaTitle" type="text" [(ngModel)]="formData.title"
+                        placeholder="e.g., Architecture Diagram">
+                </div>
+
+                <div class="form-group">
+                    <label for="mediaDescription">Description</label>
+                    <textarea id="mediaDescription" [(ngModel)]="formData.description" rows="2"
+                        placeholder="Brief description of this media"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label for="mediaType">Media Type</label>
+                        <select id="mediaType" [(ngModel)]="formData.type">
+                            <option *ngFor="let type of mediaTypes" [value]="type">{{ type }}</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group flex-1">
+                        <label for="mediaVisibility">Visibility</label>
+                        <select id="mediaVisibility" [(ngModel)]="formData.visibility">
+                            <option *ngFor="let visibility of visibilityTypes" [value]="visibility">{{ visibility }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" *ngIf="isEditing && formData.url">
+                    <label>Media URL</label>
+                    <input type="text" [(ngModel)]="formData.url" class="form-input" readonly>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-secondary" (click)="closeModal()">Cancel</button>
+                <button class="btn-primary" (click)="submitForm()"
+                    [disabled]="submitting || (!isEditing && !formData.url) || !formData.title || !formData.projectId">
+                    {{ submitting ? 'Saving...' : (isEditing ? 'Update Media' : 'Create Media') }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <app-confirm-dialog [open]="showDeleteDialog" title="Delete Media"
+        [message]="'Are you sure you want to delete &quot;' + deleteMediaTitle + '&quot;? This action cannot be undone.'"
+        confirmText="Delete" cancelText="Cancel" (confirm)="confirmDelete()" (cancel)="cancelDelete()">
+    </app-confirm-dialog>
+
+</div>

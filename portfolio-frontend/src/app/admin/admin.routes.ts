@@ -49,5 +49,23 @@ export const ADMIN_ROUTES: Routes = [
         canActivate: [AdminGuard],
         loadComponent: () => import('./pages/admin-comments/admin-comments.component')
             .then(m => m.AdminCommentsComponent)
+    },
+    {
+        path: 'skills',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/admin-skills/admin-skills.component')
+            .then(m => m.AdminSkillsComponent)
+    },
+    {
+        path: 'tools',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/admin-tools/admin-tools.component')
+            .then(m => m.AdminToolsComponent)
+    },
+    {
+        path: 'media',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/admin-media/admin-media.component')
+            .then(m => m.AdminMediaComponent)
     }
 ];

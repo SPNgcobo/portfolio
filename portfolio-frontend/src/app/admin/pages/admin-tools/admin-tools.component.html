@@ -1,0 +1,95 @@
+<div class="admin-tools">
+
+    <div class="page-header">
+        <div>
+            <h1>Tools Management</h1>
+            <p class="subtitle">Manage development tools and software you use</p>
+        </div>
+        <button class="btn-primary" (click)="openCreateModal()">
+            <span>➕</span> Add New Tool
+        </button>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading tools...</p>
+    </div>
+
+    <div class="tools-grid" *ngIf="!loading && tools.length > 0">
+        <div class="tool-card" *ngFor="let tool of tools">
+            <div class="tool-header">
+                <div class="tool-icon">{{ getIconPreview(tool.icon) }}</div>
+                <div class="tool-info">
+                    <h3 class="tool-name">{{ tool.name }}</h3>
+                    <p class="tool-description">{{ tool.description }}</p>
+                </div>
+                <div class="tool-priority">Priority: {{ tool.priority }}</div>
+            </div>
+            <div class="tool-actions">
+                <button class="action-btn edit" (click)="openEditModal(tool)">
+                    ✏️ Edit
+                </button>
+                <button class="action-btn delete" (click)="openDeleteDialog(tool.id!, tool.name)">
+                    🗑️ Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && tools.length === 0">
+        <span class="empty-icon">🛠️</span>
+        <h3>No Tools Added Yet</h3>
+        <p>Add the development tools and software you use.</p>
+        <button class="btn-primary" (click)="openCreateModal()">Add Your First Tool</button>
+    </div>
+
+    <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>{{ isEditing ? 'Edit Tool' : 'Add New Tool' }}</h3>
+                <button class="close-btn" (click)="closeModal()">✕</button>
+            </div>
+
+            <div class="form-group">
+                <label for="toolName">Tool Name *</label>
+                <input id="toolName" type="text" [(ngModel)]="formData.name"
+                    placeholder="e.g., VS Code, Docker, Git, Postman" class="form-input">
+            </div>
+
+            <div class="form-group">
+                <label for="toolDescription">Description</label>
+                <textarea id="toolDescription" [(ngModel)]="formData.description" rows="3"
+                    placeholder="Brief description of how you use this tool" class="form-textarea"></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group flex-2">
+                    <label for="toolIcon">Icon</label>
+                    <input id="toolIcon" type="text" [(ngModel)]="formData.icon"
+                        placeholder="e.g., 🐳, 🐙, 📝 or image URL" class="form-input">
+                    <small class="hint">Emoji or image URL</small>
+                </div>
+
+                <div class="form-group flex-1">
+                    <label for="toolPriority">Priority (0-100)</label>
+                    <input id="toolPriority" type="number" [(ngModel)]="formData.priority"
+                        placeholder="Higher = more important" class="form-input">
+                    <small class="hint">Higher priority shows first</small>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-secondary" (click)="closeModal()">Cancel</button>
+                <button class="btn-primary" (click)="submitForm()" [disabled]="submitting || !formData.name.trim()">
+                    {{ submitting ? 'Saving...' : (isEditing ? 'Update Tool' : 'Create Tool') }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <app-confirm-dialog [open]="showDeleteDialog" title="Delete Tool"
+        [message]="'Are you sure you want to delete &quot;' + deleteToolName + '&quot;? This action cannot be undone.'"
+        confirmText="Delete" cancelText="Cancel" (confirm)="confirmDelete()" (cancel)="cancelDelete()">
+    </app-confirm-dialog>
+
+</div>

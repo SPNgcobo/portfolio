@@ -274,30 +274,13 @@ public class SecurityConfig {
                         ).hasRole("ADMIN")
 
                         /*
-                         * ADMIN PROJECT MANAGEMENT
-                         */
-                        .requestMatchers(
-                                "/api/admin/projects/**"
-                        ).hasRole("ADMIN")
-
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/projects"
-                        ).hasRole("ADMIN")
-
-                        .requestMatchers(
-                                HttpMethod.PUT,
-                                "/api/projects/**"
-                        ).hasRole("ADMIN")
-
-                        .requestMatchers(
-                                HttpMethod.DELETE,
-                                "/api/projects/**"
-                        ).hasRole("ADMIN")
-
-                        /*
                          * ADMIN MEDIA MANAGEMENT
                          */
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/media"
+                        ).hasRole("ADMIN")
+
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/media/**"

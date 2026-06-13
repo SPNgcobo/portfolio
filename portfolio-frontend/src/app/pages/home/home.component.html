@@ -8,3 +8,51 @@
         </div>
     </div>
 </section>
+
+<section class="skills-section">
+    <div class="container">
+        <h2 class="section-title">Technical Skills</h2>
+        <p class="section-subtitle">Technologies I specialize in</p>
+
+        <div class="skills-grid" *ngIf="!loadingSkills; else skillsLoading">
+            <div class="skill-card" *ngFor="let skill of skills">
+                <div class="skill-icon">{{ getIconPreview(skill.icon) }}</div>
+                <h3 class="skill-name">{{ skill.name }}</h3>
+                <p class="skill-description">{{ skill.description || 'No description available' }}</p>
+            </div>
+        </div>
+
+        <ng-template #skillsLoading>
+            <div class="skills-loading">
+                <div class="spinner"></div>
+                <p>Loading skills...</p>
+            </div>
+        </ng-template>
+    </div>
+</section>
+
+<section class="tools-section">
+    <div class="container">
+        <h2 class="section-title">Tools & Technologies</h2>
+        <p class="section-subtitle">Development tools I work with daily</p>
+
+        <div class="tools-grid" *ngIf="!loadingTools; else toolsLoading">
+            <div class="tool-card" *ngFor="let tool of tools">
+                <div class="tool-icon">{{ getIconPreview(tool.icon) }}</div>
+                <h3 class="tool-name">{{ tool.name }}</h3>
+                <p class="tool-description">{{ tool.description || 'Essential development tool' }}</p>
+            </div>
+        </div>
+
+        <ng-template #toolsLoading>
+            <div class="tools-loading">
+                <div class="spinner"></div>
+                <p>Loading tools...</p>
+            </div>
+        </ng-template>
+
+        <div class="view-all-link" *ngIf="tools.length > 0">
+            <a routerLink="/about" class="btn-outline">View All Tools & Skills →</a>
+        </div>
+    </div>
+</section>

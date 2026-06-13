@@ -99,6 +99,18 @@ public class MediaController {
     }
 
     /*
+     * GET ALL MEDIA (ADMIN)
+     */
+    @GetMapping
+    public ApiResponse<List<Media>> getAllMedia() {
+        return new ApiResponse<>(
+                true,
+                "All media fetched",
+                service.getAllMedia()
+        );
+    }
+
+    /*
      * SECURE MEDIA ACCESS
      */
     @GetMapping("/{id}")
