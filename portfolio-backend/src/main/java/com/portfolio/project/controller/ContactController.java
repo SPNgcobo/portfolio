@@ -4,6 +4,7 @@ import com.portfolio.common.ApiResponse;
 import com.portfolio.project.dto.ContactMessageRequest;
 import com.portfolio.project.service.AuditLogService;
 import com.portfolio.project.service.EmailService;
+import com.portfolio.project.service.NotificationEventService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,15 +15,21 @@ public class ContactController {
 
     private final AuditLogService auditLogService;
 
+    private final NotificationEventService notificationEventService;
+
     public ContactController(
             EmailService emailService,
-            AuditLogService auditLogService
+            AuditLogService auditLogService,
+            NotificationEventService notificationEventService
     ) {
 
         this.emailService = emailService;
 
         this.auditLogService =
                 auditLogService;
+
+        this.notificationEventService =
+                notificationEventService;
     }
 
     /*
@@ -57,6 +64,11 @@ public class ContactController {
                 request.getEmail(),
                 "Contact form submitted",
                 null
+        );
+
+        notificationEventService.broadcast(
+                "CONTACT_MESSAGE",
+                "New contact message from " + request.getEmail() + " - Subject: " + request.getSubject()
         );
 
         return new ApiResponse<>(

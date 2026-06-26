@@ -3,12 +3,13 @@ import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './layout/navbar/navbar.component';
 import { FooterComponent } from './layout/footer/footer.component';
 import { SnackbarComponent } from './shared/components/snackbar/snackbar.component';
+import { NotificationBannerComponent } from './shared/components/notification-banner/notification-banner.component';
 import { AuthService } from './auth/services/auth.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NavbarComponent, FooterComponent, SnackbarComponent],
+  imports: [RouterOutlet, NavbarComponent, FooterComponent, SnackbarComponent, NotificationBannerComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })

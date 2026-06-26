@@ -1,17 +1,32 @@
 <div class="comment-section">
 
     <div class="comments-header">
-        <h3>Comments ({{ comments.length }})</h3>
+        <div class="header-left">
+            <h3>💬 Comments</h3>
+            <span class="comment-count">{{ comments.length }}</span>
+        </div>
     </div>
 
     <div class="comment-form" *ngIf="isLoggedIn(); else loginPrompt">
         <div class="form-group">
-            <label for="comment">Leave a comment</label>
-            <textarea id="comment" [(ngModel)]="newComment" rows="3"
-                placeholder="Share your thoughts about this project..." [disabled]="submitting"></textarea>
+            <div class="input-wrapper">
+                <textarea #commentInput id="comment" [(ngModel)]="newComment" rows="2"
+                    placeholder="Share your thoughts about this project..." [disabled]="submitting"
+                    (focus)="showEmojiPicker = false"></textarea>
+                <button class="emoji-btn" type="button" (click)="toggleEmojiPicker()" [class.active]="showEmojiPicker"
+                    [disabled]="submitting">
+                    😊
+                </button>
+                <div class="emoji-picker-container" *ngIf="showEmojiPicker">
+                    <emoji-mart (emojiSelect)="addEmoji($event)"
+                        [include]="['people', 'nature', 'foods', 'activity', 'places', 'objects']"
+                        [showPreview]="false">
+                    </emoji-mart>
+                </div>
+            </div>
         </div>
         <button class="submit-btn" (click)="submitComment()" [disabled]="submitting || !newComment.trim()">
-            {{ submitting ? 'Submitting...' : 'Submit Comment' }}
+            {{ submitting ? 'Sending...' : 'Post Comment' }}
         </button>
     </div>
 
@@ -22,48 +37,151 @@
     </ng-template>
 
     <div class="comments-list" *ngIf="!loading">
-        <div class="comment-card" *ngFor="let comment of comments">
-            <div class="comment">
-                <div class="comment-header">
-                    <strong class="comment-author">{{ comment.username }}</strong>
-                    <span class="comment-date">{{ formatDate(comment.createdAt) }}</span>
-                </div>
-                <div class="comment-content">{{ comment.content }}</div>
-                <button class="reply-btn" (click)="replyingTo = comment" *ngIf="isLoggedIn()">
-                    💬 Reply
-                </button>
+        <div *ngFor="let comment of getTopLevelComments()" class="comment-thread" [id]="'comment-' + comment.id">
 
-                <div class="admin-reply" *ngIf="comment.adminReply">
-                    <span class="admin-badge">Admin Response</span>
-                </div>
-            </div>
+            <div class="comment" [class.admin-message]="isAdminComment(comment) && !comment.deleted"
+                [class.user-message]="!isAdminComment(comment) && !comment.deleted"
+                [class.deleted-message]="comment.deleted">
 
-            <div class="reply-form" *ngIf="replyingTo?.id === comment.id">
-                <textarea [(ngModel)]="replyContent" rows="2" placeholder="Write your reply..."
-                    [disabled]="submitting"></textarea>
-                <div class="reply-actions">
-                    <button class="cancel-btn" (click)="cancelReply()">Cancel</button>
-                    <button class="submit-reply-btn" (click)="submitReply()"
-                        [disabled]="submitting || !replyContent.trim()">
-                        {{ submitting ? 'Sending...' : 'Send Reply' }}
-                    </button>
+                <div class="comment-avatar" [class.deleted-avatar]="comment.deleted">
+                    {{ comment.deleted ? '🗑️' : (isAdminComment(comment) ? '👨‍💼' : '👤') }}
                 </div>
-            </div>
 
-            <div class="replies" *ngIf="comment.id">
-                <div class="reply-card" *ngFor="let reply of getReplies(comment.id)">
-                    <div class="reply-header">
-                        <strong class="reply-author">{{ reply.username }}</strong>
-                        <span class="reply-date">{{ formatDate(reply.createdAt) }}</span>
+                <div class="comment-bubble" [class.deleted-bubble]="comment.deleted">
+                    <div *ngIf="comment.deleted" class="deleted-content">
+                        <div class="deleted-message">
+                            <span class="deleted-icon">🗑️</span>
+                            <span class="deleted-text">
+                                This message was deleted by
+                                <strong>{{ getDeletedByDisplayName(comment) }}</strong>
+                            </span>
+                            <span class="deleted-time" *ngIf="comment.deletedAt">
+                                {{ formatDate(comment.deletedAt) }}
+                            </span>
+                        </div>
                     </div>
-                    <div class="reply-content">{{ reply.content }}</div>
+
+                    <div *ngIf="!comment.deleted">
+                        <div class="comment-header">
+                            <span class="comment-author">{{ getDisplayName(comment) }}</span>
+                            <span class="comment-date">{{ formatDate(comment.createdAt) }}</span>
+                            <span *ngIf="!comment.approved" class="pending-badge">⏳ Pending</span>
+                            <span *ngIf="isAdminComment(comment)" class="admin-badge">👨‍💼 Admin</span>
+                        </div>
+                        <div class="comment-content">
+                            {{ comment.content }}
+                            <span *ngIf="comment.edited && comment.approved" class="edited-tag">
+                                <span class="edited-badge">✏️ Edited</span>
+                                <span class="edited-time" *ngIf="comment.editedAt">({{ formatDate(comment.editedAt)
+                                    }})</span>
+                            </span>
+                        </div>
+                        <div class="comment-footer">
+                            <button class="reply-btn" (click)="startReply(comment)"
+                                *ngIf="isLoggedIn() && comment.approved">
+                                💬 Reply
+                            </button>
+                            <app-comment-actions [comment]="comment" [isAdmin]="isAdmin()"
+                                (commentUpdated)="onCommentUpdated()">
+                            </app-comment-actions>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="replies-container" *ngIf="getReplies(comment.id!).length > 0">
+                <div class="replies-line"></div>
+                <div class="replies">
+                    <div *ngFor="let reply of getReplies(comment.id!)" class="reply-item" [id]="'comment-' + reply.id">
+
+                        <div class="comment" [class.admin-message]="isAdminComment(reply) && !reply.deleted"
+                            [class.user-message]="!isAdminComment(reply) && !reply.deleted"
+                            [class.deleted-message]="reply.deleted">
+
+                            <div class="comment-avatar reply-avatar" [class.deleted-avatar]="reply.deleted">
+                                {{ reply.deleted ? '🗑️' : (isAdminComment(reply) ? '👨‍💼' : '👤') }}
+                            </div>
+
+                            <div class="comment-bubble reply-bubble" [class.deleted-bubble]="reply.deleted">
+                                <div *ngIf="reply.deleted" class="deleted-content">
+                                    <div class="deleted-message">
+                                        <span class="deleted-icon">🗑️</span>
+                                        <span class="deleted-text">
+                                            This message was deleted by
+                                            <strong>{{ getDeletedByDisplayName(reply) }}</strong>
+                                        </span>
+                                        <span class="deleted-time" *ngIf="reply.deletedAt">
+                                            {{ formatDate(reply.deletedAt) }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div *ngIf="!reply.deleted">
+                                    <div class="comment-header">
+                                        <span class="comment-author">{{ getDisplayName(reply) }}</span>
+                                        <span class="comment-date">{{ formatDate(reply.createdAt) }}</span>
+                                        <span *ngIf="!reply.approved" class="pending-badge">⏳ Pending</span>
+                                        <span *ngIf="isAdminComment(reply)" class="admin-badge">👨‍💼 Admin</span>
+                                    </div>
+                                    <div class="comment-content">
+                                        {{ reply.content }}
+                                        <span *ngIf="reply.edited && reply.approved" class="edited-tag">
+                                            <span class="edited-badge">✏️ Edited</span>
+                                            <span class="edited-time" *ngIf="reply.editedAt">({{
+                                                formatDate(reply.editedAt) }})</span>
+                                        </span>
+                                    </div>
+                                    <div class="comment-footer">
+                                        <button class="reply-btn" (click)="startReply(reply)"
+                                            *ngIf="isLoggedIn() && reply.approved">
+                                            💬 Reply
+                                        </button>
+                                        <app-comment-actions [comment]="reply" [isAdmin]="isAdmin()"
+                                            (commentUpdated)="onCommentUpdated()">
+                                        </app-comment-actions>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="reply-form-inline"
+                *ngIf="replyingTo && (replyingTo.id === comment.id || replyingTo.parentCommentId === comment.id)">
+                <div class="reply-to-indicator">
+                    <span>Replying to <strong>{{ getDisplayName(replyingTo) }}</strong></span>
+                    <button class="cancel-reply-btn" (click)="cancelReply()">✕</button>
+                </div>
+                <div class="reply-form">
+                    <div class="input-wrapper">
+                        <textarea [(ngModel)]="replyContent" rows="2" placeholder="Write your reply..."
+                            [disabled]="submitting" (focus)="showReplyEmojiPicker = false"></textarea>
+                        <button class="emoji-btn" type="button" (click)="toggleReplyEmojiPicker()"
+                            [class.active]="showReplyEmojiPicker" [disabled]="submitting">
+                            😊
+                        </button>
+                        <div class="emoji-picker-container" *ngIf="showReplyEmojiPicker">
+                            <emoji-mart (emojiSelect)="addReplyEmoji($event)"
+                                [include]="['people', 'nature', 'foods', 'activity', 'places', 'objects']"
+                                [showPreview]="false">
+                            </emoji-mart>
+                        </div>
+                    </div>
+                    <div class="reply-actions">
+                        <button class="submit-reply-btn" (click)="submitReply()"
+                            [disabled]="submitting || !replyContent.trim()">
+                            {{ submitting ? 'Sending...' : 'Send Reply' }}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="empty-state" *ngIf="comments.length === 0">
+        <div class="empty-state" *ngIf="getTopLevelComments().length === 0">
             <span class="empty-icon">💬</span>
-            <p>No comments yet. Be the first to share your thoughts!</p>
+            <h4>No comments yet</h4>
+            <p>Be the first to share your thoughts about this project.</p>
         </div>
     </div>
 

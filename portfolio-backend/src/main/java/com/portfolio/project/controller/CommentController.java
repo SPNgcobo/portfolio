@@ -112,14 +112,31 @@ public class CommentController {
      */
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(
-            @PathVariable String id
+            @PathVariable String id,
+            HttpServletRequest request
     ) {
 
-        service.delete(id);
-
+        String email = request.getParameter("email");
+        service.delete(id, email);
         return new ApiResponse<>(
                 true,
                 "Comment deleted",
+                null
+        );
+    }
+
+    /*
+     * ADMIN DELETE
+     */
+    @DeleteMapping("/admin/{id}")
+    public ApiResponse<Void> adminDelete(
+            @PathVariable String id
+    ) {
+
+        service.adminDelete(id);
+        return new ApiResponse<>(
+                true,
+                "Comment deleted by admin",
                 null
         );
     }
@@ -133,10 +150,63 @@ public class CommentController {
             @RequestBody Comment reply
     ) {
 
+        // Ensure admin reply is always approved
+        reply.setApproved(true);
+        reply.setAdminReply(true);
         return new ApiResponse<>(
                 true,
                 "Admin reply submitted",
                 service.adminReply(id, reply)
+        );
+    }
+
+    /*
+     * ADMIN - ALL COMMENTS
+     */
+    @GetMapping("/all")
+    public ApiResponse<List<Comment>> getAll() {
+        return new ApiResponse<>(
+                true,
+                "All comments fetched",
+                service.getAllComments()
+        );
+    }
+
+    /*
+     * EDIT COMMENT - Users can edit their own comments
+     */
+    @PutMapping("/{id}/edit")
+    public ApiResponse<Comment> editComment(
+            @PathVariable String id,
+            @RequestBody Comment updatedComment,
+            HttpServletRequest request
+    ) {
+
+        String email = request.getParameter("email");
+        if (email == null || email.isBlank()) {
+            throw new RuntimeException("Email is required to edit comment");
+        }
+
+        return new ApiResponse<>(
+                true,
+                "Comment updated",
+                service.editComment(id, updatedComment.getContent(), email)
+        );
+    }
+
+    /*
+     * ADMIN EDIT COMMENT - Admin can edit any comment
+     */
+    @PutMapping("/admin/{id}/edit")
+    public ApiResponse<Comment> adminEditComment(
+            @PathVariable String id,
+            @RequestBody Comment updatedComment
+    ) {
+
+        return new ApiResponse<>(
+                true,
+                "Comment updated by admin",
+                service.adminEditComment(id, updatedComment.getContent())
         );
     }
 }

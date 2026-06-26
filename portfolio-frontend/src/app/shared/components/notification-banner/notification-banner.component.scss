@@ -1,0 +1,118 @@
+.notification-banner {
+    position: sticky;
+    top: 70px;
+    z-index: 999;
+}
+
+.notification-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0.5rem 2rem;
+}
+
+.notification-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    border-left: 4px solid;
+    box-shadow: var(--shadow-soft);
+    animation: slideDown 0.3s ease;
+
+    &.banner {
+        border-left-color: #6366f1;
+        background: linear-gradient(90deg, rgba(99, 102, 241, 0.1), var(--bg-card));
+    }
+
+    &.alert {
+        border-left-color: #ef4444;
+        background: linear-gradient(90deg, rgba(239, 68, 68, 0.1), var(--bg-card));
+    }
+
+    &.update {
+        border-left-color: #10b981;
+        background: linear-gradient(90deg, rgba(16, 185, 129, 0.1), var(--bg-card));
+    }
+
+    &.info {
+        border-left-color: #3b82f6;
+        background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), var(--bg-card));
+    }
+
+    &.warning {
+        border-left-color: #f59e0b;
+        background: linear-gradient(90deg, rgba(245, 158, 11, 0.1), var(--bg-card));
+    }
+
+    &.success {
+        border-left-color: #10b981;
+        background: linear-gradient(90deg, rgba(16, 185, 129, 0.1), var(--bg-card));
+    }
+}
+
+.notification-icon {
+    font-size: 1.2rem;
+}
+
+.notification-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    strong {
+        font-size: 0.85rem;
+        color: var(--text-main);
+    }
+
+    span {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+}
+
+.notification-dismiss {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 0.25rem;
+    transition: var(--transition);
+
+    &:hover {
+        color: var(--danger-color);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .notification-container {
+        padding: 0.5rem 1rem;
+    }
+
+    .notification-item {
+        flex-wrap: wrap;
+    }
+
+    .notification-content {
+        flex: 1;
+        min-width: 200px;
+    }
+}

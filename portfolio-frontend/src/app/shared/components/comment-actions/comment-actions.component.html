@@ -1,0 +1,52 @@
+<div class="comment-actions-wrapper">
+    <div *ngIf="!isEditing" class="comment-actions">
+        <div class="comment-meta">
+            <span *ngIf="comment.edited" class="edited-badge" title="Edited on {{ formatEditTime(comment.editedAt) }}">
+                ✏️ Edited
+                <span *ngIf="comment.editCount && comment.editCount > 1">
+                    ({{ comment.editCount }} times)
+                </span>
+            </span>
+        </div>
+
+        <div class="dropdown-container" *ngIf="(canEdit || canDelete) && !comment.deleted">
+            <button class="dot-menu-btn" (click)="toggleMenu($event)">
+                ⋮
+            </button>
+
+            <div class="dropdown-menu" *ngIf="showMenu" (click)="$event.stopPropagation()">
+                <button *ngIf="canEdit" class="dropdown-item edit-btn" (click)="startEdit()">
+                    ✏️ Edit
+                </button>
+                <button *ngIf="canDelete" class="dropdown-item delete-btn" (click)="openDeleteDialog()">
+                    🗑️ Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="isEditing" class="edit-mode">
+        <div class="edit-form">
+            <textarea [(ngModel)]="editContent" rows="3" class="edit-textarea"
+                placeholder="Edit your comment..."></textarea>
+            <div class="edit-actions">
+                <button class="btn-cancel" (click)="cancelEdit()" [disabled]="isSaving">
+                    Cancel
+                </button>
+                <button class="btn-save" (click)="confirmEdit()" [disabled]="!editContent.trim() || isSaving">
+                    {{ isSaving ? 'Saving...' : 'Save Changes' }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <app-confirm-dialog [open]="showEditConfirmDialog" title="Confirm Edit"
+        message="Are you sure you want to update this comment?" confirmText="Update" cancelText="Cancel"
+        (confirm)="saveEdit()" (cancel)="showEditConfirmDialog = false">
+    </app-confirm-dialog>
+
+    <app-confirm-dialog [open]="showDeleteDialog" title="Delete Comment"
+        [message]="'Are you sure you want to delete this comment? This action cannot be undone.'" confirmText="Delete"
+        cancelText="Cancel" (confirm)="confirmDelete()" (cancel)="cancelDelete()">
+    </app-confirm-dialog>
+</div>

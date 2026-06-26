@@ -3,6 +3,7 @@ package com.portfolio.project.controller;
 import com.portfolio.common.ApiResponse;
 import com.portfolio.project.dto.AnalyticsResponse;
 import com.portfolio.project.model.Project;
+import com.portfolio.project.service.NotificationEventService;
 import com.portfolio.project.service.ProjectService;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -15,10 +16,14 @@ public class AdminProjectController {
 
     private final ProjectService service;
 
+    private final NotificationEventService notificationEventService;
+
     public AdminProjectController(
-            ProjectService service
+            ProjectService service,
+            NotificationEventService notificationEventService
     ) {
         this.service = service;
+        this.notificationEventService = notificationEventService;
     }
 
     /*
@@ -96,10 +101,17 @@ public class AdminProjectController {
             @PathVariable String id
     ) {
 
+        Project project = service.publishProject(id);
+
+        notificationEventService.broadcast(
+                "PROJECT_PUBLISHED",
+                "Project \"" + project.getTitle() + "\" has been published"
+        );
+
         return new ApiResponse<>(
                 true,
                 "Project published",
-                service.publishProject(id)
+                project
         );
     }
 
@@ -112,10 +124,17 @@ public class AdminProjectController {
             @PathVariable String id
     ) {
 
+        Project project = service.unpublishProject(id);
+
+        notificationEventService.broadcast(
+                "PROJECT_UNPUBLISHED",
+                "Project \"" + project.getTitle() + "\" has been unpublished"
+        );
+
         return new ApiResponse<>(
                 true,
                 "Project unpublished",
-                service.unpublishProject(id)
+                project
         );
     }
 

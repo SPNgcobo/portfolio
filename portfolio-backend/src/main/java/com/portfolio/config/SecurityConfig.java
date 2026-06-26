@@ -194,25 +194,7 @@ public class SecurityConfig {
                         ).permitAll()
 
                         /*
-                         * ADMIN BLOG MANAGEMENT
-                         */
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/blogs/**"
-                        ).hasRole("ADMIN")
-
-                        .requestMatchers(
-                                HttpMethod.PUT,
-                                "/api/blogs/**"
-                        ).hasRole("ADMIN")
-
-                        .requestMatchers(
-                                HttpMethod.DELETE,
-                                "/api/blogs/**"
-                        ).hasRole("ADMIN")
-
-                        /*
-                         * COMMENTS
+                         * COMMENTS - Consolidated all comment rules
                          */
                         .requestMatchers(
                                 HttpMethod.GET,
@@ -224,17 +206,26 @@ public class SecurityConfig {
                                 "/api/comments/**"
                         ).authenticated()
 
-                        /*
-                         * NOTIFICATIONS
-                         */
                         .requestMatchers(
-                                HttpMethod.GET,
-                                "/api/notifications/**"
-                        ).permitAll()
+                                HttpMethod.PUT,
+                                "/api/comments/*/edit"
+                        ).authenticated()
 
-                        /*
-                         * ADMIN COMMENT MODERATION
-                         */
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/api/comments/admin/*/edit"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/comments/*"
+                        ).authenticated()
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/comments/admin/*"
+                        ).hasRole("ADMIN")
+
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/comments/pending"
@@ -250,28 +241,76 @@ public class SecurityConfig {
                                 "/api/comments/*/reply"
                         ).hasRole("ADMIN")
 
-                        .requestMatchers(
-                                HttpMethod.DELETE,
-                                "/api/comments/**"
-                        ).hasRole("ADMIN")
-
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/comments"
-                        ).authenticated()
-
                         /*
-                         * ADMIN NOTIFICATIONS
+                         * NOTIFICATIONS - Public read for active notifications
                          */
                         .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/notifications/active"
+                        ).permitAll()
+
+                        /*
+                         * ADMIN NOTIFICATIONS MANAGEMENT
+                         */
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/notifications"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
                                 HttpMethod.POST,
-                                "/api/notifications/**"
+                                "/api/notifications"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/api/notifications/*"
                         ).hasRole("ADMIN")
 
                         .requestMatchers(
                                 HttpMethod.DELETE,
-                                "/api/notifications/**"
+                                "/api/notifications/*"
                         ).hasRole("ADMIN")
+
+                        /*
+                         * ACTIVITY EVENTS (ADMIN ONLY)
+                         */
+                        .requestMatchers(
+                                "/api/activity-events/**"
+                        ).hasRole("ADMIN")
+
+                        /*
+                         * USER NOTIFICATIONS - Authenticated users can view and manage their own
+                         */
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/notifications/user/me"
+                        ).authenticated()
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/notifications/user/me/unread/count"
+                        ).authenticated()
+
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/api/notifications/user/me/read/all"
+                        ).authenticated()
+
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/api/notifications/user/me/*/read"
+                        ).authenticated()
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/notifications/user/me/all"
+                        ).authenticated()
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/notifications/user/me/*"
+                        ).authenticated()
 
                         /*
                          * ADMIN MEDIA MANAGEMENT
@@ -288,12 +327,12 @@ public class SecurityConfig {
 
                         .requestMatchers(
                                 HttpMethod.PUT,
-                                "/api/media/**"
+                                "/api/media/*"
                         ).hasRole("ADMIN")
 
                         .requestMatchers(
                                 HttpMethod.DELETE,
-                                "/api/media/**"
+                                "/api/media/*"
                         ).hasRole("ADMIN")
 
                         /*
@@ -306,12 +345,12 @@ public class SecurityConfig {
 
                         .requestMatchers(
                                 HttpMethod.PUT,
-                                "/api/skills/**"
+                                "/api/skills/*"
                         ).hasRole("ADMIN")
 
                         .requestMatchers(
                                 HttpMethod.DELETE,
-                                "/api/skills/**"
+                                "/api/skills/*"
                         ).hasRole("ADMIN")
 
                         /*
@@ -324,12 +363,12 @@ public class SecurityConfig {
 
                         .requestMatchers(
                                 HttpMethod.PUT,
-                                "/api/tools/**"
+                                "/api/tools/*"
                         ).hasRole("ADMIN")
 
                         .requestMatchers(
                                 HttpMethod.DELETE,
-                                "/api/tools/**"
+                                "/api/tools/*"
                         ).hasRole("ADMIN")
 
                         /*

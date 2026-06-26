@@ -19,6 +19,13 @@ export class AdminCommentService {
     );
   }
 
+  getAllComments(): Observable<ApiResponse<Comment[]>> {
+    return this.http.get<ApiResponse<Comment[]>>(
+      `${this.apiUrl}/all`,
+      { withCredentials: true }
+    );
+  }
+
   getProjectComments(projectId: string): Observable<ApiResponse<Comment[]>> {
     return this.http.get<ApiResponse<Comment[]>>(
       `${this.apiUrl}/project/${projectId}`,
@@ -30,6 +37,21 @@ export class AdminCommentService {
     return this.http.put<ApiResponse<Comment>>(
       `${this.apiUrl}/${id}/approve`,
       {},
+      { withCredentials: true }
+    );
+  }
+
+  adminDeleteComment(id: string): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(
+      `${this.apiUrl}/admin/${id}`,
+      { withCredentials: true }
+    );
+  }
+
+  adminEditComment(id: string, content: string): Observable<ApiResponse<Comment>> {
+    return this.http.put<ApiResponse<Comment>>(
+      `${this.apiUrl}/admin/${id}/edit`,
+      { content },
       { withCredentials: true }
     );
   }
@@ -47,7 +69,8 @@ export class AdminCommentService {
       username: username,
       email: email,
       adminReply: true,
-      approved: true
+      approved: true,
+      parentCommentId: parentId
     };
     return this.http.post<ApiResponse<Comment>>(
       `${this.apiUrl}/${parentId}/reply`,

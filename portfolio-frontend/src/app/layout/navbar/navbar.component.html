@@ -38,8 +38,14 @@
                 <a routerLink="/admin/tools">Tools</a>
                 <a routerLink="/admin/media">Media</a>
                 <a routerLink="/admin/comments">Comments</a>
+                <a routerLink="/admin/notifications">Notifications</a>
                 <a routerLink="/admin/access-requests">Access Requests</a>
             </div>
+        </div>
+
+        <div class="notification-bell" *ngIf="isLoggedIn()" (click)="toggleNotificationPanel()">
+            <span class="bell-icon">🔔</span>
+            <span class="bell-badge" *ngIf="unreadNotificationsCount > 0">{{ unreadNotificationsCount }}</span>
         </div>
 
         <ng-container *ngIf="!isLoggedIn()">
@@ -51,6 +57,83 @@
 
         <div class="theme-toggle" [class.active]="isLightMode" (click)="toggleTheme()">
             <span class="theme-icon">{{ isLightMode ? '☀️' : '🌙' }}</span>
+        </div>
+    </div>
+
+    <div class="notification-panel" *ngIf="showNotificationPanel" (click)="$event.stopPropagation()">
+        <div class="notification-panel-header">
+            <h4>Notifications</h4>
+            <div class="header-actions">
+                <button class="mark-all-read" (click)="markAllAsRead()">✓ Mark all as read</button>
+                <button class="delete-all-read" (click)="deleteAllRead()" *ngIf="isAdmin() && hasReadEvents()">🗑️ Clear
+                    read</button>
+                <button class="delete-all" (click)="deleteAllUserNotifications()"
+                    *ngIf="!isAdmin() && userNotifications.length > 0">🗑️ Clear all</button>
+            </div>
+        </div>
+
+        <div class="notification-panel-list">
+            <div class="notification-group" *ngIf="isAdmin() && activityEvents.length > 0">
+                <div class="notification-group-title">Recent Activity</div>
+                <div class="notification-item activity" *ngFor="let event of activityEvents | slice:0:20"
+                    [ngClass]="[getActivityTypeClass(event.type), event.read ? 'read' : '']"
+                    (click)="navigateToComment(event)">
+                    <div class="notification-icon">{{ getNotificationIcon(event.type) }}</div>
+                    <div class="notification-content">
+                        <div class="notification-message">{{ event.message }}</div>
+                        <div class="notification-date">{{ event.createdAt | date:'short' }}</div>
+                    </div>
+                    <div class="notification-actions" *ngIf="isAdmin()">
+                        <button class="mark-read-btn" *ngIf="!event.read"
+                            (click)="markActivityAsRead(event.id!); $event.stopPropagation()"
+                            title="Mark as read">✓</button>
+                        <button class="delete-btn" (click)="deleteActivityEvent(event.id!, $event)"
+                            title="Delete">✕</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="notification-group" *ngIf="!isAdmin() && userNotifications.length > 0">
+                <div class="notification-group-title">Your Notifications</div>
+                <div class="notification-item" *ngFor="let notification of userNotifications"
+                    [class]="getActivityTypeClass(notification.type)" (click)="navigateToNotification(notification)">
+                    <div class="notification-icon">{{ getNotificationIcon(notification.type) }}</div>
+                    <div class="notification-content">
+                        <div class="notification-message">{{ notification.message }}</div>
+                        <div class="notification-date">{{ notification.createdAt | date:'short' }}</div>
+                    </div>
+                    <div class="notification-actions">
+                        <button class="mark-read-btn" *ngIf="!notification.read"
+                            (click)="markActivityAsRead(notification.id!); $event.stopPropagation()"
+                            title="Mark as read">✓</button>
+                        <button class="delete-btn" (click)="deleteActivityEvent(notification.id!, $event)"
+                            title="Delete">✕</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="notification-group" *ngIf="activeNotifications.length > 0">
+                <div class="notification-group-title">{{ isAdmin() ? 'Announcements' : 'Updates & Announcements' }}
+                </div>
+                <div class="notification-item announcement" *ngFor="let notification of activeNotifications">
+                    <div class="notification-icon">{{ getNotificationIcon(notification.type) }}</div>
+                    <div class="notification-content">
+                        <div class="notification-title">{{ notification.title }}</div>
+                        <div class="notification-message">{{ notification.message }}</div>
+                        <div class="notification-date" *ngIf="notification.createdAt">{{ notification.createdAt |
+                            date:'mediumDate' }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="no-notifications" *ngIf="activityEvents.length === 0 && activeNotifications.length === 0">
+                <span class="no-icon">🔔</span>
+                <p>No new notifications</p>
+            </div>
+        </div>
+
+        <div class="notification-panel-footer" *ngIf="isAdmin()">
+            <a routerLink="/admin/notifications">Manage Announcements →</a>
         </div>
     </div>
 </nav>

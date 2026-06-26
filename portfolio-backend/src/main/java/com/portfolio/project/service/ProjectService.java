@@ -2,6 +2,7 @@ package com.portfolio.project.service;
 
 import com.portfolio.common.exceptions.ResourceNotFoundException;
 import com.portfolio.dashboard.websocket.DashboardActivityPublisher;
+import com.portfolio.project.service.NotificationEventService;
 import com.portfolio.project.dto.AnalyticsResponse;
 import com.portfolio.project.model.Project;
 import com.portfolio.project.repository.ProjectRepository;
@@ -21,13 +22,17 @@ public class ProjectService {
 
     private final DashboardActivityPublisher publisher;
 
+    private final NotificationEventService notificationEventService;
+
+
     public ProjectService(
             ProjectRepository repository,
-            DashboardActivityPublisher publisher
+            DashboardActivityPublisher publisher,
+            NotificationEventService notificationEventService
     ) {
-
         this.repository = repository;
         this.publisher = publisher;
+        this.notificationEventService = notificationEventService;
     }
 
     /*
@@ -205,21 +210,14 @@ public class ProjectService {
     /*
      * GITHUB CLICK
      */
-    public Project incrementGithubClick(
-            String id
-    ) {
+    public Project incrementGithubClick(String id) {
+        Project project = getAdminProjectById(id);
+        project.setGithubClicks(project.getGithubClicks() + 1);
+        publisher.publish("GITHUB_CLICK", project.getTitle() + " GitHub clicked");
 
-        Project project =
-                getAdminProjectById(id);
-
-        project.setGithubClicks(
-                project.getGithubClicks() + 1
-        );
-
-        publisher.publish(
+        notificationEventService.broadcast(
                 "GITHUB_CLICK",
-                project.getTitle()
-                        + " GitHub clicked"
+                "GitHub link clicked on project \"" + project.getTitle() + "\""
         );
 
         return repository.save(project);
@@ -228,21 +226,14 @@ public class ProjectService {
     /*
      * DEMO CLICK
      */
-    public Project incrementDemoClick(
-            String id
-    ) {
+    public Project incrementDemoClick(String id) {
+        Project project = getAdminProjectById(id);
+        project.setDemoClicks(project.getDemoClicks() + 1);
+        publisher.publish("DEMO_CLICK", project.getTitle() + " demo opened");
 
-        Project project =
-                getAdminProjectById(id);
-
-        project.setDemoClicks(
-                project.getDemoClicks() + 1
-        );
-
-        publisher.publish(
+        notificationEventService.broadcast(
                 "DEMO_CLICK",
-                project.getTitle()
-                        + " demo opened"
+                "Live demo opened for project \"" + project.getTitle() + "\""
         );
 
         return repository.save(project);
@@ -251,15 +242,13 @@ public class ProjectService {
     /*
      * DETAIL CLICK
      */
-    public Project incrementDetailClick(
-            String id
-    ) {
+    public Project incrementDetailClick(String id) {
+        Project project = getAdminProjectById(id);
+        project.setDetailClicks(project.getDetailClicks() + 1);
 
-        Project project =
-                getAdminProjectById(id);
-
-        project.setDetailClicks(
-                project.getDetailClicks() + 1
+        notificationEventService.broadcast(
+                "DETAIL_CLICK",
+                "Project detail page viewed: \"" + project.getTitle() + "\""
         );
 
         return repository.save(project);
@@ -268,20 +257,14 @@ public class ProjectService {
     /*
      * LIKE
      */
-    public Project incrementLike(
-            String id
-    ) {
+    public Project incrementLike(String id) {
+        Project project = getAdminProjectById(id);
+        project.setLikes(project.getLikes() + 1);
+        publisher.publish("PROJECT_LIKE", project.getTitle() + " liked");
 
-        Project project =
-                getAdminProjectById(id);
-
-        project.setLikes(
-                project.getLikes() + 1
-        );
-
-        publisher.publish(
+        notificationEventService.broadcast(
                 "PROJECT_LIKE",
-                project.getTitle() + " liked"
+                "Project \"" + project.getTitle() + "\" received a like! Total likes: " + project.getLikes()
         );
 
         return repository.save(project);

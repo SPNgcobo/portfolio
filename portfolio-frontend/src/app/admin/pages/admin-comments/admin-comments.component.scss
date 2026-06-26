@@ -84,12 +84,23 @@
 }
 
 .comments-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 1.5rem;
 
     h2 {
         font-size: 1.25rem;
         margin: 0;
         color: var(--text-main);
+    }
+
+    .pending-count {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        background: rgba(99, 102, 241, 0.08);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
     }
 }
 
@@ -161,6 +172,102 @@
     }
 }
 
+.comment-edited-indicator {
+    margin-bottom: 0.75rem;
+}
+
+.edited-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.85rem;
+    color: #f59e0b;
+
+    &:hover {
+        background: rgba(245, 158, 11, 0.15);
+    }
+
+    .expand-icon {
+        margin-left: auto;
+        font-size: 0.7rem;
+    }
+}
+
+.edit-history {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    animation: slideDown 0.25s ease;
+}
+
+.version {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+
+    &.original {
+        background: rgba(239, 68, 68, 0.05);
+        border-left: 3px solid #ef4444;
+    }
+
+    &.edited {
+        background: rgba(16, 185, 129, 0.05);
+        border-left: 3px solid #10b981;
+    }
+
+    .version-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 0.25rem;
+    }
+
+    .version-content {
+        font-size: 0.9rem;
+        color: var(--text-main);
+        line-height: 1.5;
+        padding: 0.25rem 0.5rem;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: var(--radius-sm);
+    }
+}
+
+.version-meta {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.comment-edited-badge {
+    margin-bottom: 0.75rem;
+
+    .badge {
+        display: inline-block;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+
+        &.edited {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+        }
+    }
+}
+
 .comment-badge {
     margin-bottom: 0.75rem;
 
@@ -173,6 +280,11 @@
         &.approved {
             background: rgba(16, 185, 129, 0.15);
             color: #10b981;
+        }
+
+        &.pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
         }
     }
 }
@@ -190,6 +302,7 @@
     display: flex;
     gap: 0.75rem;
     justify-content: flex-end;
+    flex-wrap: wrap;
 }
 
 .action-btn {
@@ -272,6 +385,8 @@
     padding: 1.5rem;
     max-width: 500px;
     width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
     box-shadow: var(--shadow-soft);
 }
 
@@ -316,6 +431,22 @@
         margin: 0;
         color: var(--text-main);
         font-style: italic;
+        padding: 0.25rem 0.5rem;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: var(--radius-sm);
+    }
+
+    .edit-note {
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--border);
+
+        .note-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
     }
 }
 
@@ -326,6 +457,13 @@
         display: block;
         margin-bottom: 0.5rem;
         font-weight: 500;
+        color: var(--text-muted);
+    }
+
+    .hint {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.7rem;
         color: var(--text-muted);
     }
 }
@@ -339,10 +477,12 @@
     color: var(--text-main);
     font-family: inherit;
     resize: vertical;
+    min-height: 100px;
 
     &:focus {
         outline: none;
         border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
     }
 }
 
@@ -388,6 +528,18 @@
     }
 }
 
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 @media (max-width: 768px) {
     .admin-comments {
         padding: 1rem;
@@ -400,5 +552,92 @@
 
     .comment-actions {
         flex-wrap: wrap;
+    }
+
+    .edit-history {
+        padding: 0.5rem;
+    }
+
+    .version {
+        .version-content {
+            font-size: 0.8rem;
+        }
+    }
+}
+
+.input-wrapper {
+    position: relative;
+    display: block;
+    width: 100%;
+    overflow: visible;
+}
+
+.emoji-wrapper {
+    position: relative;
+    overflow: visible;
+}
+
+.emoji-btn {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+
+    &:hover {
+        background: rgba(99, 102, 241, 0.1);
+        color: var(--primary);
+        transform: scale(1.05);
+    }
+
+    &.active {
+        background: var(--primary);
+        color: white;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+}
+
+.emoji-picker-container {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 0.5rem);
+    z-index: 9999;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-soft);
+    overflow: visible;
+    pointer-events: auto;
+    max-height: 400px;
+    min-width: 320px;
+
+    emoji-mart {
+        display: block;
+        pointer-events: auto;
+        --em-rgb-color: 99, 102, 241;
+    }
+}
+
+@media (max-width: 768px) {
+    .emoji-picker-container {
+        right: -10px;
+        max-width: 280px;
+        min-width: 200px;
     }
 }

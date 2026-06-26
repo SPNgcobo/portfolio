@@ -17,12 +17,31 @@ public class NotificationController {
         this.service = service;
     }
 
-    // CREATE
+    // GET ALL NOTIFICATIONS (ADMIN)
+    @GetMapping
+    public ApiResponse<List<Notification>> getAllNotifications() {
+        return new ApiResponse<>(
+                true,
+                "All notifications fetched",
+                service.getAll()
+        );
+    }
+
+    // GET ACTIVE NOTIFICATIONS (PUBLIC)
+    @GetMapping("/active")
+    public ApiResponse<List<Notification>> getActiveNotifications() {
+        return new ApiResponse<>(
+                true,
+                "Active notifications fetched",
+                service.getActive()
+        );
+    }
+
+    // CREATE NOTIFICATION
     @PostMapping
     public ApiResponse<Notification> create(
             @RequestBody Notification notification
     ) {
-
         return new ApiResponse<>(
                 true,
                 "Notification created",
@@ -30,25 +49,37 @@ public class NotificationController {
         );
     }
 
-    // GET ACTIVE
-    @GetMapping
-    public ApiResponse<List<Notification>> getActive() {
-
+    // UPDATE NOTIFICATION
+    @PutMapping("/{id}")
+    public ApiResponse<Notification> update(
+            @PathVariable String id,
+            @RequestBody Notification notification
+    ) {
         return new ApiResponse<>(
                 true,
-                "Notifications fetched",
-                service.getActive()
+                "Notification updated",
+                service.update(id, notification)
         );
     }
 
-    // DELETE
+    // TOGGLE NOTIFICATION ACTIVE STATUS
+    @PutMapping("/{id}/toggle")
+    public ApiResponse<Notification> toggle(
+            @PathVariable String id
+    ) {
+        return new ApiResponse<>(
+                true,
+                "Notification toggled",
+                service.toggleActive(id)
+        );
+    }
+
+    // DELETE NOTIFICATION
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(
             @PathVariable String id
     ) {
-
         service.delete(id);
-
         return new ApiResponse<>(
                 true,
                 "Notification deleted",

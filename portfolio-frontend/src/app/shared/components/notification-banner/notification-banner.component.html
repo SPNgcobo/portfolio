@@ -1,0 +1,14 @@
+<div class="notification-banner" *ngIf="!loading && notifications.length > 0">
+    <div class="notification-container">
+        <ng-container *ngFor="let notification of notifications">
+            <div *ngIf="!isDismissed(notification.id!)" class="notification-item" [class]="notification.type">
+                <div class="notification-icon">{{ getTypeIcon(notification.type) }}</div>
+                <div class="notification-content">
+                    <strong>{{ notification.title }}</strong>
+                    <span>{{ notification.message }}</span>
+                </div>
+                <button class="notification-dismiss" (click)="dismissNotification(notification.id!)">✕</button>
+            </div>
+        </ng-container>
+    </div>
+</div>

@@ -23,4 +23,19 @@ export class CommentService {
       { withCredentials: true }
     );
   }
+
+  editComment(id: string, content: string, email: string): Observable<ApiResponse<Comment>> {
+    return this.http.put<ApiResponse<Comment>>(
+      `${this.apiUrl}/${id}/edit?email=${encodeURIComponent(email)}`,
+      { content },
+      { withCredentials: true }
+    );
+  }
+
+  deleteComment(id: string, email: string): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(
+      `${this.apiUrl}/${id}?email=${encodeURIComponent(email)}`,
+      { withCredentials: true }
+    );
+  }
 }

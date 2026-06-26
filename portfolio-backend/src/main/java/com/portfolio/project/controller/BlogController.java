@@ -3,6 +3,7 @@ package com.portfolio.project.controller;
 import com.portfolio.common.ApiResponse;
 import com.portfolio.project.model.Blog;
 import com.portfolio.project.service.BlogService;
+import com.portfolio.project.service.NotificationEventService;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,10 +15,14 @@ public class BlogController {
 
     private final BlogService service;
 
+    private final NotificationEventService notificationEventService;
+
     public BlogController(
-            BlogService service
+            BlogService service,
+            NotificationEventService notificationEventService
     ) {
         this.service = service;
+        this.notificationEventService = notificationEventService;
     }
 
     // ============ PUBLIC ENDPOINTS ============
@@ -116,10 +121,17 @@ public class BlogController {
     public ApiResponse<Blog> createBlog(
             @RequestBody Blog blog
     ) {
+        Blog created = service.create(blog);
+
+        notificationEventService.broadcast(
+                "BLOG_CREATED",
+                "New blog post: \"" + created.getTitle() + "\""
+        );
+
         return new ApiResponse<>(
                 true,
                 "Blog created",
-                service.create(blog)
+                created
         );
     }
 
@@ -160,10 +172,17 @@ public class BlogController {
     public ApiResponse<Blog> publishBlog(
             @PathVariable String id
     ) {
+        Blog blog = service.publishBlog(id);
+
+        notificationEventService.broadcast(
+                "BLOG_PUBLISHED",
+                "Blog post \"" + blog.getTitle() + "\" has been published"
+        );
+
         return new ApiResponse<>(
                 true,
                 "Blog published",
-                service.publishBlog(id)
+                blog
         );
     }
 

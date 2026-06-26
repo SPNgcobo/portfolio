@@ -31,6 +31,14 @@ public class Comment {
     private String content;
 
     /*
+     * EDIT HISTORY
+     */
+    private String originalContent;
+    private boolean edited = false;
+    private Date editedAt;
+    private int editCount = 0;
+
+    /*
      * THREADING
      */
     private String parentCommentId;
@@ -49,4 +57,15 @@ public class Comment {
      * TIMESTAMPS
      */
     private Date createdAt;
+
+    /*
+     * DELETED FLAG
+     */
+    private boolean deleted = false;
+    private Date deletedAt;
+
+    /*
+     * Who deleted this comment
+     */
+    private String deletedBy;
 }

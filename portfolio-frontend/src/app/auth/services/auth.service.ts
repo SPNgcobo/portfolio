@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, tap } from 'rxjs';
+import { Observable, map, tap, catchError, of } from 'rxjs';
 import { LoginRequest } from '../models/login-request';
 import { LoginResponse } from '../models/login-response';
 import { UserInfo } from '../models/user-info';
@@ -8,7 +8,6 @@ import { ForgotPasswordRequest } from '../models/forgot-password';
 import { ResetPasswordRequest } from '../models/reset-password';
 import type { ApiResponse } from '../../models/api-response.model';
 import { environment } from '../../../environments/environment';
-
 
 @Injectable({
   providedIn: 'root'
@@ -26,6 +25,7 @@ export class AuthService {
       { withCredentials: true }
     ).pipe(
       map(() => {
+        this.loadUser();
         return { token: '', refreshToken: '', role: '' };
       })
     );
@@ -36,7 +36,9 @@ export class AuthService {
       `${this.apiUrl}/register`,
       request,
       { withCredentials: true }
-    ).pipe(map(res => undefined));
+    ).pipe(
+      map(res => undefined)
+    );
   }
 
   logout(): Observable<void> {
@@ -44,7 +46,12 @@ export class AuthService {
       `${this.apiUrl}/logout`,
       {},
       { withCredentials: true }
-    ).pipe(map(res => undefined));
+    ).pipe(
+      map(res => {
+        this.clearUser();
+        return undefined;
+      })
+    );
   }
 
   getMe(): Observable<UserInfo> {
@@ -53,7 +60,11 @@ export class AuthService {
       { withCredentials: true }
     ).pipe(
       map(res => res.data),
-      tap(user => this.currentUser = user)
+      tap(user => this.currentUser = user),
+      catchError(() => {
+        this.currentUser = null;
+        return of({ email: '', role: '' });
+      })
     );
   }
 
@@ -61,28 +72,57 @@ export class AuthService {
     return this.http.post<ApiResponse<void>>(
       `${this.apiUrl}/forgot-password`,
       request
-    ).pipe(map(res => undefined));
+    ).pipe(
+      map(res => undefined),
+      catchError((error) => {
+        console.error('Forgot password error:', error);
+        throw error;
+      })
+    );
   }
 
   resetPassword(request: ResetPasswordRequest): Observable<void> {
     return this.http.post<ApiResponse<void>>(
       `${this.apiUrl}/reset-password`,
       request
-    ).pipe(map(res => undefined));
+    ).pipe(
+      map(res => undefined),
+      catchError((error) => {
+        console.error('Reset password error:', error);
+        throw error;
+      })
+    );
   }
 
-  refreshToken(): Observable<void> {
+  refreshToken(): Observable<boolean> {
     return this.http.post<ApiResponse<void>>(
       `${this.apiUrl}/refresh`,
       {},
       { withCredentials: true }
-    ).pipe(map(res => undefined));
+    ).pipe(
+      map(() => {
+        console.log('✅ Token refreshed successfully');
+        this.loadUser();
+        return true;
+      }),
+      catchError((error) => {
+        console.error('❌ Refresh token failed:', error);
+        this.clearUser();
+        return of(false);
+      })
+    );
   }
 
   loadUser(): void {
     this.getMe().subscribe({
-      next: (user) => this.currentUser = user,
-      error: () => this.currentUser = null
+      next: (user) => {
+        if (user && user.email) {
+          this.currentUser = user;
+        }
+      },
+      error: () => {
+        this.currentUser = null;
+      }
     });
   }
 
@@ -95,7 +135,7 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    return this.currentUser !== null;
+    return this.currentUser !== null && !!this.currentUser.email;
   }
 
   getRole(): string | null {

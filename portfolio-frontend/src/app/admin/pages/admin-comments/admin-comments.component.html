@@ -12,6 +12,7 @@
         </button>
         <button class="tab-btn" [class.active]="activeTab === 'all'" (click)="activeTab = 'all'">
             All Comments
+            <span class="badge" *ngIf="allComments.length > 0">{{ allComments.length }}</span>
         </button>
     </div>
 
@@ -23,6 +24,9 @@
     <div class="comments-list" *ngIf="!loading && activeTab === 'pending'">
         <div class="comments-header">
             <h2>Comments Awaiting Moderation</h2>
+            <span class="pending-count" *ngIf="pendingComments.length > 0">
+                {{ pendingComments.length }} pending
+            </span>
         </div>
 
         <div class="comments-grid" *ngIf="pendingComments.length > 0">
@@ -40,8 +44,38 @@
                     <span class="project-name">{{ comment.projectTitle || 'Loading...' }}</span>
                 </div>
 
-                <div class="comment-content">
+                <div class="comment-edited-indicator" *ngIf="comment.edited && isUserComment(comment)">
+                    <div class="edited-banner" (click)="toggleEditHistory(comment.id!)">
+                        <span>✏️</span>
+                        <span>This comment was edited</span>
+                        <span class="expand-icon">{{ isEditHistoryExpanded(comment.id!) ? '▲' : '▼' }}</span>
+                    </div>
+
+                    <div class="edit-history" *ngIf="isEditHistoryExpanded(comment.id!)">
+                        <div class="version original">
+                            <div class="version-label">📄 Original:</div>
+                            <div class="version-content">{{ comment.originalContent || comment.content }}</div>
+                        </div>
+                        <div class="version edited">
+                            <div class="version-label">✏️ Edited:</div>
+                            <div class="version-content">{{ comment.content }}</div>
+                        </div>
+                        <div class="version-meta" *ngIf="comment.editedAt">
+                            <span>Edited on: {{ formatDate(comment.editedAt) }}</span>
+                            <span *ngIf="comment.editCount && comment.editCount > 1">
+                                ({{ comment.editCount }} edits)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comment-content" *ngIf="!comment.edited || !isUserComment(comment)">
                     {{ comment.content }}
+                </div>
+
+                <div class="comment-edited-badge"
+                    *ngIf="comment.edited && isUserComment(comment) && !isEditHistoryExpanded(comment.id!)">
+                    <span class="badge edited">✏️ Edited</span>
                 </div>
 
                 <div class="comment-actions">
@@ -83,9 +117,42 @@
                 <div class="comment-badge" *ngIf="comment.approved">
                     <span class="badge approved">Approved</span>
                 </div>
+                <div class="comment-badge" *ngIf="!comment.approved">
+                    <span class="badge pending">Pending</span>
+                </div>
 
-                <div class="comment-content">
+                <div class="comment-edited-indicator" *ngIf="comment.edited && isUserComment(comment)">
+                    <div class="edited-banner" (click)="toggleEditHistory(comment.id!)">
+                        <span>✏️</span>
+                        <span>This comment was edited</span>
+                        <span class="expand-icon">{{ isEditHistoryExpanded(comment.id!) ? '▲' : '▼' }}</span>
+                    </div>
+
+                    <div class="edit-history" *ngIf="isEditHistoryExpanded(comment.id!)">
+                        <div class="version original">
+                            <div class="version-label">📄 Original:</div>
+                            <div class="version-content">{{ comment.originalContent || comment.content }}</div>
+                        </div>
+                        <div class="version edited">
+                            <div class="version-label">✏️ Edited:</div>
+                            <div class="version-content">{{ comment.content }}</div>
+                        </div>
+                        <div class="version-meta" *ngIf="comment.editedAt">
+                            <span>Edited on: {{ formatDate(comment.editedAt) }}</span>
+                            <span *ngIf="comment.editCount && comment.editCount > 1">
+                                ({{ comment.editCount }} edits)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comment-content" *ngIf="!comment.edited || !isUserComment(comment)">
                     {{ comment.content }}
+                </div>
+
+                <div class="comment-edited-badge"
+                    *ngIf="comment.edited && isUserComment(comment) && !isEditHistoryExpanded(comment.id!)">
+                    <span class="badge edited">✏️ Edited</span>
                 </div>
 
                 <div class="comment-actions">
@@ -111,14 +178,32 @@
             </div>
 
             <div class="original-comment" *ngIf="selectedComment">
-                <p class="original-author">{{ selectedComment.username }} wrote:</p>
+                <p class="original-author"><strong>{{ selectedComment.username }}</strong> wrote:</p>
                 <p class="original-text">"{{ selectedComment.content }}"</p>
+                <div class="edit-note" *ngIf="selectedComment.edited && selectedComment.originalContent">
+                    <span class="note-label">📄 Original version:</span>
+                    <p class="original-text">"{{ selectedComment.originalContent }}"</p>
+                </div>
             </div>
 
             <div class="form-group">
                 <label for="reply">Your Reply</label>
-                <textarea id="reply" [(ngModel)]="replyContent" rows="4" placeholder="Write your reply as admin..."
-                    class="reply-textarea"></textarea>
+                <div class="input-wrapper emoji-wrapper">
+                    <textarea #replyInput id="reply" [(ngModel)]="replyContent" rows="4"
+                        placeholder="Write your reply as admin..." class="reply-textarea"
+                        (keydown.ctrl.enter)="submitReply()" (focus)="showEmojiPicker = false"></textarea>
+                    <button class="emoji-btn" type="button" (click)="toggleEmojiPicker($event)"
+                        [class.active]="showEmojiPicker" [disabled]="replying">
+                        😊
+                    </button>
+                    <div class="emoji-picker-container" *ngIf="showEmojiPicker" (click)="$event.stopPropagation()">
+                        <emoji-mart (emojiSelect)="addEmoji($event)"
+                            [include]="['people', 'nature', 'foods', 'activity', 'places', 'objects']"
+                            [showPreview]="false">
+                        </emoji-mart>
+                    </div>
+                </div>
+                <small class="hint">Press Ctrl+Enter to send</small>
             </div>
 
             <div class="modal-actions">

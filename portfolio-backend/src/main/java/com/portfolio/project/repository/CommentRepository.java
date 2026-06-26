@@ -7,7 +7,18 @@ import java.util.List;
 
 public interface CommentRepository extends MongoRepository<Comment, String> {
 
-    List<Comment> findByProjectIdAndApprovedTrue(String projectId);
+    /**
+     * Public project comments
+     */
+    List<Comment> findByProjectIdAndApprovedTrueOrderByCreatedAtAsc(String projectId);
 
-    List<Comment> findByApprovedFalse();
+    /**
+     * Pending comments for moderation
+     */
+    List<Comment> findByApprovedFalseAndDeletedFalse();
+
+    /**
+     * Admin view
+     */
+    List<Comment> findAllByOrderByCreatedAtDesc();
 }

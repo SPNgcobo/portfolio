@@ -1,0 +1,131 @@
+<div class="admin-notifications">
+
+    <div class="page-header">
+        <div>
+            <h1>Notifications Management</h1>
+            <p class="subtitle">Create and manage announcements for your website visitors</p>
+        </div>
+        <button class="btn-primary" (click)="openCreateModal()">
+            <span>➕</span> Create Notification
+        </button>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading notifications...</p>
+    </div>
+
+    <div class="notifications-grid" *ngIf="!loading && notifications.length > 0">
+        <div class="notification-card" *ngFor="let notification of notifications" [class.active]="notification.active"
+            [class]="notification.type">
+
+            <div class="notification-header">
+                <div class="notification-type">
+                    <span class="type-icon">{{ getTypeIcon(notification.type) }}</span>
+                    <span class="type-name">{{ notification.type | uppercase }}</span>
+                </div>
+                <div class="notification-status">
+                    <span class="status-badge" [class.active]="notification.active">
+                        {{ notification.active ? 'Active' : 'Inactive' }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="notification-body">
+                <h3 class="notification-title">{{ notification.title }}</h3>
+                <p class="notification-message">{{ notification.message }}</p>
+                <div class="notification-date" *ngIf="notification.createdAt">
+                    Created: {{ notification.createdAt | date:'medium' }}
+                </div>
+            </div>
+
+            <div class="notification-actions">
+                <button class="action-btn toggle" (click)="toggleActive(notification)">
+                    {{ notification.active ? '🔴 Deactivate' : '🟢 Activate' }}
+                </button>
+                <button class="action-btn edit" (click)="openEditModal(notification)">
+                    ✏️ Edit
+                </button>
+                <button class="action-btn delete" (click)="openDeleteDialog(notification.id!, notification.title)">
+                    🗑️ Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && notifications.length === 0">
+        <span class="empty-icon">🔔</span>
+        <h3>No Notifications Yet</h3>
+        <p>Create your first notification to announce updates, alerts, or banners.</p>
+        <button class="btn-primary" (click)="openCreateModal()">Create Notification</button>
+    </div>
+
+    <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>{{ isEditing ? 'Edit Notification' : 'Create New Notification' }}</h3>
+                <button class="close-btn" (click)="closeModal()">✕</button>
+            </div>
+
+            <div class="form-group">
+                <label for="notificationType">Notification Type *</label>
+                <select id="notificationType" [(ngModel)]="formData.type">
+                    <option *ngFor="let type of notificationTypes" [value]="type">
+                        {{ getTypeIcon(type) }} {{ type | uppercase }}
+                    </option>
+                </select>
+                <small class="hint">
+                    Banner: Full width announcement | Alert: Important message | Update: Feature update | Info: General
+                    info
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="notificationTitle">Title *</label>
+                <input id="notificationTitle" type="text" [(ngModel)]="formData.title"
+                    placeholder="e.g., New Feature Released!" class="form-input">
+            </div>
+
+            <div class="form-group">
+                <label for="notificationMessage">Message *</label>
+                <textarea id="notificationMessage" [(ngModel)]="formData.message" rows="4"
+                    placeholder="Write your notification message here..." class="form-textarea"></textarea>
+            </div>
+
+            <div class="form-group checkbox">
+                <label>
+                    <input type="checkbox" [(ngModel)]="formData.active">
+                    Active (visible to visitors)
+                </label>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-secondary" (click)="closeModal()">Cancel</button>
+                <button class="btn-primary" (click)="submitForm()"
+                    [disabled]="submitting || !formData.title.trim() || !formData.message.trim()">
+                    {{ submitting ? 'Saving...' : (isEditing ? 'Update Notification' : 'Create Notification') }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="preview-section" *ngIf="!loading && notifications.length > 0">
+        <h3>Preview - Active Notifications</h3>
+        <div class="preview-container">
+            <div class="preview-notification" *ngFor="let notification of notifications | slice:0:3"
+                [class]="notification.type" [class.active]="notification.active">
+                <div class="preview-icon">{{ getTypeIcon(notification.type) }}</div>
+                <div class="preview-content">
+                    <strong>{{ notification.title }}</strong>
+                    <span>{{ notification.message }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <app-confirm-dialog [open]="showDeleteDialog" title="Delete Notification"
+        [message]="'Are you sure you want to delete &quot;' + deleteNotificationTitle + '&quot;? This action cannot be undone.'"
+        confirmText="Delete" cancelText="Cancel" (confirm)="confirmDelete()" (cancel)="cancelDelete()">
+    </app-confirm-dialog>
+
+</div>

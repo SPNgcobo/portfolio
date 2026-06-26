@@ -1,0 +1,171 @@
+.comment-actions-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.comment-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.comment-meta {
+    .edited-badge {
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        background: rgba(99, 102, 241, 0.08);
+        padding: 0.15rem 0.5rem;
+        border-radius: 4px;
+        cursor: help;
+    }
+}
+
+.dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+.dot-menu-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    transition: var(--transition);
+    line-height: 1;
+
+    &:hover {
+        background: rgba(99, 102, 241, 0.1);
+        color: var(--primary);
+    }
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-soft);
+    min-width: 120px;
+    z-index: 100;
+    padding: 0.25rem 0;
+    animation: slideDown 0.15s ease;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    background: none;
+    border: none;
+    color: var(--text-main);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+
+    &:hover {
+        background: rgba(99, 102, 241, 0.08);
+    }
+
+    &.edit-btn {
+        &:hover {
+            color: #3b82f6;
+        }
+    }
+
+    &.delete-btn {
+        color: var(--danger-color);
+
+        &:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.edit-mode {
+    margin-top: 0.5rem;
+}
+
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.edit-textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-main);
+    color: var(--text-main);
+    font-family: inherit;
+    resize: vertical;
+    font-size: 0.875rem;
+    min-height: 60px;
+
+    &:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+}
+
+.edit-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.btn-cancel,
+.btn-save {
+    padding: 0.3rem 0.75rem;
+    border-radius: var(--radius-sm);
+    border: none;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: var(--transition);
+}
+
+.btn-cancel {
+    background: var(--bg-surface);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+
+    &:hover:not(:disabled) {
+        background: var(--border);
+    }
+}
+
+.btn-save {
+    background: var(--primary);
+    color: white;
+
+    &:hover:not(:disabled) {
+        background: var(--secondary);
+        transform: translateY(-1px);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}

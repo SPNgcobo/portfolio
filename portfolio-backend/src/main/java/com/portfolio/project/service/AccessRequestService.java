@@ -13,9 +13,7 @@ import java.util.List;
 public class AccessRequestService {
 
     private final AccessRequestRepository repository;
-
     private final AuditLogService auditLogService;
-
     private final NotificationEventService notificationEventService;
 
     public AccessRequestService(
@@ -23,48 +21,25 @@ public class AccessRequestService {
             AuditLogService auditLogService,
             NotificationEventService notificationEventService
     ) {
-
         this.repository = repository;
-
-        this.auditLogService =
-                auditLogService;
-
-        this.notificationEventService =
-                notificationEventService;
+        this.auditLogService = auditLogService;
+        this.notificationEventService = notificationEventService;
     }
 
     /*
      * CREATE REQUEST
      */
-    public AccessRequest create(
-            AccessRequest request
-    ) {
+    public AccessRequest create(AccessRequest request) {
+        request.setStatus(AccessStatus.PENDING);
+        request.setCreatedAt(new Date());
+        request.setUpdatedAt(new Date());
 
-        request.setStatus(
-                AccessStatus.PENDING
-        );
+        AccessRequest saved = repository.save(request);
 
-        request.setCreatedAt(
-                new Date()
-        );
-
-        request.setUpdatedAt(
-                new Date()
-        );
-
-        AccessRequest saved =
-                repository.save(request);
-
-        auditLogService.log(
-                "ACCESS_REQUEST_CREATED",
-                request.getEmail(),
-                saved.getId(),
-                "Vault access requested"
-        );
-
+        auditLogService.log("ACCESS_REQUEST_CREATED", request.getEmail(), saved.getId(), "Vault access requested");
         notificationEventService.broadcast(
                 "ACCESS_REQUEST",
-                "New vault access request"
+                "New vault access request from " + request.getEmail()
         );
 
         return saved;
@@ -74,7 +49,6 @@ public class AccessRequestService {
      * GET ALL
      */
     public List<AccessRequest> getAll() {
-
         return repository.findAll();
     }
 
@@ -82,99 +56,68 @@ public class AccessRequestService {
      * GET PENDING
      */
     public List<AccessRequest> getPending() {
-
-        return repository.findByStatus(
-                AccessStatus.PENDING
-        );
+        return repository.findByStatus(AccessStatus.PENDING);
     }
 
     /*
-     * APPROVE
+     * APPROVE - Notify the requester with target URL
      */
-    public AccessRequest approve(
-            String id,
-            String adminMessage
-    ) {
+    public AccessRequest approve(String id, String adminMessage) {
+        AccessRequest request = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Access request not found"));
 
-        AccessRequest request =
-                repository.findById(id)
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Access request not found"
-                                )
-                        );
+        request.setStatus(AccessStatus.APPROVED);
+        request.setAdminMessage(adminMessage);
+        request.setUpdatedAt(new Date());
 
-        request.setStatus(
-                AccessStatus.APPROVED
-        );
+        AccessRequest updated = repository.save(request);
 
-        request.setAdminMessage(
-                adminMessage
-        );
-
-        request.setUpdatedAt(
-                new Date()
-        );
-
-        AccessRequest updated =
-                repository.save(request);
-
-        auditLogService.log(
-                "ACCESS_REQUEST_APPROVED",
-                "ADMIN",
-                updated.getId(),
-                "Vault access approved"
-        );
+        auditLogService.log("ACCESS_REQUEST_APPROVED", "ADMIN", updated.getId(), "Vault access approved");
 
         notificationEventService.broadcast(
                 "ACCESS_APPROVED",
-                "Vault request approved"
+                "Access request approved for " + request.getEmail()
+        );
+
+        notificationEventService.notifyUser(
+                request.getEmail(),
+                request.getName(),
+                "ACCESS_APPROVED",
+                "Your access request has been approved! You can now access the requested content.",
+                "/access-requests",
+                request.getId()
         );
 
         return updated;
     }
 
     /*
-     * REJECT
+     * REJECT - Notify the requester with target URL
      */
-    public AccessRequest reject(
-            String id,
-            String adminMessage
-    ) {
+    public AccessRequest reject(String id, String adminMessage) {
+        AccessRequest request = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Access request not found"));
 
-        AccessRequest request =
-                repository.findById(id)
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Access request not found"
-                                )
-                        );
+        request.setStatus(AccessStatus.REJECTED);
+        request.setAdminMessage(adminMessage);
+        request.setUpdatedAt(new Date());
 
-        request.setStatus(
-                AccessStatus.REJECTED
-        );
+        AccessRequest updated = repository.save(request);
 
-        request.setAdminMessage(
-                adminMessage
-        );
-
-        request.setUpdatedAt(
-                new Date()
-        );
-
-        AccessRequest updated =
-                repository.save(request);
-
-        auditLogService.log(
-                "ACCESS_REQUEST_REJECTED",
-                "ADMIN",
-                updated.getId(),
-                "Vault access rejected"
-        );
+        auditLogService.log("ACCESS_REQUEST_REJECTED", "ADMIN", updated.getId(), "Vault access rejected");
 
         notificationEventService.broadcast(
                 "ACCESS_REJECTED",
-                "Vault request rejected"
+                "Access request rejected for " + request.getEmail()
+        );
+
+        notificationEventService.notifyUser(
+                request.getEmail(),
+                request.getName(),
+                "ACCESS_REJECTED",
+                "Your access request has been rejected. Reason: " + adminMessage,
+                "/access-requests",
+                request.getId()
         );
 
         return updated;

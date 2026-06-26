@@ -11,6 +11,7 @@ import com.portfolio.auth.repository.UserRepository;
 import com.portfolio.common.exceptions.AuthenticationException;
 import com.portfolio.config.JwtService;
 import com.portfolio.project.service.EmailService;
+import com.portfolio.project.service.NotificationEventService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -56,17 +57,21 @@ public class AuthService {
 
     private final EmailService emailService;
 
+    private final NotificationEventService notificationEventService;
+
     public AuthService(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
-            EmailService emailService
+            EmailService emailService,
+            NotificationEventService notificationEventService
     ) {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.emailService = emailService;
+        this.notificationEventService = notificationEventService;
     }
 
     /*
@@ -181,6 +186,11 @@ public class AuthService {
         userRepository.save(user);
 
         emailService.sendWelcomeEmail(user.getEmail(), user.getUsername());
+
+        notificationEventService.broadcast(
+                "NEW_USER",
+                "New user registered: " + request.getEmail()
+        );
 
         String jwt =
                 jwtService.generateToken(

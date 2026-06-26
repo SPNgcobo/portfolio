@@ -4,6 +4,7 @@ import com.portfolio.common.ApiResponse;
 import com.portfolio.project.dto.SecureMediaResponse;
 import com.portfolio.project.model.Media;
 import com.portfolio.project.service.MediaService;
+import com.portfolio.project.service.NotificationEventService;
 import com.portfolio.project.service.VaultGuardService;
 import com.portfolio.security.RateLimitService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,10 +25,13 @@ public class MediaController {
     private final RateLimitService
             rateLimitService;
 
+    private final NotificationEventService notificationEventService;
+
     public MediaController(
             MediaService service,
             VaultGuardService vaultGuardService,
-            RateLimitService rateLimitService
+            RateLimitService rateLimitService,
+            NotificationEventService notificationEventService
     ) {
 
         this.service = service;
@@ -37,6 +41,9 @@ public class MediaController {
 
         this.rateLimitService =
                 rateLimitService;
+
+        this.notificationEventService =
+                notificationEventService;
     }
 
     /*
@@ -47,10 +54,17 @@ public class MediaController {
             @RequestBody Media media
     ) {
 
+        Media created = service.create(media);
+
+        notificationEventService.broadcast(
+                "MEDIA_UPLOADED",
+                "New media uploaded: \"" + created.getTitle() + "\" (Type: " + created.getType() + ")"
+        );
+
         return new ApiResponse<>(
                 true,
                 "Media created",
-                service.create(media)
+                created
         );
     }
 

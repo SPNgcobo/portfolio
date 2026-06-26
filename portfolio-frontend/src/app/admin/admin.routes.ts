@@ -67,5 +67,11 @@ export const ADMIN_ROUTES: Routes = [
         canActivate: [AdminGuard],
         loadComponent: () => import('./pages/admin-media/admin-media.component')
             .then(m => m.AdminMediaComponent)
+    },
+    {
+        path: 'notifications',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/admin-notifications/admin-notifications.component')
+            .then(m => m.AdminNotificationsComponent)
     }
 ];
