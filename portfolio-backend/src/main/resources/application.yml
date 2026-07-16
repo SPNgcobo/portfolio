@@ -30,7 +30,7 @@ admin:
 
 app:
   cookie:
-    secure: ${APP_COOKIE_SECURE:false}
+    secure: ${APP_COOKIE_SECURE:true}
   email:
     from: ${APP_EMAIL_FROM:noreply@samkelongcobo.is-a.dev}
     admin: ${ADMIN_EMAIL:samkelop.dev@gmail.com}

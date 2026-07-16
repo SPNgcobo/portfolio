@@ -18,7 +18,8 @@ public class CorsConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:4200",
                 "https://samkelongcobo.is-a.dev",
-                "https://www.samkelongcobo.is-a.dev"
+                "https://www.samkelongcobo.is-a.dev",
+                "portfolio-ak0wug6ao-samkelongcobo.vercel.app"
         ));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
