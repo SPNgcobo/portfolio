@@ -1,0 +1,126 @@
+<div class="admin-access-requests">
+
+    <div class="page-header">
+        <h1>Access Requests</h1>
+        <p class="subtitle">Manage requests for private repositories, vault content, and project resources</p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn" [class.active]="activeTab === 'pending'" (click)="activeTab = 'pending'">
+            Pending
+            <span class="badge" *ngIf="getPendingRequests().length > 0">{{ getPendingRequests().length }}</span>
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'all'" (click)="activeTab = 'all'">
+            All Requests
+            <span class="badge" *ngIf="requests.length > 0">{{ requests.length }}</span>
+        </button>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading requests...</p>
+    </div>
+
+    <div class="requests-list" *ngIf="!loading">
+        <div class="requests-grid" *ngIf="getFilteredRequests().length > 0">
+            <div class="request-card" *ngFor="let request of getFilteredRequests()"
+                [class]="request.status.toLowerCase()">
+
+                <div class="request-header">
+                    <div class="requester-info">
+                        <strong class="requester-name">{{ request.name }}</strong>
+                        <span class="requester-email">{{ request.email }}</span>
+                    </div>
+                    <span class="request-status" [class]="getStatusBadgeClass(request.status)">
+                        {{ getStatusText(request.status) }}
+                    </span>
+                </div>
+
+                <div class="request-body">
+                    <div class="request-detail" *ngIf="request.company">
+                        <span class="detail-label">Company:</span>
+                        <span class="detail-value">{{ request.company }}</span>
+                    </div>
+
+                    <div class="request-detail">
+                        <span class="detail-label">Reason:</span>
+                        <p class="detail-value reason-text">{{ request.reason }}</p>
+                    </div>
+
+                    <div class="request-meta" *ngIf="request.projectId || request.mediaId">
+                        <div class="meta-item" *ngIf="request.projectId">
+                            <span class="meta-label">Project ID:</span>
+                            <span class="meta-value">{{ request.projectId }}</span>
+                        </div>
+                        <div class="meta-item" *ngIf="request.mediaId">
+                            <span class="meta-label">Media ID:</span>
+                            <span class="meta-value">{{ request.mediaId }}</span>
+                        </div>
+                    </div>
+
+                    <div class="request-admin-message" *ngIf="request.adminMessage">
+                        <span class="admin-label">Admin Response:</span>
+                        <p class="admin-message-text">{{ request.adminMessage }}</p>
+                    </div>
+
+                    <div class="request-timestamp">
+                        <span>Submitted: {{ formatDate(request.createdAt) }}</span>
+                        <span *ngIf="request.updatedAt && request.status !== 'PENDING'">
+                            Updated: {{ formatDate(request.updatedAt) }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="request-actions" *ngIf="request.status === 'PENDING'">
+                    <button class="action-btn approve" (click)="openDecisionModal(request, 'approve')">
+                        ✅ Approve
+                    </button>
+                    <button class="action-btn reject" (click)="openDecisionModal(request, 'reject')">
+                        ❌ Reject
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="empty-state" *ngIf="getFilteredRequests().length === 0">
+            <span class="empty-icon">🔐</span>
+            <h3 *ngIf="activeTab === 'pending'">No Pending Requests</h3>
+            <h3 *ngIf="activeTab === 'all'">No Access Requests</h3>
+            <p *ngIf="activeTab === 'pending'">All access requests have been reviewed.</p>
+            <p *ngIf="activeTab === 'all'">No access requests have been submitted yet.</p>
+        </div>
+    </div>
+
+    <div class="modal-overlay" *ngIf="showDecisionModal" (click)="closeDecisionModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>{{ decisionType === 'approve' ? 'Approve' : 'Reject' }} Access Request</h3>
+                <button class="close-btn" (click)="closeDecisionModal()">✕</button>
+            </div>
+
+            <div class="modal-body" *ngIf="selectedRequest">
+                <div class="request-summary">
+                    <p><strong>Name:</strong> {{ selectedRequest.name }}</p>
+                    <p><strong>Email:</strong> {{ selectedRequest.email }}</p>
+                    <p><strong>Reason:</strong> {{ selectedRequest.reason }}</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="adminMessage">Admin Message (Optional)</label>
+                    <textarea id="adminMessage" [(ngModel)]="adminMessage" rows="3"
+                        placeholder="Add a message for the requester..." class="form-textarea"></textarea>
+                    <small class="hint">This message will be sent to the requester via email and notification</small>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-secondary" (click)="closeDecisionModal()">Cancel</button>
+                <button class="btn-primary" [class.approve]="decisionType === 'approve'"
+                    [class.reject]="decisionType === 'reject'" (click)="submitDecision()" [disabled]="processing">
+                    {{ processing ? 'Processing...' : (decisionType === 'approve' ? 'Approve' : 'Reject') }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>

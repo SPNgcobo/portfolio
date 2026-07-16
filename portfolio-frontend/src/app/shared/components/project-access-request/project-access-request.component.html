@@ -1,0 +1,112 @@
+<div class="project-access-request">
+    <!-- Loading State -->
+    <div class="loading-spinner" *ngIf="loading">
+        <div class="spinner-small"></div>
+    </div>
+
+    <!-- Compact Button Mode -->
+    <div *ngIf="!loading && showAsButton">
+        <!-- Approved -->
+        <button *ngIf="isApproved()" class="btn-approved" (click)="openGithub()" title="View Repository">
+            <span>🐙</span> View Repo
+        </button>
+
+        <!-- Pending -->
+        <button *ngIf="isPending()" class="btn-pending" disabled>
+            <span>⏳</span> Pending
+        </button>
+
+        <!-- Rejected -->
+        <button *ngIf="isRejected()" class="btn-rejected" (click)="openRequestModal()">
+            <span>🔄</span> Request Again
+        </button>
+
+        <!-- None -->
+        <button *ngIf="canRequest()" class="btn-request" (click)="openRequestModal()">
+            <span>🔐</span> Request Access
+        </button>
+
+        <!-- Login Prompt -->
+        <a *ngIf="!isLoggedIn()" routerLink="/login" class="btn-login">
+            🔐 Login to Request
+        </a>
+    </div>
+
+    <!-- Full Status Display Mode -->
+    <div *ngIf="!loading && !showAsButton">
+        <!-- Access Status Display -->
+        <div class="access-status" [class]="getStatusClass()">
+            <span class="status-icon">{{ getStatusIcon() }}</span>
+            <span class="status-text">{{ getStatusText() }}</span>
+        </div>
+
+        <!-- Admin Message (if rejected) -->
+        <div *ngIf="isRejected() && adminMessage" class="admin-message">
+            <strong>Admin Response:</strong> {{ adminMessage }}
+        </div>
+
+        <!-- Actions -->
+        <div class="access-actions">
+            <!-- Approved: Show GitHub Button -->
+            <button *ngIf="isApproved()" class="btn-github" (click)="openGithub()">
+                <span>🐙</span> View Repository
+            </button>
+
+            <!-- Pending: Show Waiting State -->
+            <div *ngIf="isPending()" class="pending-state">
+                <span>⏳</span> Your request is being reviewed
+            </div>
+
+            <!-- Rejected: Show Request Again Button -->
+            <button *ngIf="isRejected()" class="btn-request-again" (click)="openRequestModal()">
+                🔄 Request Again
+            </button>
+
+            <!-- None: Show Request Access Button -->
+            <button *ngIf="canRequest()" class="btn-request" (click)="openRequestModal()">
+                🔐 Request Access
+            </button>
+
+            <!-- Login Prompt for unauthenticated users -->
+            <div *ngIf="!isLoggedIn()" class="login-prompt">
+                <a routerLink="/login" class="login-link">Login to request access</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Request Access Modal -->
+    <div class="modal-overlay" *ngIf="showRequestModal" (click)="closeRequestModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>Request Project Access</h3>
+                <button class="close-btn" (click)="closeRequestModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="project-info">
+                    <p><strong>Project:</strong> {{ project.title }}</p>
+                    <p *ngIf="project.shortDescription"><strong>Description:</strong> {{ project.shortDescription }}</p>
+                    <p *ngIf="project.description"><strong>Full Description:</strong> {{ project.description |
+                        slice:0:200 }}{{ project.description.length > 200 ? '...' : '' }}</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="requestReason">Reason for Access *</label>
+                    <textarea id="requestReason" [(ngModel)]="requestReason" rows="4"
+                        placeholder="Please explain why you need access to this project's resources..."
+                        class="form-textarea"></textarea>
+                    <small class="hint">Minimum 20 characters recommended</small>
+                    <small class="char-count">{{ requestReason.length }}/20 characters</small>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-secondary" (click)="closeRequestModal()">Cancel</button>
+                <button class="btn-primary" (click)="submitRequest()"
+                    [disabled]="submitting || !requestReason.trim() || requestReason.trim().length < 20">
+                    {{ submitting ? 'Submitting...' : 'Submit Request' }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

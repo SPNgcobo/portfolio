@@ -1,10 +1,10 @@
 package com.portfolio.auth.controller;
 
-import com.portfolio.auth.dto.ForgotPasswordRequest;
-import com.portfolio.auth.dto.ResetPasswordRequest;
 import com.portfolio.auth.dto.*;
+import com.portfolio.auth.repository.UserRepository;
 import com.portfolio.auth.service.AuthService;
 import com.portfolio.common.ApiResponse;
+import com.portfolio.common.exceptions.AuthenticationException;
 import com.portfolio.security.CurrentUserService;
 import com.portfolio.auth.model.User;
 
@@ -18,6 +18,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.Date;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -25,6 +26,8 @@ public class AuthController {
 
     private final AuthService authService;
     private final CurrentUserService currentUserService;
+    private final UserRepository userRepository;
+
 
     // COOKIE ENV CONTROL (LOCAL vs PROD)
     @Value("${app.cookie.secure}")
@@ -32,10 +35,12 @@ public class AuthController {
 
     public AuthController(
             AuthService authService,
-            CurrentUserService currentUserService
+            CurrentUserService currentUserService,
+            UserRepository userRepository
     ) {
         this.authService = authService;
         this.currentUserService = currentUserService;
+        this.userRepository = userRepository;
     }
 
     /*
@@ -80,10 +85,78 @@ public class AuthController {
 
         UserInfoResponse response = new UserInfoResponse(
                 user.getEmail(),
-                user.getRole().name()
+                user.getRole().name(),
+                user.getUsername()
         );
 
         return new ApiResponse<>(true, "User fetched", response);
+    }
+
+    /*
+     * GET FULL PROFILE
+     */
+    @GetMapping("/profile")
+    public ApiResponse<UserProfileResponse> getProfile() {
+
+        User user = currentUserService.getCurrentUser();
+
+        Date createdAt = user.getCreatedAt();
+        if (createdAt == null) {
+            createdAt = new Date();
+            user.setCreatedAt(createdAt);
+            user.setUpdatedAt(createdAt);
+            userRepository.save(user);
+        }
+
+        UserProfileResponse response = new UserProfileResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getRole().name(),
+                user.getCreatedAt(),
+                user.getUpdatedAt(),
+                user.getPasswordLastChanged()
+        );
+
+        return new ApiResponse<>(true, "Profile fetched", response);
+    }
+
+    /*
+     * UPDATE USERNAME
+     */
+    @PutMapping("/profile/username")
+    public ApiResponse<UserProfileResponse> updateUsername(
+            @RequestBody UpdateUsernameRequest request
+    ) {
+
+        User user = currentUserService.getCurrentUser();
+        User updatedUser = authService.updateUsername(user, request.getUsername());
+
+        UserProfileResponse response = new UserProfileResponse(
+                updatedUser.getId(),
+                updatedUser.getUsername(),
+                updatedUser.getEmail(),
+                updatedUser.getRole().name(),
+                updatedUser.getCreatedAt(),
+                updatedUser.getUpdatedAt(),
+                updatedUser.getPasswordLastChanged()
+        );
+
+        return new ApiResponse<>(true, "Username updated successfully", response);
+    }
+
+    /*
+     * CHANGE PASSWORD
+     */
+    @PostMapping("/change-password")
+    public ApiResponse<Void> changePassword(
+            @RequestBody ChangePasswordRequest request
+    ) {
+
+        User user = currentUserService.getCurrentUser();
+        authService.changePassword(user, request);
+
+        return new ApiResponse<>(true, "Password changed successfully", null);
     }
 
     /*
@@ -146,14 +219,51 @@ public class AuthController {
     public ApiResponse<Object> resetPassword(
             @RequestBody ResetPasswordRequest request
     ) {
+        System.out.println("🔑 Reset password request received");
+        System.out.println("📝 Token: " + request.getToken());
+        System.out.println("📝 New Password: " + (request.getNewPassword() != null ? "***" : "null"));
 
-        authService.resetPassword(request);
+        try {
+            authService.resetPassword(request);
+            System.out.println("✅ Password reset successful");
+            return new ApiResponse<>(
+                    true,
+                    "Password reset successful",
+                    null
+            );
+        } catch (AuthenticationException e) {
+            System.err.println("❌ Authentication error: " + e.getMessage());
+            return new ApiResponse<>(
+                    false,
+                    e.getMessage(),
+                    null
+            );
+        } catch (Exception e) {
+            System.err.println("❌ Error: " + e.getMessage());
+            e.printStackTrace();
+            return new ApiResponse<>(
+                    false,
+                    "Failed to reset password. Please try again.",
+                    null
+            );
+        }
+    }
 
-        return new ApiResponse<>(
-                true,
-                "Password reset successful",
-                null
-        );
+    /*
+     * DELETE ACCOUNT
+     */
+    @DeleteMapping("/account")
+    public ApiResponse<Void> deleteAccount(
+            @RequestBody(required = false) DeleteAccountRequest request,
+            HttpServletRequest httpRequest,
+            HttpServletResponse response
+    ) {
+        User user = currentUserService.getCurrentUser();
+        authService.deleteAccount(user, request, httpRequest);
+
+        clearCookies(response);
+
+        return new ApiResponse<>(true, "Account deleted successfully", null);
     }
 
     // ================= COOKIE HELPERS =================

@@ -1,0 +1,71 @@
+<div class="account-deletion-page">
+    <div class="deletion-container">
+
+        <div class="success-state" *ngIf="showSuccessMessage">
+            <span class="success-icon">✅</span>
+            <h2>Account Deleted Successfully</h2>
+            <p>Your account has been permanently removed from our system.</p>
+            <p class="sub-text">You will be redirected to the homepage shortly...</p>
+            <div class="spinner-small"></div>
+        </div>
+
+        <div *ngIf="!showSuccessMessage">
+            <div class="deletion-header">
+                <button class="back-btn" (click)="goBack()">← Back</button>
+                <h1>🗑️ Delete Account</h1>
+                <p class="warning-text">
+                    <span class="warning-icon">⚠️</span>
+                    This action is <strong>permanent</strong> and cannot be undone.
+                </p>
+            </div>
+
+            <div class="deletion-content">
+                <div class="info-box">
+                    <h3>What happens when you delete your account?</h3>
+                    <ul>
+                        <li>✅ Your account will be permanently removed</li>
+                        <li>✅ All your personal data will be deleted</li>
+                        <li>✅ Your comments will be marked as deleted</li>
+                        <li>✅ You will lose access to all vault content</li>
+                        <li>❌ This action cannot be undone</li>
+                    </ul>
+                </div>
+
+                <div class="form-group">
+                    <label for="reason">Why are you leaving? (Optional)</label>
+                    <select id="reason" [(ngModel)]="selectedReason" (change)="onReasonChange()">
+                        <option value="">Select a reason...</option>
+                        <option *ngFor="let reason of reasons" [value]="reason.value">
+                            {{ reason.label }}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group" *ngIf="selectedReason === 'other'">
+                    <label for="otherReason">Please specify:</label>
+                    <input id="otherReason" type="text" [(ngModel)]="otherReason"
+                        placeholder="Tell us why you're leaving..." class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label for="feedback">Additional Feedback (Optional)</label>
+                    <textarea id="feedback" [(ngModel)]="feedback" rows="3"
+                        placeholder="Any suggestions to improve the platform?" class="form-textarea"></textarea>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-cancel" (click)="goBack()">Cancel</button>
+                    <button class="btn-delete" (click)="submitDeletion()" [disabled]="isLoading">
+                        {{ isLoading ? 'Deleting...' : 'Delete My Account' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <app-confirm-dialog [open]="showConfirmDialog" title="⚠️ Permanent Account Deletion"
+            message="Are you sure you want to permanently delete your account? This action cannot be undone and all your data will be lost."
+            confirmText="Yes, Delete My Account" cancelText="Cancel" (confirm)="confirmDelete()"
+            (cancel)="cancelDelete()">
+        </app-confirm-dialog>
+    </div>
+</div>

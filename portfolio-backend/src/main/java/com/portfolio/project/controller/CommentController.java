@@ -150,7 +150,6 @@ public class CommentController {
             @RequestBody Comment reply
     ) {
 
-        // Ensure admin reply is always approved
         reply.setApproved(true);
         reply.setAdminReply(true);
         return new ApiResponse<>(

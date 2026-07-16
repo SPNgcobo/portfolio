@@ -1,0 +1,178 @@
+<div class="admin-analytics">
+
+    <div class="page-header">
+        <div>
+            <h1>📊 Advanced Analytics</h1>
+            <p class="subtitle">Deep insights into your content performance</p>
+        </div>
+        <div class="header-actions">
+            <a routerLink="/admin" class="btn-back">← Back to Dashboard</a>
+            <button class="btn-export" (click)="exportData()">
+                📥 Export Data
+            </button>
+            <button class="btn-refresh" (click)="refreshData()" [disabled]="loading">
+                🔄 {{ loading ? 'Loading...' : 'Refresh' }}
+            </button>
+            <label class="auto-refresh-toggle">
+                <input type="checkbox" [(ngModel)]="autoRefresh">
+                Auto-refresh
+            </label>
+        </div>
+    </div>
+
+    <div class="period-selector">
+        <button class="period-btn" [class.active]="selectedPeriod === '7d'" (click)="changePeriod('7d')">
+            Last 7 Days
+        </button>
+        <button class="period-btn" [class.active]="selectedPeriod === '30d'" (click)="changePeriod('30d')">
+            Last 30 Days
+        </button>
+        <button class="period-btn" [class.active]="selectedPeriod === '90d'" (click)="changePeriod('90d')">
+            Last 90 Days
+        </button>
+        <button class="period-btn" [class.active]="selectedPeriod === 'all'" (click)="changePeriod('all')">
+            All Time
+        </button>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading analytics data...</p>
+    </div>
+
+    <div *ngIf="!loading && stats">
+
+        <div class="summary-grid">
+            <div class="summary-card">
+                <span class="summary-icon">📁</span>
+                <div class="summary-info">
+                    <span class="summary-value">{{ getTotalProjects() }}</span>
+                    <span class="summary-label">Total Projects</span>
+                </div>
+            </div>
+            <div class="summary-card">
+                <span class="summary-icon">👁️</span>
+                <div class="summary-info">
+                    <span class="summary-value">{{ getTotalViews() }}</span>
+                    <span class="summary-label">Total Views</span>
+                </div>
+            </div>
+            <div class="summary-card">
+                <span class="summary-icon">❤️</span>
+                <div class="summary-info">
+                    <span class="summary-value">{{ getTotalLikes() }}</span>
+                    <span class="summary-label">Total Likes</span>
+                </div>
+            </div>
+            <div class="summary-card">
+                <span class="summary-icon">💬</span>
+                <div class="summary-info">
+                    <span class="summary-value">{{ getTotalComments() }}</span>
+                    <span class="summary-label">Total Comments</span>
+                </div>
+            </div>
+            <div class="summary-card">
+                <span class="summary-icon">👥</span>
+                <div class="summary-info">
+                    <span class="summary-value">{{ getTotalVisitors() }}</span>
+                    <span class="summary-label">Total Visitors</span>
+                </div>
+            </div>
+            <div class="summary-card">
+                <span class="summary-icon">📈</span>
+                <div class="summary-info">
+                    <span class="summary-value">{{ getEngagementRate() }}%</span>
+                    <span class="summary-label">Engagement Rate</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-section">
+            <div class="chart-header">
+                <h2>{{ getChartLabel() }}</h2>
+                <div class="chart-controls">
+                    <button class="chart-btn" [class.active]="selectedChart === 'views'" (click)="changeChart('views')">
+                        👁️ Views
+                    </button>
+                    <button class="chart-btn" [class.active]="selectedChart === 'likes'" (click)="changeChart('likes')">
+                        ❤️ Likes
+                    </button>
+                    <button class="chart-btn" [class.active]="selectedChart === 'github'"
+                        (click)="changeChart('github')">
+                        🐙 GitHub
+                    </button>
+                    <button class="chart-btn" [class.active]="selectedChart === 'demo'" (click)="changeChart('demo')">
+                        🚀 Demo
+                    </button>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-bars">
+                    <div class="chart-bar-item" *ngFor="let item of getChartData()">
+                        <span class="chart-label">{{ item.label }}</span>
+                        <div class="bar-wrapper">
+                            <div class="bar" [style.width.%]="getBarWidth(item.value, getMaxChartValue(getChartData()))"
+                                [style.background-color]="getChartColor()">
+                                <span class="bar-value">{{ item.value }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="empty-chart" *ngIf="getChartData().length === 0">
+                        <span>📊 No data available</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="insights-section">
+            <h2>📈 Key Insights</h2>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <span class="insight-icon">📈</span>
+                    <div class="insight-content">
+                        <h4>Average Views per Project</h4>
+                        <p>{{ getAverageViewsPerProject() }} views</p>
+                        <span class="insight-trend">Most viewed: {{ (getChartData()[0] && getChartData()[0].label) ||
+                            'N/A' }}</span>
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <span class="insight-icon">❤️</span>
+                    <div class="insight-content">
+                        <h4>Average Likes per Project</h4>
+                        <p>{{ getAverageLikesPerProject() }} likes</p>
+                        <span class="insight-trend">Most liked: {{ (getChartData()[0] && getChartData()[0].label) ||
+                            'N/A' }}</span>
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <span class="insight-icon">🔄</span>
+                    <div class="insight-content">
+                        <h4>Engagement Rate</h4>
+                        <p>{{ getEngagementRate() }}%</p>
+                        <span class="insight-trend">Based on likes vs views</span>
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <span class="insight-icon">🎯</span>
+                    <div class="insight-content">
+                        <h4>Click-Through Rate</h4>
+                        <p>{{ getClickThroughRate() }}%</p>
+                        <span class="insight-trend">GitHub + Demo clicks</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="export-section">
+            <h2>📤 Export Analytics</h2>
+            <p>Download analytics data in JSON format for further analysis</p>
+            <button class="btn-export-large" (click)="exportData()">
+                📥 Export All Data
+            </button>
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,212 @@
+<div class="vault-page">
+
+    <div class="page-header">
+        <div>
+            <h1>🔐 Vault</h1>
+            <p class="subtitle">Access restricted content that requires approval</p>
+        </div>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading vault content...</p>
+    </div>
+
+    <div class="login-prompt" *ngIf="!loading && !isLoggedIn()">
+        <span class="lock-icon">🔒</span>
+        <h3>Login Required</h3>
+        <p>Please login to view and request access to vault content.</p>
+        <a routerLink="/login" class="btn-primary">Login</a>
+    </div>
+
+    <div *ngIf="!loading && isLoggedIn()">
+
+        <div class="media-section" *ngIf="hasCategory('images')">
+            <h2 class="section-title">📷 Images</h2>
+            <div class="media-grid images-grid">
+                <div class="media-card" *ngFor="let media of getImages()">
+                    <div class="vault-media">
+                        <div class="media-preview">
+                            <img [src]="media.url" [alt]="getDisplayName(media)"
+                                [class.blurred]="!isMediaAccessApproved(media)">
+                            <div *ngIf="!isMediaAccessApproved(media)" class="media-lock-overlay">
+                                <div class="lock-content">
+                                    <span class="lock-icon">🔒</span>
+                                    <span class="lock-text">Access required</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="media-info">
+                        <h3 class="media-title">{{ getDisplayName(media) }}</h3>
+                        <p class="media-description">{{ media.description || 'No description available' }}</p>
+                        <div class="media-meta">
+                            <span class="badge type image">IMAGE</span>
+                            <span class="media-size">{{ formatFileSize(media.size) }}</span>
+                        </div>
+                    </div>
+                    <div class="media-actions">
+                        <app-media-access-request [media]="media" (modalStateChange)="onModalStateChange($event)">
+                        </app-media-access-request>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="media-section" *ngIf="hasCategory('videos')">
+            <h2 class="section-title">🎥 Videos</h2>
+            <div class="media-grid videos-grid">
+                <div class="media-card" *ngFor="let media of getVideos()">
+                    <div class="vault-media">
+                        <div class="media-preview video-preview">
+                            <video controls preload="metadata" [class.blurred]="!isMediaAccessApproved(media)">
+                                <source [src]="media.url" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <div *ngIf="!isMediaAccessApproved(media)" class="media-lock-overlay">
+                                <div class="lock-content">
+                                    <span class="lock-icon">🔒</span>
+                                    <span class="lock-text">Access required</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="media-info">
+                        <h3 class="media-title">{{ getDisplayName(media) }}</h3>
+                        <p class="media-description">{{ media.description || 'No description available' }}</p>
+                        <div class="media-meta">
+                            <span class="badge type video">VIDEO</span>
+                            <span class="media-size">{{ formatFileSize(media.size) }}</span>
+                        </div>
+                    </div>
+                    <div class="media-actions">
+                        <app-media-access-request [media]="media" (modalStateChange)="onModalStateChange($event)">
+                        </app-media-access-request>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="media-section" *ngIf="hasCategory('audio')">
+            <h2 class="section-title">🎵 Audio</h2>
+            <div class="media-grid audio-grid">
+                <div class="media-card audio-card" *ngFor="let media of getAudio()">
+                    <div class="vault-media">
+                        <div class="audio-player">
+                            <div class="audio-icon-large">🎵</div>
+                            <div class="audio-info">
+                                <span class="audio-title">{{ getDisplayName(media) }}</span>
+                                <span class="audio-size">{{ formatFileSize(media.size) }}</span>
+                            </div>
+                            <audio controls class="audio-controls" [class.blurred]="!isMediaAccessApproved(media)">
+                                <source [src]="getSafeAudioUrl(media.url)" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                            <div *ngIf="!isMediaAccessApproved(media)" class="media-lock-overlay">
+                                <div class="lock-content">
+                                    <span class="lock-icon">🔒</span>
+                                    <span class="lock-text">Access required</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="media-info">
+                        <p class="media-description">{{ media.description || 'No description available' }}</p>
+                        <div class="media-meta">
+                            <span class="badge type audio">AUDIO</span>
+                        </div>
+                    </div>
+                    <div class="media-actions">
+                        <app-media-access-request [media]="media" (modalStateChange)="onModalStateChange($event)">
+                        </app-media-access-request>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="media-section" *ngIf="hasCategory('pdfs')">
+            <h2 class="section-title">📄 PDF Documents</h2>
+            <div class="media-grid documents-grid">
+                <div class="media-card document-card" *ngFor="let media of getPDFs()">
+                    <div class="document-preview">
+                        <div class="document-icon">📕</div>
+                        <div class="document-info">
+                            <span class="document-name">{{ getDisplayName(media) }}</span>
+                            <div class="document-meta">
+                                <span class="badge type pdf">PDF</span>
+                                <span class="media-size">{{ formatFileSize(media.size) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="media-info">
+                        <p class="media-description">{{ media.description || 'No description available' }}</p>
+                    </div>
+                    <div class="media-actions">
+                        <app-media-access-request [media]="media" (modalStateChange)="onModalStateChange($event)">
+                        </app-media-access-request>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="media-section" *ngIf="hasCategory('certificates')">
+            <h2 class="section-title">🏆 Certificates</h2>
+            <div class="media-grid documents-grid">
+                <div class="media-card document-card" *ngFor="let media of getCertificates()">
+                    <div class="document-preview">
+                        <div class="document-icon">🏆</div>
+                        <div class="document-info">
+                            <span class="document-name">{{ getDisplayName(media) }}</span>
+                            <div class="document-meta">
+                                <span class="badge type certificate">CERTIFICATE</span>
+                                <span class="media-size">{{ formatFileSize(media.size) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="media-info">
+                        <p class="media-description">{{ media.description || 'No description available' }}</p>
+                    </div>
+                    <div class="media-actions">
+                        <app-media-access-request [media]="media" (modalStateChange)="onModalStateChange($event)">
+                        </app-media-access-request>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="media-section" *ngIf="hasCategory('cvs')">
+            <h2 class="section-title">📋 CV / Resume</h2>
+            <div class="media-grid documents-grid">
+                <div class="media-card document-card" *ngFor="let media of getCVs()">
+                    <div class="document-preview">
+                        <div class="document-icon">📋</div>
+                        <div class="document-info">
+                            <span class="document-name">{{ getDisplayName(media) }}</span>
+                            <div class="document-meta">
+                                <span class="badge type cv">CV</span>
+                                <span class="media-size">{{ formatFileSize(media.size) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="media-info">
+                        <p class="media-description">{{ media.description || 'No description available' }}</p>
+                    </div>
+                    <div class="media-actions">
+                        <app-media-access-request [media]="media" (modalStateChange)="onModalStateChange($event)">
+                        </app-media-access-request>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="empty-state" *ngIf="!hasAnyMedia()">
+            <span class="empty-icon">🔐</span>
+            <h3>No Vault Content Available</h3>
+            <p>There is no restricted content available at the moment.</p>
+            <p class="sub-text">Check back later or contact the administrator.</p>
+            <a routerLink="/projects" class="btn-primary">Browse Projects</a>
+        </div>
+
+    </div>
+
+</div>

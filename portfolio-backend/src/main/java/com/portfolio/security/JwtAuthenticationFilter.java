@@ -43,7 +43,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = extractToken(request);
 
-        // If no token, continue without authentication
         if (token == null) {
             System.out.println("❌ No token found for: " + path);
             filterChain.doFilter(request, response);
@@ -52,14 +51,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         System.out.println("✅ Token found: " + token.substring(0, Math.min(token.length(), 30)) + "...");
 
-        // If token invalid, send 401 instead of continuing
         if (!jwtService.isValid(token)) {
             System.out.println("❌ Token is invalid or expired for: " + path);
-            // Send 401 Unauthorized instead of continuing
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.getWriter().write("{\"success\":false,\"message\":\"Token expired or invalid\"}");
-            return; // Don't continue the filter chain
+            return;
         }
 
         try {
@@ -87,7 +84,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
-            // Set authentication
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
                             user.getEmail(),
@@ -106,7 +102,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 response.getWriter().write("{\"success\":false,\"message\":\"Authentication error\"}");
             } catch (IOException ioException) {
-                // Log the error but don't throw
                 System.err.println("Error writing response: " + ioException.getMessage());
             }
             return;
@@ -116,7 +111,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String extractToken(HttpServletRequest request) {
-        // 1. Try Authorization header first
         String header = request.getHeader("Authorization");
 
         if (header != null && header.startsWith("Bearer ")) {
@@ -124,7 +118,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return header.substring(7);
         }
 
-        // 2. Try cookie
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("access_token".equals(cookie.getName())) {

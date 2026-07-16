@@ -1,0 +1,148 @@
+<div class="admin-audit-logs">
+
+    <div class="page-header">
+        <div>
+            <h1>📋 Audit Logs</h1>
+            <p class="subtitle">Track all administrative actions and system events</p>
+        </div>
+        <div class="header-actions">
+            <button class="export-btn" (click)="exportLogs()" [disabled]="filteredLogs.length === 0">
+                📥 Export CSV
+            </button>
+            <button class="refresh-btn" (click)="refreshLogs()" [disabled]="loading">
+                🔄 {{ loading ? 'Loading...' : 'Refresh' }}
+            </button>
+            <label class="auto-refresh-toggle">
+                <input type="checkbox" [(ngModel)]="autoRefresh">
+                Auto-refresh
+            </label>
+        </div>
+    </div>
+
+    <div class="stats-bar">
+        <span class="stat-item">
+            <span class="stat-label">Total Logs:</span>
+            <span class="stat-value">{{ logs.length }}</span>
+        </span>
+        <span class="stat-item">
+            <span class="stat-label">Filtered:</span>
+            <span class="stat-value">{{ filteredLogs.length }}</span>
+        </span>
+        <span class="stat-item">
+            <span class="stat-label">Showing:</span>
+            <span class="stat-value">{{ getPaginatedLogs().length }} of {{ filteredLogs.length }}</span>
+        </span>
+    </div>
+
+    <div class="filters-bar">
+        <div class="filter-group search-group">
+            <label>🔍 Search</label>
+            <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()"
+                placeholder="Search actions, actors, details..." class="search-input" />
+        </div>
+
+        <div class="filter-group">
+            <label>Action</label>
+            <select [(ngModel)]="selectedAction" (change)="applyFilters()">
+                <option value="">All Actions</option>
+                <option *ngFor="let action of uniqueActions" [value]="action">
+                    {{ getActionLabel(action) }}
+                </option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Actor</label>
+            <select [(ngModel)]="selectedActor" (change)="applyFilters()">
+                <option value="">All Actors</option>
+                <option *ngFor="let actor of uniqueActors" [value]="actor">
+                    {{ actor === 'ADMIN' || actor === 'Admin' ? '👨‍💼 Admin' : actor }}
+                </option>
+            </select>
+        </div>
+
+        <div class="filter-group date-group">
+            <label>Date From</label>
+            <input type="date" [(ngModel)]="dateFrom" (change)="applyFilters()" />
+        </div>
+
+        <div class="filter-group date-group">
+            <label>Date To</label>
+            <input type="date" [(ngModel)]="dateTo" (change)="applyFilters()" />
+        </div>
+
+        <button class="clear-filters-btn" (click)="clearFilters()">✕ Clear Filters</button>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading audit logs...</p>
+    </div>
+
+    <div class="logs-container" *ngIf="!loading">
+        <div class="logs-table-wrapper" *ngIf="filteredLogs.length > 0">
+            <table class="logs-table">
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>Actor</th>
+                        <th>Details</th>
+                        <th>Target ID</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let log of getPaginatedLogs(); trackBy: trackByFn"
+                        [class]="'action-' + getActionColor(log.action)">
+                        <td class="action-cell">
+                            <span class="action-icon">{{ getActionIcon(log.action) }}</span>
+                            <span class="action-label">{{ getActionLabel(log.action) }}</span>
+                        </td>
+                        <td class="actor-cell">
+                            <span class="actor-badge" [class]="getActorType(log.actor)">
+                                {{ getActorDisplay(log.actor) }}
+                            </span>
+                        </td>
+                        <td class="details-cell">
+                            <span class="details-text">{{ log.details || '—' }}</span>
+                        </td>
+                        <td class="target-cell">
+                            <span class="target-id" *ngIf="log.targetId">{{ log.targetId }}</span>
+                            <span class="no-target" *ngIf="!log.targetId">—</span>
+                        </td>
+                        <td class="time-cell">
+                            <span class="time-relative">{{ getRelativeTime(log.createdAt) }}</span>
+                            <span class="time-absolute">{{ formatDate(log.createdAt) }}</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="empty-state" *ngIf="filteredLogs.length === 0">
+            <span class="empty-icon">📋</span>
+            <h3>No Audit Logs Found</h3>
+            <p *ngIf="logs.length > 0">Try adjusting your filters.</p>
+            <p *ngIf="logs.length === 0">No audit logs have been recorded yet.</p>
+            <button *ngIf="logs.length > 0" class="btn-clear" (click)="clearFilters()">Clear Filters</button>
+        </div>
+
+        <div class="pagination" *ngIf="filteredLogs.length > 0 && totalPages > 1">
+            <button class="page-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 0">
+                ← Previous
+            </button>
+
+            <div class="page-numbers">
+                <button *ngFor="let page of getPageNumbers()" class="page-number" [class.active]="page === currentPage"
+                    (click)="goToPage(page)">
+                    {{ page + 1 }}
+                </button>
+            </div>
+
+            <button class="page-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage >= totalPages - 1">
+                Next →
+            </button>
+        </div>
+    </div>
+
+</div>

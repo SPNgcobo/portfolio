@@ -31,7 +31,9 @@
             <label>Filter by Visibility:</label>
             <select [(ngModel)]="selectedVisibility" (change)="onFilterChange()">
                 <option value="">All</option>
-                <option *ngFor="let visibility of visibilityTypes" [value]="visibility">{{ visibility }}</option>
+                <option *ngFor="let visibility of visibilityTypes" [value]="visibility">
+                    {{ getVisibilityIcon(visibility) }} {{ visibility }}
+                </option>
             </select>
         </div>
 
@@ -48,46 +50,224 @@
         <p>Loading media...</p>
     </div>
 
-    <div class="media-grid" *ngIf="!loading && filteredMedia.length > 0">
-        <div class="media-card" *ngFor="let media of filteredMedia">
+    <div *ngIf="!loading">
 
-            <div class="media-preview">
-                <div *ngIf="media.type === 'IMAGE'" class="preview-image">
-                    <img [src]="media.url" [alt]="media.title">
+        <div class="media-section" *ngIf="hasCategory('images')">
+            <h2 class="section-title">📷 Images</h2>
+            <div class="media-grid images-grid">
+                <div class="media-card" *ngFor="let media of getImages()">
+                    <div class="media-preview">
+                        <img [src]="media.url" [alt]="getDisplayName(media)">
+                    </div>
+                    <div class="media-info">
+                        <h3 class="media-title">{{ getDisplayName(media) }}</h3>
+                        <p class="media-description">{{ media.description || 'No description' }}</p>
+                        <div class="media-meta">
+                            <span class="badge type image">IMAGE</span>
+                            <span class="badge visibility" [class]="media.visibility.toLowerCase()"
+                                [title]="getVisibilityTooltip(media.visibility)">
+                                {{ getVisibilityIcon(media.visibility) }} {{ media.visibility }}
+                            </span>
+                            <span class="media-size">{{ formatFileSize(media.size) }}</span>
+                        </div>
+                        <div class="media-project">
+                            Project: {{ getProjectName(media.projectId) }}
+                        </div>
+                    </div>
+                    <div class="media-actions">
+                        <a [href]="media.url" target="_blank" class="action-btn view">👁️ View</a>
+                        <button class="action-btn edit" (click)="openEditModal(media)">✏️ Edit</button>
+                        <button class="action-btn delete" (click)="openDeleteDialog(media.id!, media.title)">🗑️
+                            Delete</button>
+                    </div>
                 </div>
-                <div *ngIf="media.type !== 'IMAGE'" class="preview-icon">
-                    <span class="file-icon">{{ getFileIcon(media.type) }}</span>
-                </div>
-            </div>
-
-            <div class="media-info">
-                <h3 class="media-title">{{ media.title }}</h3>
-                <p class="media-description">{{ media.description || 'No description' }}</p>
-                <div class="media-meta">
-                    <span class="badge type" [class]="media.type.toLowerCase()">{{ media.type }}</span>
-                    <span class="badge visibility" [class]="media.visibility.toLowerCase()">{{ media.visibility
-                        }}</span>
-                    <span class="media-size">{{ formatFileSize(media.size) }}</span>
-                </div>
-                <div class="media-project">
-                    Project: {{ getProjectName(media.projectId) }}
-                </div>
-            </div>
-
-            <div class="media-actions">
-                <a [href]="media.url" target="_blank" class="action-btn view">👁️ View</a>
-                <button class="action-btn edit" (click)="openEditModal(media)">✏️ Edit</button>
-                <button class="action-btn delete" (click)="openDeleteDialog(media.id!, media.title)">🗑️ Delete</button>
             </div>
         </div>
-    </div>
 
-    <div class="empty-state" *ngIf="!loading && filteredMedia.length === 0">
-        <span class="empty-icon">📁</span>
-        <h3>No Media Found</h3>
-        <p *ngIf="mediaItems.length === 0">Upload your first image or document to get started.</p>
-        <p *ngIf="mediaItems.length > 0">Try changing your filter criteria.</p>
-        <button class="btn-primary" (click)="openCreateModal()" *ngIf="mediaItems.length === 0">Upload Media</button>
+        <div class="media-section" *ngIf="hasCategory('videos')">
+            <h2 class="section-title">🎥 Videos</h2>
+            <div class="media-grid videos-grid">
+                <div class="media-card" *ngFor="let media of getVideos()">
+                    <div class="media-preview video-preview">
+                        <video controls preload="metadata">
+                            <source [src]="media.url" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <div class="media-info">
+                        <h3 class="media-title">{{ getDisplayName(media) }}</h3>
+                        <p class="media-description">{{ media.description || 'No description' }}</p>
+                        <div class="media-meta">
+                            <span class="badge type video">VIDEO</span>
+                            <span class="badge visibility" [class]="media.visibility.toLowerCase()"
+                                [title]="getVisibilityTooltip(media.visibility)">
+                                {{ getVisibilityIcon(media.visibility) }} {{ media.visibility }}
+                            </span>
+                            <span class="media-size">{{ formatFileSize(media.size) }}</span>
+                        </div>
+                        <div class="media-project">
+                            Project: {{ getProjectName(media.projectId) }}
+                        </div>
+                    </div>
+                    <div class="media-actions">
+                        <a [href]="media.url" target="_blank" class="action-btn view">👁️ View</a>
+                        <button class="action-btn edit" (click)="openEditModal(media)">✏️ Edit</button>
+                        <button class="action-btn delete" (click)="openDeleteDialog(media.id!, media.title)">🗑️
+                            Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="media-section" *ngIf="hasCategory('audio')">
+            <h2 class="section-title">🎵 Audio</h2>
+            <div class="media-grid audio-grid">
+                <div class="media-card audio-card" *ngFor="let media of getAudio()">
+                    <div class="audio-player">
+                        <div class="audio-icon-large">🎵</div>
+                        <div class="audio-info">
+                            <span class="audio-title">{{ getDisplayName(media) }}</span>
+                            <span class="audio-size">{{ formatFileSize(media.size) }}</span>
+                        </div>
+                        <audio controls class="audio-controls">
+                            <source [src]="getSafeAudioUrl(media.url)" type="audio/mpeg">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+                    <div class="media-info">
+                        <p class="media-description">{{ media.description || 'No description' }}</p>
+                        <div class="media-meta">
+                            <span class="badge type audio">AUDIO</span>
+                            <span class="badge visibility" [class]="media.visibility.toLowerCase()"
+                                [title]="getVisibilityTooltip(media.visibility)">
+                                {{ getVisibilityIcon(media.visibility) }} {{ media.visibility }}
+                            </span>
+                            <span class="media-size">{{ formatFileSize(media.size) }}</span>
+                        </div>
+                        <div class="media-project">
+                            Project: {{ getProjectName(media.projectId) }}
+                        </div>
+                    </div>
+                    <div class="media-actions">
+                        <button class="action-btn edit" (click)="openEditModal(media)">✏️ Edit</button>
+                        <button class="action-btn delete" (click)="openDeleteDialog(media.id!, media.title)">🗑️
+                            Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="media-section" *ngIf="hasCategory('pdfs')">
+            <h2 class="section-title">📄 PDF Documents</h2>
+            <div class="media-grid documents-grid">
+                <div class="media-card document-card" *ngFor="let media of getPDFs()">
+                    <div class="document-preview">
+                        <div class="document-icon">📕</div>
+                        <div class="document-info">
+                            <span class="document-name">{{ getDisplayName(media) }}</span>
+                            <div class="document-meta">
+                                <span class="badge type pdf">PDF</span>
+                                <span class="badge visibility" [class]="media.visibility.toLowerCase()"
+                                    [title]="getVisibilityTooltip(media.visibility)">
+                                    {{ getVisibilityIcon(media.visibility) }} {{ media.visibility }}
+                                </span>
+                                <span class="media-size">{{ formatFileSize(media.size) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="media-info">
+                        <p class="media-description">{{ media.description || 'No description' }}</p>
+                        <div class="media-project">
+                            Project: {{ getProjectName(media.projectId) }}
+                        </div>
+                    </div>
+                    <div class="media-actions">
+                        <a [href]="media.url" target="_blank" class="action-btn view">👁️ View</a>
+                        <button class="action-btn edit" (click)="openEditModal(media)">✏️ Edit</button>
+                        <button class="action-btn delete" (click)="openDeleteDialog(media.id!, media.title)">🗑️
+                            Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="media-section" *ngIf="hasCategory('certificates')">
+            <h2 class="section-title">🏆 Certificates</h2>
+            <div class="media-grid documents-grid">
+                <div class="media-card document-card" *ngFor="let media of getCertificates()">
+                    <div class="document-preview">
+                        <div class="document-icon">🏆</div>
+                        <div class="document-info">
+                            <span class="document-name">{{ getDisplayName(media) }}</span>
+                            <div class="document-meta">
+                                <span class="badge type certificate">CERTIFICATE</span>
+                                <span class="badge visibility" [class]="media.visibility.toLowerCase()"
+                                    [title]="getVisibilityTooltip(media.visibility)">
+                                    {{ getVisibilityIcon(media.visibility) }} {{ media.visibility }}
+                                </span>
+                                <span class="media-size">{{ formatFileSize(media.size) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="media-info">
+                        <p class="media-description">{{ media.description || 'No description' }}</p>
+                        <div class="media-project">
+                            Project: {{ getProjectName(media.projectId) }}
+                        </div>
+                    </div>
+                    <div class="media-actions">
+                        <a [href]="media.url" target="_blank" class="action-btn view">👁️ View</a>
+                        <button class="action-btn edit" (click)="openEditModal(media)">✏️ Edit</button>
+                        <button class="action-btn delete" (click)="openDeleteDialog(media.id!, media.title)">🗑️
+                            Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="media-section" *ngIf="hasCategory('cvs')">
+            <h2 class="section-title">📋 CV / Resume</h2>
+            <div class="media-grid documents-grid">
+                <div class="media-card document-card" *ngFor="let media of getCVs()">
+                    <div class="document-preview">
+                        <div class="document-icon">📋</div>
+                        <div class="document-info">
+                            <span class="document-name">{{ getDisplayName(media) }}</span>
+                            <div class="document-meta">
+                                <span class="badge type cv">CV</span>
+                                <span class="badge visibility" [class]="media.visibility.toLowerCase()"
+                                    [title]="getVisibilityTooltip(media.visibility)">
+                                    {{ getVisibilityIcon(media.visibility) }} {{ media.visibility }}
+                                </span>
+                                <span class="media-size">{{ formatFileSize(media.size) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="media-info">
+                        <p class="media-description">{{ media.description || 'No description' }}</p>
+                        <div class="media-project">
+                            Project: {{ getProjectName(media.projectId) }}
+                        </div>
+                    </div>
+                    <div class="media-actions">
+                        <a [href]="media.url" target="_blank" class="action-btn view">👁️ View</a>
+                        <button class="action-btn edit" (click)="openEditModal(media)">✏️ Edit</button>
+                        <button class="action-btn delete" (click)="openDeleteDialog(media.id!, media.title)">🗑️
+                            Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="empty-state" *ngIf="filteredMedia.length === 0">
+            <span class="empty-icon">📁</span>
+            <h3>No Media Found</h3>
+            <p *ngIf="mediaItems.length === 0">Upload your first image or document to get started.</p>
+            <p *ngIf="mediaItems.length > 0">Try changing your filter criteria.</p>
+            <button class="btn-primary" (click)="openCreateModal()" *ngIf="mediaItems.length === 0">Upload
+                Media</button>
+        </div>
+
     </div>
 
     <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
@@ -148,11 +328,17 @@
 
             <div class="form-section">
                 <div class="form-group">
-                    <label for="mediaProject">Project *</label>
-                    <select id="mediaProject" [(ngModel)]="formData.projectId">
-                        <option value="">Select a project</option>
+                    <label for="mediaProject">Project (Optional - leave empty for standalone media)</label>
+                    <select id="mediaProject" [(ngModel)]="formData.projectId" (change)="onProjectChange()">
+                        <option value="">Standalone (No Project)</option>
                         <option *ngFor="let project of projects" [value]="project.id">{{ project.title }}</option>
                     </select>
+                    <small class="hint">
+                        <span *ngIf="isProjectSelected">📌 Project-based media will be forced to <strong>PUBLIC</strong>
+                            visibility</span>
+                        <span *ngIf="!isProjectSelected">Leave empty for certificates, CVs, or documents not tied to a
+                            specific project</span>
+                    </small>
                 </div>
 
                 <div class="form-group">
@@ -177,10 +363,22 @@
 
                     <div class="form-group flex-1">
                         <label for="mediaVisibility">Visibility</label>
-                        <select id="mediaVisibility" [(ngModel)]="formData.visibility">
-                            <option *ngFor="let visibility of visibilityTypes" [value]="visibility">{{ visibility }}
+                        <select id="mediaVisibility" [(ngModel)]="formData.visibility" [disabled]="isProjectSelected">
+                            <option *ngFor="let visibility of visibilityTypes" [value]="visibility">
+                                {{ getVisibilityIcon(visibility) }} {{ visibility }}
                             </option>
                         </select>
+                        <small class="hint">
+                            <span *ngIf="isProjectSelected">
+                                🔒 <strong>PUBLIC</strong> (forced - media linked to a project)
+                            </span>
+                            <span *ngIf="!isProjectSelected">
+                                <span *ngIf="formData.visibility === 'PUBLIC'">🌐 Visible to everyone</span>
+                                <span *ngIf="formData.visibility === 'PRIVATE'">🔒 Admin only - not visible to
+                                    users</span>
+                                <span *ngIf="formData.visibility === 'VAULT'">🔐 Users can request access</span>
+                            </span>
+                        </small>
                     </div>
                 </div>
 
@@ -193,7 +391,7 @@
             <div class="modal-actions">
                 <button class="btn-secondary" (click)="closeModal()">Cancel</button>
                 <button class="btn-primary" (click)="submitForm()"
-                    [disabled]="submitting || (!isEditing && !formData.url) || !formData.title || !formData.projectId">
+                    [disabled]="submitting || (!isEditing && !formData.url) || !formData.title">
                     {{ submitting ? 'Saving...' : (isEditing ? 'Update Media' : 'Create Media') }}
                 </button>
             </div>

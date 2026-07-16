@@ -1,0 +1,182 @@
+<div class="profile-page">
+
+    <div class="page-header">
+        <h1>👤 Profile Settings</h1>
+        <p class="subtitle">Manage your account information and preferences</p>
+    </div>
+
+    <div class="profile-wrapper">
+
+        <div class="loading-state" *ngIf="loading">
+            <div class="spinner"></div>
+            <p>Loading profile...</p>
+        </div>
+
+        <div *ngIf="!loading && profile" class="profile-content">
+
+            <div class="profile-tabs">
+                <button class="tab-btn" [class.active]="activeTab === 'profile'" (click)="activeTab = 'profile'">
+                    👤 Profile
+                </button>
+                <button class="tab-btn" [class.active]="activeTab === 'settings'" (click)="activeTab = 'settings'">
+                    ⚙️ Settings
+                </button>
+            </div>
+
+            <div class="tab-content" *ngIf="activeTab === 'profile'">
+
+                <div class="profile-card">
+                    <div class="profile-avatar">
+                        <span class="avatar-emoji">👤</span>
+                        <span class="role-badge" [class]="getRoleColor(profile.role)">
+                            {{ getRoleDisplay(profile.role) }}
+                        </span>
+                    </div>
+
+                    <div class="profile-info">
+                        <h2>{{ profile.username }}</h2>
+                        <p class="profile-email">{{ profile.email }}</p>
+                        <div class="profile-meta">
+                            <span class="meta-item">
+                                <span class="meta-label">Member since</span>
+                                <span class="meta-value">{{ formatDate(profile.createdAt) }}</span>
+                            </span>
+                            <span class="meta-item">
+                                <span class="meta-label">Role</span>
+                                <span class="meta-value">{{ getRoleDisplay(profile.role) }}</span>
+                            </span>
+                            <span class="meta-item">
+                                <span class="meta-label">Password last changed</span>
+                                <span class="meta-value">{{ formatDate(profile.passwordLastChanged) }}</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <h3>✏️ Update Username</h3>
+                    <form [formGroup]="profileForm" (ngSubmit)="updateProfile()" class="profile-form">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input id="username" type="text" formControlName="username"
+                                placeholder="Enter your username"
+                                [class.error]="f['username'].invalid && f['username'].touched" />
+                            <small class="error-text" *ngIf="f['username'].touched && f['username'].invalid">
+                                {{ f['username'].hasError('required') ? 'Username is required' : 'Minimum 3 characters
+                                required' }}
+                            </small>
+                        </div>
+
+                        <button type="submit" class="btn-update" [disabled]="isUpdating || profileForm.invalid">
+                            {{ isUpdating ? 'Updating...' : 'Update Username' }}
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Change Password -->
+                <div class="form-card">
+                    <h3>🔒 Change Password</h3>
+
+                    <button class="btn-toggle-password" (click)="toggleChangePassword()">
+                        {{ showChangePassword ? 'Cancel' : 'Change Password' }}
+                    </button>
+
+                    <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" *ngIf="showChangePassword"
+                        class="password-form">
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password</label>
+                            <input id="currentPassword" type="password" formControlName="currentPassword"
+                                placeholder="Enter your current password"
+                                [class.error]="pf['currentPassword'].invalid && pf['currentPassword'].touched" />
+                            <small class="error-text"
+                                *ngIf="pf['currentPassword'].touched && pf['currentPassword'].invalid">
+                                Current password is required (minimum 6 characters)
+                            </small>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group flex-1">
+                                <label for="newPassword">New Password</label>
+                                <input id="newPassword" type="password" formControlName="newPassword"
+                                    placeholder="Enter new password"
+                                    [class.error]="pf['newPassword'].invalid && pf['newPassword'].touched" />
+                                <small class="error-text"
+                                    *ngIf="pf['newPassword'].touched && pf['newPassword'].invalid">
+                                    Password must be at least 6 characters
+                                </small>
+                            </div>
+
+                            <div class="form-group flex-1">
+                                <label for="confirmPassword">Confirm Password</label>
+                                <input id="confirmPassword" type="password" formControlName="confirmPassword"
+                                    placeholder="Confirm new password"
+                                    [class.error]="passwordForm.hasError('passwordMismatch') && pf['confirmPassword'].touched" />
+                                <small class="error-text"
+                                    *ngIf="passwordForm.hasError('passwordMismatch') && pf['confirmPassword'].touched">
+                                    Passwords do not match
+                                </small>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-change-password"
+                            [disabled]="isChangingPassword || passwordForm.invalid">
+                            {{ isChangingPassword ? 'Changing...' : 'Change Password' }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div class="tab-content" *ngIf="activeTab === 'settings'">
+
+                <!-- Account Actions -->
+                <div class="settings-card">
+                    <h3>⚙️ Account Settings</h3>
+
+                    <div class="settings-item">
+                        <div class="settings-info">
+                            <h4>🗑️ Delete Account</h4>
+                            <p>Permanently delete your account and all associated data. This action cannot be undone.
+                            </p>
+                        </div>
+                        <button class="btn-danger" (click)="goToAccountDeletion()">
+                            Delete Account
+                        </button>
+                    </div>
+
+                    <div class="settings-divider"></div>
+
+                    <div class="settings-item">
+                        <div class="settings-info">
+                            <h4>🚪 Logout</h4>
+                            <p>Sign out of your account on this device.</p>
+                        </div>
+                        <button class="btn-logout" (click)="logout()">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Session Info -->
+                <div class="settings-card session-card">
+                    <h3>🔐 Security</h3>
+
+                    <div class="session-item">
+                        <span class="session-icon">🛡️</span>
+                        <div class="session-info">
+                            <h4>Password Security</h4>
+                            <p>Last changed: {{ formatDate(profile.updatedAt) || 'Never' }}</p>
+                        </div>
+                        <button class="btn-secondary" (click)="activeTab = 'profile'">
+                            Change Password
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

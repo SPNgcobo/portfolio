@@ -259,10 +259,16 @@ public class ProjectController {
     }
 
     /*
-     * DETAIL CLICK
+     * DETAIL CLICK - Track unique users using fingerprint
      */
     @PostMapping("/{id}/detail-click")
-    public ApiResponse<Project> detailClick(@PathVariable String id) {
+    public ApiResponse<Project> detailClick(
+            @PathVariable String id,
+            HttpServletRequest request
+    ) {
+        String fingerprint = fingerprintService.generateFingerprint(request);
+
+        engagementService.track(id, fingerprint, "DETAIL_CLICK");
 
         activityPublisher.publish(
                 "DETAIL_CLICK",

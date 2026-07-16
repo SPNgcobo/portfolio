@@ -36,6 +36,7 @@ export class ResetPasswordComponent implements OnInit {
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       this.token = params['token'];
+      console.log('🔑 Reset token from URL:', this.token);
       if (!this.token) {
         this.errorMessage = 'Invalid reset link. Please request a new password reset.';
       }
@@ -43,17 +44,27 @@ export class ResetPasswordComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.form.invalid || !this.token) return;
+    if (this.form.invalid || !this.token) {
+      if (!this.token) {
+        this.errorMessage = 'Invalid reset token. Please request a new password reset.';
+      }
+      return;
+    }
 
     this.loading = true;
     this.errorMessage = '';
     this.successMessage = '';
 
-    this.authService.resetPassword({
+    const request = {
       token: this.token,
       newPassword: this.form.value.password!
-    }).subscribe({
+    };
+
+    console.log('📤 Sending reset request with token:', this.token);
+
+    this.authService.resetPassword(request).subscribe({
       next: () => {
+        console.log('✅ Password reset successful');
         this.successMessage = 'Password reset successful! Redirecting to login...';
         setTimeout(() => {
           this.router.navigate(['/login']);
@@ -61,8 +72,17 @@ export class ResetPasswordComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        console.error('Reset password error:', err);
-        this.errorMessage = err.error?.message || 'Failed to reset password. The link may have expired.';
+        console.error('❌ Reset password error:', err);
+
+        if (err.status === 0) {
+          this.errorMessage = 'Unable to connect to server. Please check your connection and try again.';
+        } else if (err.error?.message) {
+          this.errorMessage = err.error.message;
+        } else if (err.message) {
+          this.errorMessage = err.message;
+        } else {
+          this.errorMessage = 'Failed to reset password. The link may have expired. Please request a new one.';
+        }
         this.loading = false;
       }
     });

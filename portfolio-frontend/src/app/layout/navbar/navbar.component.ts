@@ -36,24 +36,35 @@ export class NavbarComponent implements OnInit, OnDestroy {
   readNotifications: Set<string> = new Set();
   loading = false;
 
+  userDisplayName: string = 'User';
+
   private wsNotificationSubscription: Subscription | null = null;
+  private authSubscription: Subscription | null = null;
   private refreshInterval: any;
   private readonly STORAGE_KEY = 'read_notifications';
 
   ngOnInit(): void {
     this.loadReadNotificationsFromStorage();
+
     this.loadNotifications();
     this.loadActivityEvents();
     this.subscribeToWebSocket();
 
-    this.refreshInterval = setInterval(() => {
-      if (this.auth.isLoggedIn()) {
+    this.authSubscription = this.auth.user$.subscribe((user) => {
+      this.updateUserDisplayName(user);
+      if (user && user.email) {
         this.loadNotifications();
         if (this.auth.isAdmin()) {
           this.loadActivityEvents();
         }
       }
-    }, 5000);
+    });
+
+    this.refreshInterval = setInterval(() => {
+      if (this.auth.isLoggedIn()) {
+        this.updateUnreadCountOnly();
+      }
+    }, 30000);
   }
 
   ngOnDestroy(): void {
@@ -61,16 +72,97 @@ export class NavbarComponent implements OnInit, OnDestroy {
       clearInterval(this.refreshInterval);
     }
     this.wsNotificationSubscription?.unsubscribe();
+    this.authSubscription?.unsubscribe();
+  }
+
+  private updateUserDisplayName(user: any): void {
+    if (user) {
+      if (user.username) {
+        this.userDisplayName = user.username;
+      } else if (user.email) {
+        this.userDisplayName = user.email.split('@')[0] || 'User';
+      } else {
+        this.userDisplayName = 'User';
+      }
+    } else {
+      this.userDisplayName = 'User';
+    }
+    this.cdr.detectChanges();
   }
 
   private subscribeToWebSocket(): void {
     this.wsNotificationSubscription = this.notificationWebSocket.onNotificationUpdate().subscribe((event) => {
-      console.log('WebSocket event received:', event);
+      console.log('📡 Navbar WebSocket event received:', event.type);
+
       if (this.auth.isLoggedIn()) {
         this.loadNotifications();
+        if (this.auth.isAdmin()) {
+          this.loadActivityEventsSilently();
+        }
+        this.updateUnreadCount();
+        this.cdr.detectChanges();
       }
-      if (this.auth.isAdmin()) {
-        this.loadActivityEvents();
+    });
+  }
+
+  toggleUserDropdown(): void {
+    const dropdown = document.querySelector('.dropdown.user-dropdown');
+    if (dropdown) {
+      dropdown.classList.toggle('open');
+    }
+  }
+
+  getUserDisplayName(): string {
+    if (this.userDisplayName && this.userDisplayName !== 'User') {
+      return this.userDisplayName;
+    }
+    const currentUser = this.auth.getCurrentUser();
+    if (currentUser) {
+      if (currentUser.username) {
+        return currentUser.username;
+      }
+      if (currentUser.email) {
+        return currentUser.email.split('@')[0] || 'User';
+      }
+    }
+    return 'User';
+  }
+
+  private updateUnreadCountOnly(): void {
+    if (!this.isAdmin()) {
+      this.notificationService.getUserUnreadCount().subscribe({
+        next: (res) => {
+          this.unreadNotificationsCount = res.data || 0;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Failed to get unread count:', err);
+        }
+      });
+    } else {
+      let count = 0;
+      if (this.activeNotifications) {
+        count += this.activeNotifications.filter(n => n.id && !this.readNotifications.has(n.id)).length;
+      }
+      if (this.activityEvents) {
+        count += this.activityEvents.filter(e => !e.read).length;
+      }
+      this.unreadNotificationsCount = count;
+      this.cdr.detectChanges();
+    }
+  }
+
+  private loadActivityEventsSilently(): void {
+    if (!this.auth.isAdmin()) return;
+
+    this.activityNotificationService.getAdminEvents().subscribe({
+      next: (res) => {
+        this.activityEvents = res.data || [];
+        this.updateUnreadCount();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to load activity events silently:', err);
       }
     });
   }
@@ -78,8 +170,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
   private loadReadNotificationsFromStorage(): void {
     const stored = localStorage.getItem(this.STORAGE_KEY);
     if (stored) {
-      const readArray = JSON.parse(stored);
-      this.readNotifications = new Set(readArray);
+      try {
+        const readArray = JSON.parse(stored);
+        this.readNotifications = new Set(readArray);
+      } catch (e) {
+        console.error('Failed to parse read notifications:', e);
+        this.readNotifications = new Set();
+      }
     }
   }
 
@@ -89,30 +186,36 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   loadNotifications(): void {
-    if (this.isLoggedIn() && !this.isAdmin()) {
+    if (!this.auth.isLoggedIn()) {
+      console.log('⏸️ User not logged in, skipping notification load');
+      return;
+    }
+
+    if (!this.isAdmin()) {
       this.notificationService.getUserNotifications().subscribe({
         next: (res) => {
-          console.log('User-specific notifications loaded:', res.data?.length || 0);
+          console.log('📬 User notifications loaded:', res.data?.length || 0);
           this.userNotifications = res.data || [];
           this.updateUnreadCount();
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Failed to load user notifications:', err);
         }
       });
-    } else if (this.isLoggedIn() && this.isAdmin()) {
-      this.fallbackLoadActiveNotifications();
     } else {
       this.fallbackLoadActiveNotifications();
+      this.loadActivityEvents();
     }
   }
 
   private fallbackLoadActiveNotifications(): void {
     this.notificationService.getActiveNotifications().subscribe({
       next: (res) => {
-        console.log('Active notifications loaded:', res.data?.length || 0);
+        console.log('📬 Active notifications loaded:', res.data?.length || 0);
         this.activeNotifications = res.data || [];
         this.updateUnreadCount();
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Failed to load notifications:', err);
@@ -125,8 +228,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
     this.activityNotificationService.getAdminEvents().subscribe({
       next: (res) => {
+        console.log('📬 Activity events loaded:', res.data?.length || 0);
         this.activityEvents = res.data || [];
         this.updateUnreadCount();
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Failed to load activity events:', err);
@@ -443,9 +548,18 @@ export class NavbarComponent implements OnInit, OnDestroy {
   closeOnOutsideClick(event: Event): void {
     const clickedInside = (event.target as HTMLElement).closest('.navbar');
     const clickedNotificationPanel = (event.target as HTMLElement).closest('.notification-panel');
+    const clickedUserDropdown = (event.target as HTMLElement).closest('.user-dropdown');
+
     if (!clickedInside && !clickedNotificationPanel) {
       this.isMenuOpen = false;
       this.showNotificationPanel = false;
+    }
+
+    if (!clickedUserDropdown) {
+      const dropdown = document.querySelector('.dropdown.user-dropdown');
+      if (dropdown) {
+        dropdown.classList.remove('open');
+      }
     }
   }
 }

@@ -1,0 +1,90 @@
+<div class="admin-tags">
+
+    <div class="page-header">
+        <div>
+            <h1>🏷️ Tags Management</h1>
+            <p class="subtitle">Manage blog tags for better content organization</p>
+        </div>
+        <button class="btn-primary" (click)="openCreateModal()">
+            <span>➕</span> Create Tag
+        </button>
+    </div>
+
+    <div class="stats-bar">
+        <span class="stat-item">
+            <span class="stat-label">Total Tags:</span>
+            <span class="stat-value">{{ getTotalTags() }}</span>
+        </span>
+        <span class="stat-item">
+            <span class="stat-label">Used Tags:</span>
+            <span class="stat-value">{{ getUsedTagsCount() }}</span>
+        </span>
+        <span class="stat-item">
+            <span class="stat-label">Unused Tags:</span>
+            <span class="stat-value">{{ getUnusedTagsCount() }}</span>
+        </span>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading tags...</p>
+    </div>
+
+    <div class="tags-grid" *ngIf="!loading && tags.length > 0">
+        <div class="tag-card" *ngFor="let tag of tags">
+            <div class="tag-header">
+                <span class="tag-name">#{{ tag.name }}</span>
+                <span class="tag-usage" [class]="getUsageColor(tag.usageCount || 0)">
+                    {{ tag.usageCount || 0 }} uses
+                </span>
+            </div>
+            <p class="tag-description" *ngIf="tag.description">{{ tag.description }}</p>
+            <p class="tag-description empty" *ngIf="!tag.description">No description</p>
+            <div class="tag-actions">
+                <button class="action-btn edit" (click)="openEditModal(tag)">✏️ Edit</button>
+                <button class="action-btn delete" (click)="openDeleteDialog(tag.id!, tag.name)">🗑️ Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && tags.length === 0">
+        <span class="empty-icon">🏷️</span>
+        <h3>No Tags Created</h3>
+        <p>Create your first tag to organize blog posts.</p>
+        <button class="btn-primary" (click)="openCreateModal()">Create Tag</button>
+    </div>
+
+    <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>{{ isEditing ? 'Edit Tag' : 'Create New Tag' }}</h3>
+                <button class="close-btn" (click)="closeModal()">✕</button>
+            </div>
+
+            <div class="form-group">
+                <label for="tagName">Tag Name *</label>
+                <input id="tagName" type="text" [(ngModel)]="formData.name" placeholder="e.g., Angular, Spring Boot"
+                    class="form-input" />
+            </div>
+
+            <div class="form-group">
+                <label for="tagDescription">Description (Optional)</label>
+                <textarea id="tagDescription" [(ngModel)]="formData.description" rows="3"
+                    placeholder="Brief description of this tag" class="form-textarea"></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-secondary" (click)="closeModal()">Cancel</button>
+                <button class="btn-primary" (click)="submitForm()" [disabled]="submitting || !formData.name.trim()">
+                    {{ submitting ? 'Saving...' : (isEditing ? 'Update Tag' : 'Create Tag') }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <app-confirm-dialog [open]="showDeleteDialog" title="Delete Tag"
+        [message]="'Are you sure you want to delete &quot;' + deleteTagName + '&quot;? This action cannot be undone.'"
+        confirmText="Delete" cancelText="Cancel" (confirm)="confirmDelete()" (cancel)="cancelDelete()">
+    </app-confirm-dialog>
+
+</div>

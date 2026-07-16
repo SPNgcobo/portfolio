@@ -34,15 +34,12 @@ public class BlogService {
         blog.setCreatedAt(new Date());
         blog.setUpdatedAt(new Date());
 
-        // AUTO SLUG
         if (blog.getSlug() == null || blog.getSlug().isBlank()) {
             blog.setSlug(generateSlug(blog.getTitle()));
         }
 
-        // READ TIME
         blog.setReadTime(calculateReadTime(blog.getContent()));
 
-        // PUBLISH DATE
         if (blog.getStatus() == BlogStatus.PUBLISHED) {
             blog.setPublishedAt(new Date());
         }
@@ -73,13 +70,10 @@ public class BlogService {
         existing.setStatus(updated.getStatus());
         existing.setUpdatedAt(new Date());
 
-        // SLUG
         existing.setSlug(generateSlug(updated.getTitle()));
 
-        // READ TIME
         existing.setReadTime(calculateReadTime(updated.getContent()));
 
-        // PUBLISH DATE
         if (updated.getStatus() == BlogStatus.PUBLISHED && existing.getPublishedAt() == null) {
             existing.setPublishedAt(new Date());
         }

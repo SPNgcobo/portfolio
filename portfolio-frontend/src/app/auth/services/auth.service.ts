@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, tap, catchError, of } from 'rxjs';
+import { Observable, map, tap, catchError, of, BehaviorSubject } from 'rxjs';
 import { LoginRequest } from '../models/login-request';
 import { LoginResponse } from '../models/login-response';
 import { UserInfo } from '../models/user-info';
@@ -17,6 +17,9 @@ export class AuthService {
   private apiUrl = `${environment.apiUrl}/auth`;
 
   private currentUser: UserInfo | null = null;
+
+  private userSubject = new BehaviorSubject<UserInfo | null>(null);
+  user$ = this.userSubject.asObservable();
 
   login(request: LoginRequest): Observable<LoginResponse> {
     return this.http.post<ApiResponse<void>>(
@@ -60,10 +63,14 @@ export class AuthService {
       { withCredentials: true }
     ).pipe(
       map(res => res.data),
-      tap(user => this.currentUser = user),
+      tap(user => {
+        this.currentUser = user;
+        this.userSubject.next(user); 
+      }),
       catchError(() => {
         this.currentUser = null;
-        return of({ email: '', role: '' });
+        this.userSubject.next(null);
+        return of({ email: '', role: '', username: '' });
       })
     );
   }
@@ -86,10 +93,16 @@ export class AuthService {
       `${this.apiUrl}/reset-password`,
       request
     ).pipe(
-      map(res => undefined),
+      map(res => {
+        if (!res.success) {
+          throw new Error(res.message || 'Failed to reset password');
+        }
+        return undefined;
+      }),
       catchError((error) => {
         console.error('Reset password error:', error);
-        throw error;
+        const errorMessage = error.error?.message || error.message || 'Failed to reset password';
+        throw new Error(errorMessage);
       })
     );
   }
@@ -118,16 +131,19 @@ export class AuthService {
       next: (user) => {
         if (user && user.email) {
           this.currentUser = user;
+          this.userSubject.next(user);
         }
       },
       error: () => {
         this.currentUser = null;
+        this.userSubject.next(null);
       }
     });
   }
 
   clearUser(): void {
     this.currentUser = null;
+    this.userSubject.next(null);
   }
 
   getCurrentUser(): UserInfo | null {
@@ -144,5 +160,16 @@ export class AuthService {
 
   isAdmin(): boolean {
     return this.currentUser?.role === 'ROLE_ADMIN';
+  }
+
+  clearAuthState(): void {
+    this.clearUser();
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    document.cookie.split(';').forEach(cookie => {
+      document.cookie = cookie
+        .replace(/^ +/, '')
+        .replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
+    });
   }
 }

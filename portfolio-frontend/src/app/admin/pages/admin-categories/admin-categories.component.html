@@ -1,0 +1,101 @@
+<div class="admin-categories">
+
+    <div class="page-header">
+        <div>
+            <h1>📂 Categories Management</h1>
+            <p class="subtitle">Manage blog categories for better content organization</p>
+        </div>
+        <button class="btn-primary" (click)="openCreateModal()">
+            <span>➕</span> Create Category
+        </button>
+    </div>
+
+    <div class="stats-bar">
+        <span class="stat-item">
+            <span class="stat-label">Total Categories:</span>
+            <span class="stat-value">{{ getTotalCategories() }}</span>
+        </span>
+        <span class="stat-item">
+            <span class="stat-label">Used Categories:</span>
+            <span class="stat-value">{{ getUsedCategoriesCount() }}</span>
+        </span>
+        <span class="stat-item">
+            <span class="stat-label">Unused Categories:</span>
+            <span class="stat-value">{{ getUnusedCategoriesCount() }}</span>
+        </span>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading categories...</p>
+    </div>
+
+    <div class="categories-grid" *ngIf="!loading && categories.length > 0">
+        <div class="category-card" *ngFor="let category of categories">
+            <div class="category-header">
+                <div class="category-icon">{{ getIconPreview(category.icon) }}</div>
+                <div class="category-info">
+                    <span class="category-name">{{ category.name }}</span>
+                    <span class="category-usage" [class]="getUsageColor(category.usageCount || 0)">
+                        {{ category.usageCount || 0 }} uses
+                    </span>
+                </div>
+            </div>
+            <p class="category-description" *ngIf="category.description">{{ category.description }}</p>
+            <p class="category-description empty" *ngIf="!category.description">No description</p>
+            <div class="category-actions">
+                <button class="action-btn edit" (click)="openEditModal(category)">✏️ Edit</button>
+                <button class="action-btn delete" (click)="openDeleteDialog(category.id!, category.name)">🗑️
+                    Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && categories.length === 0">
+        <span class="empty-icon">📂</span>
+        <h3>No Categories Created</h3>
+        <p>Create your first category to organize blog posts.</p>
+        <button class="btn-primary" (click)="openCreateModal()">Create Category</button>
+    </div>
+
+    <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>{{ isEditing ? 'Edit Category' : 'Create New Category' }}</h3>
+                <button class="close-btn" (click)="closeModal()">✕</button>
+            </div>
+
+            <div class="form-group">
+                <label for="categoryName">Category Name *</label>
+                <input id="categoryName" type="text" [(ngModel)]="formData.name"
+                    placeholder="e.g., Web Development, DevOps" class="form-input" />
+            </div>
+
+            <div class="form-group">
+                <label for="categoryIcon">Icon</label>
+                <input id="categoryIcon" type="text" [(ngModel)]="formData.icon"
+                    placeholder="e.g., 🚀, 💻, 📱 or image URL" class="form-input" />
+                <small class="hint">Emoji or image URL for the category</small>
+            </div>
+
+            <div class="form-group">
+                <label for="categoryDescription">Description (Optional)</label>
+                <textarea id="categoryDescription" [(ngModel)]="formData.description" rows="3"
+                    placeholder="Brief description of this category" class="form-textarea"></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-secondary" (click)="closeModal()">Cancel</button>
+                <button class="btn-primary" (click)="submitForm()" [disabled]="submitting || !formData.name.trim()">
+                    {{ submitting ? 'Saving...' : (isEditing ? 'Update Category' : 'Create Category') }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <app-confirm-dialog [open]="showDeleteDialog" title="Delete Category"
+        [message]="'Are you sure you want to delete &quot;' + deleteCategoryName + '&quot;? This action cannot be undone.'"
+        confirmText="Delete" cancelText="Cancel" (confirm)="confirmDelete()" (cancel)="cancelDelete()">
+    </app-confirm-dialog>
+
+</div>

@@ -36,7 +36,7 @@ export class AdminMediaComponent implements OnInit {
   isEditing = false;
   selectedMediaId: string | null = null;
 
-  formData: Partial<Media> = {
+  formData: any = {
     projectId: '',
     title: '',
     description: '',
@@ -62,6 +62,8 @@ export class AdminMediaComponent implements OnInit {
 
   mediaTypes: MediaType[] = ['IMAGE', 'VIDEO', 'AUDIO', 'PDF', 'CERTIFICATE', 'CV'];
   visibilityTypes: VisibilityType[] = ['PUBLIC', 'PRIVATE', 'VAULT'];
+
+  isProjectSelected = false;
 
   ngOnInit(): void {
     this.loadProjects();
@@ -144,7 +146,7 @@ export class AdminMediaComponent implements OnInit {
         this.formData.type = 'AUDIO';
       }
       else if (fileType === 'application/pdf') {
-        this.uploadPreview = '/assets/pdf-icon.png'; 
+        this.uploadPreview = '/assets/pdf-icon.png';
         this.uploadPreviewType = 'pdf';
         this.formData.type = 'PDF';
       }
@@ -192,9 +194,18 @@ export class AdminMediaComponent implements OnInit {
     });
   }
 
+  onProjectChange(): void {
+    this.isProjectSelected = this.formData.projectId && this.formData.projectId.trim() !== '';
+
+    if (this.isProjectSelected) {
+      this.formData.visibility = 'PUBLIC';
+    }
+  }
+
   openCreateModal(): void {
     this.isEditing = false;
     this.selectedMediaId = null;
+    this.isProjectSelected = false;
     this.formData = {
       projectId: '',
       title: '',
@@ -218,6 +229,9 @@ export class AdminMediaComponent implements OnInit {
     this.isEditing = true;
     this.selectedMediaId = media.id!;
     this.formData = { ...media };
+
+    this.isProjectSelected = media.projectId !== null && media.projectId !== '';
+
     this.uploadPreview = media.url;
     this.uploadPreviewType = media.type === 'IMAGE' ? 'image' : (media.type === 'VIDEO' ? 'video' : 'file');
     this.showModal = true;
@@ -231,10 +245,11 @@ export class AdminMediaComponent implements OnInit {
     this.audioPreviewUrl = null;
     this.uploadPreviewType = '';
     this.submitting = false;
+    this.isProjectSelected = false;
   }
 
   async submitForm(): Promise<void> {
-    if (!this.formData.title || !this.formData.projectId) {
+    if (!this.formData.title) {
       return;
     }
 
@@ -243,10 +258,28 @@ export class AdminMediaComponent implements OnInit {
       if (!this.formData.url) return;
     }
 
+    const submitData: any = {
+      title: this.formData.title,
+      description: this.formData.description || '',
+      url: this.formData.url,
+      publicId: this.formData.publicId,
+      type: this.formData.type,
+      visibility: this.formData.visibility,
+      size: this.formData.size || 0,
+      format: this.formData.format || ''
+    };
+
+    if (this.formData.projectId && this.formData.projectId.trim() !== '') {
+      submitData.projectId = this.formData.projectId;
+      submitData.visibility = 'PUBLIC';
+    } else {
+      submitData.projectId = null;
+    }
+
     this.submitting = true;
 
     if (this.isEditing && this.selectedMediaId) {
-      this.mediaService.updateMedia(this.selectedMediaId, this.formData).subscribe({
+      this.mediaService.updateMedia(this.selectedMediaId, submitData).subscribe({
         next: () => {
           this.loadMedia();
           this.closeModal();
@@ -258,7 +291,7 @@ export class AdminMediaComponent implements OnInit {
         }
       });
     } else {
-      this.mediaService.createMedia(this.formData).subscribe({
+      this.mediaService.createMedia(submitData).subscribe({
         next: () => {
           this.loadMedia();
           this.closeModal();
@@ -295,7 +328,76 @@ export class AdminMediaComponent implements OnInit {
     this.showDeleteDialog = false;
   }
 
-  getProjectName(projectId: string): string {
+
+  getImages(): Media[] {
+    return this.filteredMedia.filter(media => media.type === 'IMAGE');
+  }
+
+  getVideos(): Media[] {
+    return this.filteredMedia.filter(media => media.type === 'VIDEO');
+  }
+
+  getAudio(): Media[] {
+    return this.filteredMedia.filter(media => media.type === 'AUDIO');
+  }
+
+  getPDFs(): Media[] {
+    return this.filteredMedia.filter(media => media.type === 'PDF');
+  }
+
+  getCertificates(): Media[] {
+    return this.filteredMedia.filter(media => media.type === 'CERTIFICATE');
+  }
+
+  getCVs(): Media[] {
+    return this.filteredMedia.filter(media => media.type === 'CV');
+  }
+
+  hasCategory(category: string): boolean {
+    switch (category) {
+      case 'images': return this.getImages().length > 0;
+      case 'videos': return this.getVideos().length > 0;
+      case 'audio': return this.getAudio().length > 0;
+      case 'pdfs': return this.getPDFs().length > 0;
+      case 'certificates': return this.getCertificates().length > 0;
+      case 'cvs': return this.getCVs().length > 0;
+      default: return false;
+    }
+  }
+
+
+  getVisibilityIcon(visibility: string): string {
+    switch (visibility) {
+      case 'PUBLIC': return '🌐';
+      case 'PRIVATE': return '🔒';
+      case 'VAULT': return '🔐';
+      default: return '📌';
+    }
+  }
+
+  getVisibilityTooltip(visibility: string): string {
+    switch (visibility) {
+      case 'PUBLIC': return 'Visible to everyone';
+      case 'PRIVATE': return 'Admin only - not visible to users';
+      case 'VAULT': return 'Users can request access';
+      default: return '';
+    }
+  }
+
+  getVisibilityHint(visibility: string, isProjectBased: boolean): string {
+    if (isProjectBased) {
+      return '🔒 Forced to PUBLIC when linked to a project';
+    }
+    switch (visibility) {
+      case 'PUBLIC': return '🌐 Visible to everyone';
+      case 'PRIVATE': return '🔒 Admin only - not visible to users';
+      case 'VAULT': return '🔐 Users can request access';
+      default: return '';
+    }
+  }
+
+  getProjectName(projectId: string | null): string {
+    if (!projectId) return 'Standalone (No Project)';
     const project = this.projects.find(p => p.id === projectId);
     return project?.title || 'Unknown Project';
   }
@@ -312,11 +414,62 @@ export class AdminMediaComponent implements OnInit {
     }
   }
 
+  getFileColor(type: string): string {
+    switch (type) {
+      case 'IMAGE': return '#10b981';
+      case 'VIDEO': return '#3b82f6';
+      case 'AUDIO': return '#8b5cf6';
+      case 'PDF': return '#ef4444';
+      case 'CERTIFICATE': return '#f59e0b';
+      case 'CV': return '#6366f1';
+      default: return '#6b7280';
+    }
+  }
+
   formatFileSize(bytes: number): string {
     if (!bytes) return 'Unknown';
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  getFileExtension(media: Media): string {
+    if (media.format) {
+      return media.format.toUpperCase();
+    }
+    if (media.url) {
+      const parts = media.url.split('.');
+      if (parts.length > 1) {
+        const ext = parts[parts.length - 1].split('?')[0];
+        if (ext && ext.length < 6) {
+          return ext.toUpperCase();
+        }
+      }
+    }
+    return media.type || '';
+  }
+
+  getDisplayName(media: Media): string {
+    if (media.title) {
+      const title = media.title;
+      if (title.length > 36 || title.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+        return 'File';
+      }
+      return title;
+    }
+    return 'File';
+  }
+
+  getFileTypeLabel(type: string): string {
+    switch (type) {
+      case 'IMAGE': return 'Image';
+      case 'VIDEO': return 'Video';
+      case 'AUDIO': return 'Audio';
+      case 'PDF': return 'PDF Document';
+      case 'CERTIFICATE': return 'Certificate';
+      case 'CV': return 'CV / Resume';
+      default: return 'File';
+    }
   }
 
   getPreviewIcon(type: string): string {
@@ -326,6 +479,10 @@ export class AdminMediaComponent implements OnInit {
       case 'file': return '📄';
       default: return '📁';
     }
+  }
+
+  getSafeAudioUrl(url: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
 
   removeSelectedFile(event: Event): void {

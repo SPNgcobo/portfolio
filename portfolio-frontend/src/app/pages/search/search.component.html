@@ -1,0 +1,147 @@
+<div class="search-page">
+
+    <div class="page-header">
+        <h1>🔍 Search</h1>
+        <p class="subtitle">Find projects, blog posts, and more</p>
+    </div>
+
+    <div class="search-container">
+        <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="search-form">
+            <div class="search-input-wrapper">
+                <span class="search-icon">🔍</span>
+                <input id="keyword" type="text" formControlName="keyword"
+                    placeholder="Search for projects, articles, technologies..."
+                    [class.error]="f['keyword'].invalid && f['keyword'].touched" (keydown.enter)="onSearch()" />
+                <button type="button" class="clear-btn" *ngIf="searchForm.get('keyword')?.value"
+                    (click)="clearSearch()">
+                    ✕
+                </button>
+                <button type="submit" class="search-btn" [disabled]="loading || searchForm.invalid">
+                    {{ loading ? 'Searching...' : 'Search' }}
+                </button>
+            </div>
+            <small class="error-text" *ngIf="f['keyword'].touched && f['keyword'].invalid">
+                Please enter at least 2 characters
+            </small>
+        </form>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Searching...</p>
+    </div>
+
+    <div class="error-state" *ngIf="errorMessage && !loading">
+        <span class="error-icon">⚠️</span>
+        <p>{{ errorMessage }}</p>
+    </div>
+
+    <div *ngIf="!loading && hasSearched && !errorMessage">
+
+        <div class="no-results" *ngIf="!hasAnyResults()">
+            <span class="no-results-icon">🔎</span>
+            <h3>No Results Found</h3>
+            <p>We couldn't find any matches for your search.</p>
+            <p class="sub-text">Try using different keywords or check your spelling.</p>
+        </div>
+
+        <div class="results-summary" *ngIf="hasAnyResults()">
+            <span class="result-count">{{ getTotalResults() }} results found</span>
+            <span class="search-keyword">for "{{ searchForm.get('keyword')?.value }}"</span>
+        </div>
+
+        <div class="results-wrapper">
+
+            <div class="results-section" *ngIf="hasProjectResults()">
+                <div class="section-header">
+                    <h2>📁 Projects</h2>
+                    <span class="section-count">{{ searchResults?.projects?.totalElements || 0 }} found</span>
+                </div>
+
+                <div class="project-results">
+                    <a *ngFor="let project of getProjectResults()" [routerLink]="['/projects', project.id]"
+                        class="result-card project-card">
+                        <div class="card-thumbnail" *ngIf="project.thumbnail">
+                            <img [src]="project.thumbnail" [alt]="project.title">
+                        </div>
+                        <div class="card-thumbnail placeholder" *ngIf="!project.thumbnail">
+                            <span class="placeholder-icon">📁</span>
+                        </div>
+                        <div class="card-content">
+                            <h3>{{ project.title }}</h3>
+                            <p>{{ truncateText(project.shortDescription || project.description || '') }}</p>
+                            <div class="card-meta">
+                                <span class="tech-tag" *ngFor="let tech of (project.techStack || []).slice(0, 3)">
+                                    {{ tech }}
+                                </span>
+                                <span class="tech-more" *ngIf="(project.techStack || []).length > 3">
+                                    +{{ (project.techStack || []).length - 3 }}
+                                </span>
+                            </div>
+                            <div class="card-stats">
+                                <span>👁 {{ project.viewCount || 0 }}</span>
+                                <span>❤️ {{ project.likes || 0 }}</span>
+                                <span *ngIf="project.featured" class="featured-badge">⭐ Featured</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="results-section" *ngIf="hasBlogResults()">
+                <div class="section-header">
+                    <h2>📝 Blog Posts</h2>
+                    <span class="section-count">{{ searchResults?.blogs?.totalElements || 0 }} found</span>
+                </div>
+
+                <div class="blog-results">
+                    <a *ngFor="let blog of getBlogResults()" [routerLink]="['/blogs', blog.slug]"
+                        class="result-card blog-card">
+                        <div class="card-thumbnail" *ngIf="blog.thumbnailUrl">
+                            <img [src]="blog.thumbnailUrl" [alt]="blog.title">
+                        </div>
+                        <div class="card-thumbnail placeholder" *ngIf="!blog.thumbnailUrl">
+                            <span class="placeholder-icon">📝</span>
+                        </div>
+                        <div class="card-content">
+                            <h3>{{ blog.title }}</h3>
+                            <p>{{ truncateText(blog.excerpt || blog.content || '') }}</p>
+                            <div class="card-meta">
+                                <span class="blog-date">📅 {{ blog.publishedAt | date:'MMM d, yyyy' }}</span>
+                                <span class="blog-read-time">⏱️ {{ blog.readTime || 1 }} min read</span>
+                                <span *ngIf="blog.featured" class="featured-badge">⭐ Featured</span>
+                            </div>
+                            <div class="card-tags" *ngIf="blog.tags && blog.tags.length > 0">
+                                <span class="tag" *ngFor="let tag of blog.tags.slice(0, 3)">
+                                    #{{ tag }}
+                                </span>
+                                <span class="tag-more" *ngIf="blog.tags.length > 3">
+                                    +{{ blog.tags.length - 3 }}
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="pagination" *ngIf="hasAnyResults() && totalPages > 1">
+                <button class="page-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 0">
+                    ← Previous
+                </button>
+
+                <div class="page-numbers">
+                    <button *ngFor="let page of getPageNumbers()" class="page-number"
+                        [class.active]="page === currentPage" (click)="goToPage(page)">
+                        {{ page + 1 }}
+                    </button>
+                </div>
+
+                <button class="page-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage >= totalPages - 1">
+                    Next →
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+</div>

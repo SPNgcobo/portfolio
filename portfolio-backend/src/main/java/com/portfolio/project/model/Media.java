@@ -3,6 +3,7 @@ package com.portfolio.project.model;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Date;
 
@@ -16,6 +17,7 @@ public class Media {
     /*
      * RELATIONS
      */
+    @Field(write = Field.Write.ALWAYS)
     private String projectId;
 
     /*
@@ -37,8 +39,7 @@ public class Media {
     /*
      * SECURITY
      */
-    private VisibilityType visibility =
-            VisibilityType.PUBLIC;
+    private VisibilityType visibility = VisibilityType.PUBLIC;
 
     /*
      * META
@@ -51,4 +52,11 @@ public class Media {
      * TIMESTAMPS
      */
     private Date createdAt;
+
+    /*
+     * Helper method to check if this is standalone media
+     */
+    public boolean isStandalone() {
+        return projectId == null || projectId.trim().isEmpty();
+    }
 }

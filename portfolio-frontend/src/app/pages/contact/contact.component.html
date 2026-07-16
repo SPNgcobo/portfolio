@@ -1,0 +1,150 @@
+<div class="contact-page">
+
+    <div class="page-header">
+        <h1>📧 Contact Me</h1>
+        <p class="subtitle">Have a question or want to work together? Reach out!</p>
+    </div>
+
+    <div class="contact-wrapper">
+
+        <div class="contact-card form-card">
+            <h2>Send a Message</h2>
+
+            <div class="success-message" *ngIf="isSubmitted">
+                <span class="success-icon">✅</span>
+                <h3>Message Sent!</h3>
+                <p>Thank you for reaching out. I'll get back to you as soon as possible.</p>
+                <p class="sub-text">Usually within 24-48 hours.</p>
+                <button class="btn-send-another" (click)="isSubmitted = false">Send Another Message</button>
+            </div>
+
+            <div class="error-message" *ngIf="errorMessage && !isSubmitted">
+                <span class="error-icon">⚠️</span>
+                <p>{{ errorMessage }}</p>
+            </div>
+
+            <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" *ngIf="!isSubmitted" class="contact-form">
+
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label for="name">Full Name *</label>
+                        <input id="name" type="text" formControlName="name" placeholder="John Doe"
+                            [class.error]="f['name'].invalid && f['name'].touched" />
+                        <small class="error-text" *ngIf="f['name'].touched && f['name'].invalid">
+                            {{ getFieldError('name') }}
+                        </small>
+                    </div>
+
+                    <div class="form-group flex-1">
+                        <label for="email">Email Address *</label>
+                        <input id="email" type="email" formControlName="email" placeholder="you&#64;example.com"
+                            [class.error]="f['email'].invalid && f['email'].touched" />
+                        <small class="error-text" *ngIf="f['email'].touched && f['email'].invalid">
+                            {{ getFieldError('email') }}
+                        </small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="subject">Subject *</label>
+                    <input id="subject" type="text" formControlName="subject" placeholder="What's this about?"
+                        [class.error]="f['subject'].invalid && f['subject'].touched" />
+                    <small class="error-text" *ngIf="f['subject'].touched && f['subject'].invalid">
+                        {{ getFieldError('subject') }}
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Message *</label>
+                    <textarea id="message" formControlName="message" rows="6"
+                        placeholder="Tell me about your project, question, or collaboration idea..."
+                        [class.error]="f['message'].invalid && f['message'].touched"></textarea>
+                    <div class="message-footer">
+                        <small class="error-text" *ngIf="f['message'].touched && f['message'].invalid">
+                            {{ getFieldError('message') }}
+                        </small>
+                        <small class="char-count">
+                            {{ contactForm.get('message')?.value?.length || 0 }} characters
+                        </small>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit" [disabled]="loading || contactForm.invalid">
+                    {{ loading ? 'Sending...' : 'Send Message ✨' }}
+                </button>
+
+                <div class="form-footer">
+                    <span class="required-hint">* Required fields</span>
+                    <span class="response-time">⏱️ Response within 24-48 hours</span>
+                </div>
+            </form>
+        </div>
+
+        <div class="contact-card info-card">
+            <h2>Contact Information</h2>
+
+            <div class="info-item">
+                <span class="info-icon">📧</span>
+                <div class="info-content">
+                    <h4>Email</h4>
+                    <a href="mailto:samkelop.dev&#64;gmail.com">samkelop.dev&#64;gmail.com</a>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <span class="info-icon">📱</span>
+                <div class="info-content">
+                    <h4>Phone</h4>
+                    <a href="tel:+27736365211">+27 72 625 6200</a>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <span class="info-icon">📍</span>
+                <div class="info-content">
+                    <h4>Location</h4>
+                    <p>South Africa</p>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <span class="info-icon">🕒</span>
+                <div class="info-content">
+                    <h4>Response Time</h4>
+                    <p>Usually within 24-48 hours</p>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <span class="info-icon">🔗</span>
+                <div class="info-content">
+                    <h4>Connect Online</h4>
+                    <div class="social-links">
+                        <a href="https://github.com/SPNgcobo" target="_blank" rel="noopener noreferrer"
+                            class="social-link github">
+                            <span>🐙</span> GitHub
+                        </a>
+                        <a href="https://www.linkedin.com/in/samkelo-ngcobo/" target="_blank" rel="noopener noreferrer"
+                            class="social-link linkedin">
+                            <span>🔗</span> LinkedIn
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-divider"></div>
+
+            <div class="info-note">
+                <p>💡 <strong>Looking for collaboration?</strong></p>
+                <p class="note-text">I'm always open to discussing new projects, creative ideas, or opportunities to be
+                    part of your vision.</p>
+            </div>
+
+            <a routerLink="/projects" class="btn-view-work">
+                View My Work →
+            </a>
+        </div>
+
+    </div>
+
+</div>

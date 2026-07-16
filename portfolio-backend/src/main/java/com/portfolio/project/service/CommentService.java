@@ -54,7 +54,6 @@ public class CommentService {
                 || "admin@portfolio.com".equals(comment.getEmail())
                 || "Admin".equals(comment.getUsername());
 
-        // Default values
         comment.setApproved(isAdmin);
         comment.setCreatedAt(new Date());
         comment.setEdited(false);
@@ -71,7 +70,7 @@ public class CommentService {
         if (!isAdmin) {
             notificationEventService.notifyAdmin(
                     "NEW_COMMENT",
-                    "New comment from " + comment.getUsername() + " on project: \"" + comment.getContent() + "\""
+                    "New comment from " + comment.getUsername() + " on project"
             );
 
             try {
@@ -180,10 +179,13 @@ public class CommentService {
 
         comment.setDeleted(true);
         comment.setDeletedAt(new Date());
-        // Set who deleted it (the user who owns the comment)
         comment.setDeletedBy(comment.getUsername());
 
         repository.save(comment);
+
+        if (comment.isApproved()) {
+            projectService.decrementComments(comment.getProjectId());
+        }
 
         notificationEventService.broadcastActivity(
                 "COMMENT_DELETED",
@@ -201,7 +203,7 @@ public class CommentService {
     }
 
     /*
-     * ADMIN DELETE COMMENT (NOW SOFT DELETE TOO)
+     * ADMIN DELETE COMMENT
      */
     public void adminDelete(String id) {
         Comment comment = repository.findById(id)
@@ -213,10 +215,13 @@ public class CommentService {
 
         comment.setDeleted(true);
         comment.setDeletedAt(new Date());
-        // Set who deleted it (Admin)
         comment.setDeletedBy("Admin");
 
         repository.save(comment);
+
+        if (comment.isApproved()) {
+            projectService.decrementComments(comment.getProjectId());
+        }
 
         notificationEventService.broadcastActivity(
                 "COMMENT_DELETED",
@@ -235,7 +240,6 @@ public class CommentService {
 
     /*
      * EDIT COMMENT (User can edit their own comment)
-     * When user edits, comment goes back to pending moderation
      */
     public Comment editComment(String id, String newContent, String email) {
         Comment comment = repository.findById(id)
@@ -258,7 +262,6 @@ public class CommentService {
         comment.setEditedAt(new Date());
         comment.setEditCount(comment.getEditCount() + 1);
 
-        // User edits must be re-approved
         comment.setApproved(false);
 
         Comment updated = repository.save(comment);

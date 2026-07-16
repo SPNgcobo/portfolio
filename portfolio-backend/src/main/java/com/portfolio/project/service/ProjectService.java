@@ -24,15 +24,19 @@ public class ProjectService {
 
     private final NotificationEventService notificationEventService;
 
+    private final VaultGuardService vaultGuardService;
+
 
     public ProjectService(
             ProjectRepository repository,
             DashboardActivityPublisher publisher,
-            NotificationEventService notificationEventService
+            NotificationEventService notificationEventService,
+            VaultGuardService vaultGuardService
     ) {
         this.repository = repository;
         this.publisher = publisher;
         this.notificationEventService = notificationEventService;
+        this.vaultGuardService = vaultGuardService;
     }
 
     /*
@@ -76,6 +80,16 @@ public class ProjectService {
                                 "Project not found"
                         )
                 );
+    }
+
+    /*
+     * Check if user has access to a project's private GitHub repo
+     */
+    public boolean canAccessProjectRepo(String email, String projectId) {
+        if (email == null || email.isBlank() || projectId == null || projectId.isBlank()) {
+            return false;
+        }
+        return vaultGuardService.canAccessProject(email, projectId);
     }
 
     /*
@@ -271,20 +285,29 @@ public class ProjectService {
     }
 
     /*
-     * COMMENTS COUNT
+     * INCREMENT COMMENTS - Ensure it saves properly
      */
-    public void incrementComments(
-            String id
-    ) {
-
-        Project project =
-                getAdminProjectById(id);
-
-        project.setCommentsCount(
-                project.getCommentsCount() + 1
-        );
-
+    public void incrementComments(String id) {
+        Project project = getAdminProjectById(id);
+        long currentCount = project.getCommentsCount() == 0 ? 0 : project.getCommentsCount();
+        project.setCommentsCount(currentCount + 1);
+        project.setUpdatedAt(new Date());
         repository.save(project);
+
+        System.out.println("✅ Comment count incremented for project: " + project.getTitle() + " - New count: " + project.getCommentsCount());
+    }
+
+    /*
+     * DECREMENT COMMENTS - For when comments are deleted
+     */
+    public void decrementComments(String id) {
+        Project project = getAdminProjectById(id);
+        long currentCount = project.getCommentsCount();
+        project.setCommentsCount(Math.max(0, currentCount - 1));
+        project.setUpdatedAt(new Date());
+        repository.save(project);
+
+        System.out.println("✅ Comment count decremented for project: " + project.getTitle() + " - New count: " + project.getCommentsCount());
     }
 
     /*

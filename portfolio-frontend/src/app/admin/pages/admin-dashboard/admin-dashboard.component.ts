@@ -44,11 +44,18 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.loadCharts();
   }
 
+  refreshComments(): void {
+    console.log('🔄 Refreshing comments count...');
+    this.loadStats();
+    this.loadCharts();
+  }
+
   private loadStats(): void {
     this.adminService.getStats().subscribe({
       next: (res) => {
         this.stats = res.data;
         this.loading = false;
+        console.log('📊 Stats updated - Total Comments:', this.stats?.totalComments);
       },
       error: (err) => {
         console.error('Failed to load stats:', err);

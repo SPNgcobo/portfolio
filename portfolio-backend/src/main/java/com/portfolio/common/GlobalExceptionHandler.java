@@ -163,4 +163,38 @@ public class GlobalExceptionHandler {
                         )
                 );
     }
+
+    /*
+     * NULL POINTER EXCEPTION
+     */
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<ApiResponse<Object>>
+    handleNullPointer(
+            NullPointerException ex
+    ) {
+        ex.printStackTrace();
+
+        String message = ex.getMessage();
+        if (message != null && message.contains("RefreshTokenExpiry")) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(
+                            new ApiResponse<>(
+                                    false,
+                                    "Session expired. Please login again.",
+                                    null
+                            )
+                    );
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(
+                        new ApiResponse<>(
+                                false,
+                                "An unexpected error occurred",
+                                null
+                        )
+                );
+    }
 }

@@ -20,40 +20,69 @@
             Blogs
         </a>
 
+        <a routerLink="/search" routerLinkActive="active">
+            🔍 Search
+        </a>
+
         <a routerLink="/contact" routerLinkActive="active">
-            Contact
+            📧 Contact
+        </a>
+
+        <a routerLink="/vault" routerLinkActive="active">
+            🔐 Vault
+        </a>
+
+        <a routerLink="/media" routerLinkActive="active">
+            🖼️ Media
         </a>
 
         <a routerLink="/about" routerLinkActive="active">
             About
         </a>
 
-        <div class="dropdown" *ngIf="isAdmin()">
-            <span class="dropdown-toggle">Admin ▼</span>
-            <div class="dropdown-menu">
-                <a routerLink="/admin">Dashboard</a>
-                <a routerLink="/admin/projects">Projects</a>
-                <a routerLink="/admin/blogs">Blogs</a>
-                <a routerLink="/admin/skills">Skills</a>
-                <a routerLink="/admin/tools">Tools</a>
-                <a routerLink="/admin/media">Media</a>
-                <a routerLink="/admin/comments">Comments</a>
-                <a routerLink="/admin/notifications">Notifications</a>
-                <a routerLink="/admin/access-requests">Access Requests</a>
-            </div>
-        </div>
-
         <div class="notification-bell" *ngIf="isLoggedIn()" (click)="toggleNotificationPanel()">
             <span class="bell-icon">🔔</span>
             <span class="bell-badge" *ngIf="unreadNotificationsCount > 0">{{ unreadNotificationsCount }}</span>
+        </div>
+
+        <div class="dropdown user-dropdown" *ngIf="isLoggedIn()">
+            <span class="dropdown-toggle user-toggle" (click)="toggleUserDropdown(); $event.stopPropagation()">
+                👤 {{ getUserDisplayName() }} ▼
+            </span>
+            <div class="dropdown-menu user-menu">
+                <a routerLink="/profile">👤 My Profile</a>
+
+                <ng-container *ngIf="isAdmin()">
+                    <div class="dropdown-divider">Admin</div>
+                    <a routerLink="/admin">📊 Dashboard</a>
+                    <a routerLink="/admin/analytics">📈 Analytics</a> 
+                    <a routerLink="/admin/projects">📁 Projects</a>
+                    <a routerLink="/admin/blogs">📝 Blogs</a>
+                    <a routerLink="/admin/skills">🛠️ Skills</a>
+                    <a routerLink="/admin/tools">🔧 Tools</a>
+                    <a routerLink="/admin/media">🖼️ Media</a>
+                    <a routerLink="/admin/comments">💬 Comments</a>
+                    <a routerLink="/admin/notifications">🔔 Notifications</a>
+                    <a routerLink="/admin/access-requests">🔐 Access Requests</a>
+                    <a routerLink="/admin/audit-logs">📋 Audit Logs</a>
+                    <a routerLink="/admin/tags">🏷️ Tags</a>
+                    <a routerLink="/admin/categories">📂 Categories</a>
+                </ng-container>
+
+                <div class="dropdown-divider">Account</div>
+                <a routerLink="/account-deletion" class="danger-link">
+                    🗑️ Delete Account
+                </a>
+
+                <div class="dropdown-divider"></div>
+                <a (click)="logout()" class="logout-link">🚪 Logout</a>
+            </div>
         </div>
 
         <ng-container *ngIf="!isLoggedIn()">
             <a routerLink="/login" routerLinkActive="active">Login</a>
             <a routerLink="/register" routerLinkActive="active">Register</a>
         </ng-container>
-
-        <a *ngIf="isLoggedIn()" (click)="logout()" class="logout-link">Logout</a>
 
         <div class="theme-toggle" [class.active]="isLightMode" (click)="toggleTheme()">
             <span class="theme-icon">{{ isLightMode ? '☀️' : '🌙' }}</span>

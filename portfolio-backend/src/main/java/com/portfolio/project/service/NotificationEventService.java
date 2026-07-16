@@ -88,7 +88,6 @@ public class NotificationEventService {
         event.setUserNotification(true);
         activityEventRepository.save(event);
 
-        // Broadcast to user-specific topic
         Map<String, Object> payload = new HashMap<>();
         payload.put("type", type);
         payload.put("message", message);
@@ -97,17 +96,14 @@ public class NotificationEventService {
         payload.put("targetUrl", targetUrl);
         payload.put("targetId", targetId);
 
-        // Send to user's queue
         messagingTemplate.convertAndSendToUser(userId, "/topic/notifications", payload);
 
-        // Broadcast to activity topic so the user's comment section reloads
         Map<String, String> activityPayload = new HashMap<>();
         activityPayload.put("type", type);
         activityPayload.put("message", message);
         messagingTemplate.convertAndSend("/topic/activity", activityPayload);
     }
 
-    // Overload for backward compatibility
     public void notifyUser(String userId, String userName, String type, String message) {
         notifyUser(userId, userName, type, message, null, null);
     }

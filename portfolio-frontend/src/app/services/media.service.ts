@@ -22,4 +22,17 @@ export class MediaService {
     const params = email ? `?email=${email}` : '';
     return this.http.get<ApiResponse<Media>>(`${this.apiUrl}/${id}${params}`);
   }
+
+  getVaultMedia(email: string): Observable<ApiResponse<Media[]>> {
+    return this.http.get<ApiResponse<Media[]>>(
+      `${this.apiUrl}/vault?email=${encodeURIComponent(email)}`,
+      { withCredentials: true }
+    );
+  }
+
+  getAllPublicMedia(): Observable<ApiResponse<Media[]>> {
+    return this.http.get<ApiResponse<Media[]>>(
+      `${this.apiUrl}/public`
+    );
+  }
 }

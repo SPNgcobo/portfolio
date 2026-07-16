@@ -19,14 +19,12 @@ public class ActivityEventController {
         this.notificationEventService = notificationEventService;
     }
 
-    // Admin endpoints
     @GetMapping
     public ApiResponse<List<ActivityEvent>> getAll() {
         return new ApiResponse<>(true, "Activity events fetched",
                 notificationEventService.getAllActivityEvents());
     }
 
-    // Get only admin events (excludes user notifications)
     @GetMapping("/admin")
     public ApiResponse<List<ActivityEvent>> getAdminEvents() {
         return new ApiResponse<>(true, "Admin activity events fetched",
@@ -63,7 +61,6 @@ public class ActivityEventController {
         return new ApiResponse<>(true, "All read events deleted", null);
     }
 
-    // User-specific endpoints (for regular users to manage their own notifications)
     @PutMapping("/user/{id}/read")
     public ApiResponse<Void> markUserNotificationAsRead(@PathVariable String id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

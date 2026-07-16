@@ -65,12 +65,10 @@ public class FileUploadValidator {
             throw new InvalidFileException("File is empty");
         }
 
-        // SIZE CHECK
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new FileTooLargeException("File exceeds 10MB limit");
         }
 
-        // TYPE CHECK
         String contentType = file.getContentType();
 
         if (contentType == null) {

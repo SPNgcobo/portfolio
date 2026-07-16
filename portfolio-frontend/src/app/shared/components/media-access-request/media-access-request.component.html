@@ -1,0 +1,77 @@
+<div class="media-access-request">
+    <div class="loading-spinner" *ngIf="loading">
+        <div class="spinner-small"></div>
+    </div>
+
+    <div *ngIf="!loading">
+        <div class="access-status" [class]="getStatusClass()">
+            <span class="status-text">{{ getStatusText() }}</span>
+        </div>
+
+        <div *ngIf="isRejected() && adminMessage" class="admin-message">
+            <strong>Admin Response:</strong> {{ adminMessage }}
+        </div>
+
+        <div class="access-actions">
+            <ng-container *ngIf="isApproved()">
+                <button class="btn-view" (click)="viewFile()" title="View file in browser">
+                    <span>👁️</span> View
+                </button>
+                <button class="btn-download" (click)="downloadFile()" title="Download {{ getFileName() }}">
+                    <span>📥</span> Download
+                </button>
+            </ng-container>
+
+            <div *ngIf="isPending()" class="pending-state">
+                <span>⏳</span> Your request is being reviewed
+            </div>
+
+            <button *ngIf="isRejected()" class="btn-request-again" (click)="openRequestModal()">
+                <span>🔄</span> Request Again
+            </button>
+
+            <button *ngIf="canRequest()" class="btn-request" (click)="openRequestModal()">
+                <span>🔒</span> Request Access
+            </button>
+
+            <div *ngIf="!isLoggedIn()" class="login-prompt">
+                <a routerLink="/login" class="login-link">Login to request access</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" *ngIf="showRequestModal" (click)="closeRequestModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>Request Media Access</h3>
+                <button class="close-btn" (click)="closeRequestModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="media-info">
+                    <p><strong>Resource:</strong> {{ media.title }}</p>
+                    <p><strong>Type:</strong> {{ media.type }}</p>
+                    <p *ngIf="media.description"><strong>Description:</strong> {{ media.description }}</p>
+                    <p *ngIf="getFileExtension()"><strong>Format:</strong> {{ getFileExtension().toUpperCase() }}</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="requestReason">Reason for Access *</label>
+                    <textarea id="requestReason" [(ngModel)]="requestReason" rows="4"
+                        placeholder="Please explain why you need access to this resource..."
+                        class="form-textarea"></textarea>
+                    <small class="hint">Minimum 20 characters recommended</small>
+                    <small class="char-count">{{ requestReason.length }}/20 characters</small>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-secondary" (click)="closeRequestModal()">Cancel</button>
+                <button class="btn-primary" (click)="submitRequest()"
+                    [disabled]="submitting || !requestReason.trim() || requestReason.trim().length < 20">
+                    {{ submitting ? 'Submitting...' : 'Submit Request' }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

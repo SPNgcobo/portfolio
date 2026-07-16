@@ -9,12 +9,8 @@ public interface ActivityEventRepository extends MongoRepository<ActivityEvent, 
     long countByReadFalse();
     List<ActivityEvent> findByReadFalse();
     List<ActivityEvent> findByReadTrue();
-
-    // User-specific methods
     List<ActivityEvent> findByUserIdOrderByCreatedAtDesc(String userId);
     long countByUserIdAndReadFalse(String userId);
     List<ActivityEvent> findByUserIdAndReadFalse(String userId);
-
-    // Find by userId and userNotification flag
     List<ActivityEvent> findByUserIdAndUserNotificationTrue(String userId);
 }

@@ -49,4 +49,16 @@ public class User {
     private String passwordResetToken;
 
     private Date passwordResetExpiry;
+
+    /*
+     * TIMESTAMPS
+     */
+    private Date createdAt;
+
+    private Date updatedAt;
+
+    /*
+     * PASSWORD LAST CHANGED
+     */
+    private Date passwordLastChanged;
 }

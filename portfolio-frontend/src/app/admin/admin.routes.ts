@@ -69,9 +69,43 @@ export const ADMIN_ROUTES: Routes = [
             .then(m => m.AdminMediaComponent)
     },
     {
+        path: 'access-requests',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/admin-access-requests/admin-access-requests.component')
+            .then(m => m.AdminAccessRequestsComponent)
+    },
+    {
         path: 'notifications',
         canActivate: [AdminGuard],
         loadComponent: () => import('./pages/admin-notifications/admin-notifications.component')
             .then(m => m.AdminNotificationsComponent)
+    },
+
+    {
+        path: 'audit-logs',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/admin-audit-logs/admin-audit-logs.component')
+            .then(m => m.AdminAuditLogsComponent)
+    },
+
+    {
+        path: 'tags',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/admin-tags/admin-tags.component')
+            .then(m => m.AdminTagsComponent)
+    },
+
+    {
+        path: 'categories',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/admin-categories/admin-categories.component')
+            .then(m => m.AdminCategoriesComponent)
+    },
+
+    {
+        path: 'analytics',
+        canActivate: [AdminGuard],
+        loadComponent: () => import('./pages/admin-analytics/admin-analytics.component')
+            .then(m => m.AdminAnalyticsComponent)
     }
 ];

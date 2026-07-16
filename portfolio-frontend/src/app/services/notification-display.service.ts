@@ -34,7 +34,7 @@ export class NotificationDisplayService {
 
   markUserNotificationsAsRead(): Observable<ApiResponse<void>> {
     return this.http.put<ApiResponse<void>>(
-      `${this.apiUrl}/user/me/read/all`,  
+      `${this.apiUrl}/user/me/read/all`,
       {},
       { withCredentials: true }
     );

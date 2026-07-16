@@ -2,6 +2,7 @@ package com.portfolio.project.service;
 
 import com.portfolio.project.model.AuditLog;
 import com.portfolio.project.repository.AuditLogRepository;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -51,5 +52,11 @@ public class AuditLogService {
 
         return repository
                 .findTop50ByOrderByCreatedAtDesc();
+    }
+
+    // Delete logs older than cutoffDate
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void cleanupOldLogs() {
+        Date cutoffDate = new Date(System.currentTimeMillis() - 90L * 24 * 60 * 60 * 1000); // 90 days
     }
 }

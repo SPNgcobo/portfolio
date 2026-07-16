@@ -1,14 +1,4 @@
-import {
-  Component,
-  Input,
-  OnInit,
-  inject,
-  OnDestroy,
-  AfterViewInit,
-  ElementRef,
-  ViewChild,
-  HostListener
-} from '@angular/core';
+import { Component, Input, OnInit, inject, OnDestroy, AfterViewInit, ElementRef, ViewChild, HostListener, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
@@ -31,6 +21,7 @@ import { PickerComponent } from '@ctrl/ngx-emoji-mart';
 })
 export class CommentSectionComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() projectId!: string;
+  @Output() commentChanged = new EventEmitter<void>();
 
   @ViewChild('commentInput') commentInput!: ElementRef<HTMLTextAreaElement>;
   @ViewChild('replyInput') replyInput!: ElementRef<HTMLTextAreaElement>;
@@ -85,15 +76,20 @@ export class CommentSectionComponent implements OnInit, OnDestroy, AfterViewInit
     this.wsSubscription = this.webSocketService.onNotificationUpdate().subscribe((event) => {
       console.log('📡 WebSocket event received in comment section:', event);
 
-      if (
-        event.type === 'COMMENT_APPROVED' ||
-        event.type === 'COMMENT_DELETED' ||
-        event.type === 'COMMENT_EDITED' ||
-        event.type === 'ADMIN_REPLY' ||
-        event.type === 'NEW_COMMENT'
-      ) {
+      const relevantEvents = [
+        'COMMENT_APPROVED',
+        'COMMENT_DELETED',
+        'COMMENT_EDITED',
+        'ADMIN_REPLY',
+        'NEW_COMMENT',
+        'COMMENT_COUNT_UPDATED' 
+      ];
+
+      if (relevantEvents.includes(event.type)) {
         console.log('🔄 Reloading comments due to event:', event.type);
         this.loadComments();
+
+        this.commentChanged.emit();
       }
     });
   }
@@ -317,6 +313,7 @@ export class CommentSectionComponent implements OnInit, OnDestroy, AfterViewInit
         this.newComment = '';
         this.submitting = false;
         this.loadComments();
+        this.commentChanged.emit();
       },
       error: (err) => {
         console.error('Failed to submit comment:', err);
@@ -361,6 +358,7 @@ export class CommentSectionComponent implements OnInit, OnDestroy, AfterViewInit
         this.replyingToId = null;
         this.submitting = false;
         this.loadComments();
+        this.commentChanged.emit();
       },
       error: (err) => {
         console.error('Failed to submit reply:', err);
@@ -415,5 +413,6 @@ export class CommentSectionComponent implements OnInit, OnDestroy, AfterViewInit
 
   onCommentUpdated(): void {
     this.loadComments();
+    this.commentChanged.emit();
   }
 }

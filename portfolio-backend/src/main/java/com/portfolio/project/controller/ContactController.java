@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.*;
 public class ContactController {
 
     private final EmailService emailService;
-
     private final AuditLogService auditLogService;
-
     private final NotificationEventService notificationEventService;
 
     public ContactController(
@@ -22,14 +20,9 @@ public class ContactController {
             AuditLogService auditLogService,
             NotificationEventService notificationEventService
     ) {
-
         this.emailService = emailService;
-
-        this.auditLogService =
-                auditLogService;
-
-        this.notificationEventService =
-                notificationEventService;
+        this.auditLogService = auditLogService;
+        this.notificationEventService = notificationEventService;
     }
 
     /*
@@ -37,28 +30,13 @@ public class ContactController {
      */
     @PostMapping
     public ApiResponse<Void> send(
+            @RequestBody ContactMessageRequest request
+    ) throws Exception {
 
-            @RequestBody
-            ContactMessageRequest request
-    ) {
+        emailService.sendContactEmail(request);
 
-        /*
-         * SEND TO ADMIN
-         */
-        emailService.sendContactEmail(
-                request
-        );
+        emailService.sendAutoReply(request);
 
-        /*
-         * AUTO REPLY
-         */
-        emailService.sendAutoReply(
-                request
-        );
-
-        /*
-         * AUDIT
-         */
         auditLogService.log(
                 "CONTACT_MESSAGE",
                 request.getEmail(),

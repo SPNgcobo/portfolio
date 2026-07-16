@@ -14,58 +14,45 @@ import org.springframework.web.multipart.MultipartFile;
 public class UploadController {
 
     private final CloudinaryService service;
-
-    private final RateLimitService
-            rateLimitService;
+    private final RateLimitService rateLimitService;
 
     public UploadController(
             CloudinaryService service,
             RateLimitService rateLimitService
     ) {
-
         this.service = service;
-
-        this.rateLimitService =
-                rateLimitService;
+        this.rateLimitService = rateLimitService;
     }
 
     /*
      * UPLOAD FILE
      */
     @PostMapping(
-            consumes =
-                    MediaType.MULTIPART_FORM_DATA_VALUE
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public ApiResponse<UploadResponse> upload(
-
-            @RequestParam("file")
-            MultipartFile file,
-
+            @RequestParam("file") MultipartFile file,
             HttpServletRequest request
     ) {
-
-        String ip =
-                request.getRemoteAddr();
+        String ip = request.getRemoteAddr();
 
         /*
          * RATE LIMIT
          */
-        boolean allowed =
-                rateLimitService.isAllowed(
-                        "UPLOAD_" + ip
-                );
-
+        boolean allowed = rateLimitService.isAllowed("UPLOAD_" + ip);
         if (!allowed) {
-
-            throw new RuntimeException(
-                    "Too many upload requests"
-            );
+            throw new RuntimeException("Too many upload requests");
         }
+
+        UploadResponse response = service.upload(file);
+
+        System.out.println("📤 File uploaded successfully: " + response.getUrl());
+        System.out.println("📤 Public ID: " + response.getPublicId());
 
         return new ApiResponse<>(
                 true,
                 "File uploaded successfully",
-                service.upload(file)
+                response
         );
     }
 
@@ -74,12 +61,9 @@ public class UploadController {
      */
     @DeleteMapping
     public ApiResponse<Void> delete(
-
             @RequestParam String publicId
     ) {
-
         service.delete(publicId);
-
         return new ApiResponse<>(
                 true,
                 "File deleted successfully",

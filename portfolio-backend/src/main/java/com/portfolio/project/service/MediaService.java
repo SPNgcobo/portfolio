@@ -14,27 +14,27 @@ import java.util.List;
 public class MediaService {
 
     private final MediaRepository repository;
-
-    private final CloudinaryService
-            cloudinaryService;
+    private final CloudinaryService cloudinaryService;
 
     public MediaService(
             MediaRepository repository,
             CloudinaryService cloudinaryService
     ) {
-
         this.repository = repository;
-
-        this.cloudinaryService =
-                cloudinaryService;
+        this.cloudinaryService = cloudinaryService;
     }
 
     /*
-     * CREATE
+     * CREATE - Handle null projectId properly
      */
     public Media create(Media media) {
-
         media.setCreatedAt(new Date());
+
+        if (media.getProjectId() != null && media.getProjectId().trim().isEmpty()) {
+            media.setProjectId(null);
+        }
+
+        System.out.println("📝 Creating media: " + media.getTitle() + ", projectId: " + media.getProjectId());
 
         return repository.save(media);
     }
@@ -42,27 +42,15 @@ public class MediaService {
     /*
      * GET PROJECT MEDIA
      */
-    public List<Media> getProjectMedia(
-            String projectId
-    ) {
-
-        return repository.findByProjectId(
-                projectId
-        );
+    public List<Media> getProjectMedia(String projectId) {
+        return repository.findByProjectId(projectId);
     }
 
     /*
      * GET PUBLIC PROJECT MEDIA
      */
-    public List<Media> getPublicProjectMedia(
-            String projectId
-    ) {
-
-        return repository
-                .findByProjectIdAndVisibility(
-                        projectId,
-                        VisibilityType.PUBLIC
-                );
+    public List<Media> getPublicProjectMedia(String projectId) {
+        return repository.findByProjectIdAndVisibility(projectId, VisibilityType.PUBLIC);
     }
 
     /*
@@ -75,34 +63,22 @@ public class MediaService {
     /*
      * GET SINGLE MEDIA
      */
-    public Media getById(
-            String id
-    ) {
-
+    public Media getById(String id) {
         return repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Media not found"
-                        )
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Media not found"));
     }
 
     /*
      * DELETE
      */
     public void delete(String id) {
-
         Media media = getById(id);
 
         /*
          * DELETE FROM CLOUDINARY
          */
-        if (media.getPublicId() != null
-                && !media.getPublicId().isBlank()) {
-
-            cloudinaryService.delete(
-                    media.getPublicId()
-            );
+        if (media.getPublicId() != null && !media.getPublicId().isBlank()) {
+            cloudinaryService.delete(media.getPublicId());
         }
 
         repository.delete(media);
@@ -111,32 +87,21 @@ public class MediaService {
     /*
      * PUBLIC MEDIA
      */
-    public boolean isPublic(
-            Media media
-    ) {
-
-        return media.getVisibility()
-                == VisibilityType.PUBLIC;
+    public boolean isPublic(Media media) {
+        return media.getVisibility() == VisibilityType.PUBLIC;
     }
 
     /*
      * VAULT MEDIA
      */
-    public boolean isVault(
-            Media media
-    ) {
-
-        return media.getVisibility()
-                == VisibilityType.VAULT;
+    public boolean isVault(Media media) {
+        return media.getVisibility() == VisibilityType.VAULT;
     }
 
     /*
      * SAFE RESPONSE
      */
-    public SecureMediaResponse toResponse(
-            Media media
-    ) {
-
+    public SecureMediaResponse toResponse(Media media) {
         return new SecureMediaResponse(
                 media.getId(),
                 media.getTitle(),
@@ -148,10 +113,11 @@ public class MediaService {
     }
 
     /*
-     * UPDATE MEDIA
+     * UPDATE MEDIA - Handle null projectId properly
      */
     public Media update(String id, Media updatedMedia) {
         Media existing = getById(id);
+
         existing.setTitle(updatedMedia.getTitle());
         existing.setDescription(updatedMedia.getDescription());
         existing.setUrl(updatedMedia.getUrl());
@@ -160,6 +126,15 @@ public class MediaService {
         existing.setVisibility(updatedMedia.getVisibility());
         existing.setSize(updatedMedia.getSize());
         existing.setFormat(updatedMedia.getFormat());
+
+        if (updatedMedia.getProjectId() != null && updatedMedia.getProjectId().trim().isEmpty()) {
+            existing.setProjectId(null);
+        } else {
+            existing.setProjectId(updatedMedia.getProjectId());
+        }
+
+        System.out.println("📝 Updating media: " + existing.getTitle() + ", projectId: " + existing.getProjectId());
+
         return repository.save(existing);
     }
 }

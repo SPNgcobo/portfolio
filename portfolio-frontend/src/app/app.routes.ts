@@ -15,6 +15,21 @@ export const routes: Routes = [
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
 
+  // Media Library Route
+  { path: 'media', loadComponent: () => import('./pages/media-library/media-library.component').then(m => m.MediaLibraryComponent) },
+
+  { path: 'profile', canActivate: [AuthGuard], loadComponent: () => import('./pages/profile/profile.component').then(m => m.ProfileComponent) },
+
+  // account-deletion route
+  {
+    path: 'account-deletion',
+    loadComponent: () => import('./pages/account-deletion/account-deletion.component')
+      .then(m => m.AccountDeletionComponent)
+  },
+
+  // access-request route
+  { path: 'vault', loadComponent: () => import('./pages/vault/vault.component').then(m => m.VaultComponent) },
+
   // Project Routes
   { path: 'projects', loadComponent: () => import('./pages/projects/projects.component').then(m => m.ProjectsComponent) },
   { path: 'projects/:id', loadComponent: () => import('./pages/project-detail/project-detail.component').then(m => m.ProjectDetailComponent) },
@@ -24,9 +39,9 @@ export const routes: Routes = [
   { path: 'blogs/:slug', loadComponent: () => import('./pages/blog-detail/blog-detail.component').then(m => m.BlogDetailComponent) },
 
   // // Contact & About Routes
-  // { path: 'contact', loadComponent: () => import('./pages/contact/contact.component').then(m => m.ContactComponent) },
+  { path: 'contact', loadComponent: () => import('./pages/contact/contact.component').then(m => m.ContactComponent) },
   { path: 'about', loadComponent: () => import('./pages/about/about.component').then(m => m.AboutComponent) },
-  // { path: 'search', loadComponent: () => import('./pages/search/search.component').then(m => m.SearchComponent) },
+  { path: 'search', loadComponent: () => import('./pages/search/search.component').then(m => m.SearchComponent) },
 
   // Admin Routes (Protected)
   {

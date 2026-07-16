@@ -67,8 +67,10 @@ export class AdminCommentsComponent implements OnInit, OnDestroy {
         event.type === 'COMMENT_APPROVED' ||
         event.type === 'COMMENT_DELETED' ||
         event.type === 'COMMENT_EDITED' ||
-        event.type === 'ADMIN_REPLY') {
+        event.type === 'ADMIN_REPLY' ||
+        event.type === 'COMMENT_COUNT_UPDATED') { 
         console.log('🔄 Reloading comments due to event:', event.type);
+
         this.loadPendingComments();
         this.loadAllComments();
       }
@@ -237,19 +239,19 @@ export class AdminCommentsComponent implements OnInit, OnDestroy {
 
   confirmDelete(): void {
     this.adminCommentService.adminDeleteComment(this.selectedCommentId).subscribe({
-        next: () => {
-            this.pendingComments = this.pendingComments.filter(c => c.id !== this.selectedCommentId);
-            this.allComments = this.allComments.filter(c => c.id !== this.selectedCommentId);
-            this.showDeleteDialog = false;
-            this.notificationService.success('Comment deleted');
-        },
-        error: (err: Error) => {
-            console.error('Failed to delete comment:', err);
-            this.showDeleteDialog = false;
-            this.notificationService.error('Failed to delete comment');
-        }
+      next: () => {
+        this.pendingComments = this.pendingComments.filter(c => c.id !== this.selectedCommentId);
+        this.allComments = this.allComments.filter(c => c.id !== this.selectedCommentId);
+        this.showDeleteDialog = false;
+        this.notificationService.success('Comment deleted');
+      },
+      error: (err: Error) => {
+        console.error('Failed to delete comment:', err);
+        this.showDeleteDialog = false;
+        this.notificationService.error('Failed to delete comment');
+      }
     });
-}
+  }
 
   cancelDelete(): void {
     this.showDeleteDialog = false;

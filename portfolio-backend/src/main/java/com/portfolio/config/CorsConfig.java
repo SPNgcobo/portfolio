@@ -13,35 +13,20 @@ public class CorsConfig {
 
     @Bean
     public CorsFilter corsFilter() {
-
-        CorsConfiguration config =
-                new CorsConfiguration();
-
+        CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-
         config.setAllowedOrigins(List.of(
                 "http://localhost:4200",
                 "https://samkelongcobo.is-a.dev",
                 "https://www.samkelongcobo.is-a.dev"
         ));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        config.setExposedHeaders(List.of("Authorization", "Set-Cookie"));
+        config.setMaxAge(3600L);
 
-        config.setAllowedHeaders(
-                List.of("*")
-        );
-
-        config.setAllowedMethods(
-                List.of("*")
-        );
-
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
-
-        source.registerCorsConfiguration(
-                "/**",
-                config
-        );
-
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
-
 }

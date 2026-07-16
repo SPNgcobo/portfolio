@@ -1,0 +1,190 @@
+<div class="media-library">
+
+    <div class="page-header">
+        <div>
+            <h1>🖼️ Media Library</h1>
+            <p class="subtitle">Browse all publicly available media</p>
+        </div>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Loading media...</p>
+    </div>
+
+    <div *ngIf="!loading">
+
+        <div class="media-section" *ngIf="hasCategory('images')">
+            <h2 class="section-title">📷 Images</h2>
+            <div class="media-grid images-grid">
+                <div class="media-card" *ngFor="let media of getImages()">
+                    <div class="media-preview">
+                        <img [src]="media.url" [alt]="getDisplayName(media)" loading="lazy">
+                        <div class="media-overlay" *ngIf="media.projectId">
+                            <span class="project-badge">📁 {{ media.projectId | slice:0:8 }}...</span>
+                        </div>
+                    </div>
+                    <div class="media-info">
+                        <h3 class="media-title">{{ getDisplayName(media) }}</h3>
+                        <p class="media-description">{{ media.description || 'No description available' }}</p>
+                        <div class="media-meta">
+                            <span class="badge type image">IMAGE</span>
+                            <span class="media-size">{{ formatFileSize(media.size) }}</span>
+                            <span class="media-type" *ngIf="!media.projectId">📌 Standalone</span>
+                        </div>
+                    </div>
+                    <div class="media-actions">
+                        <a [href]="media.url" target="_blank" class="action-btn view">👁️ View</a>
+                        <button class="action-btn download" (click)="downloadFile(media)">📥 Download</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="media-section" *ngIf="hasCategory('videos')">
+            <h2 class="section-title">🎥 Videos</h2>
+            <div class="media-grid videos-grid">
+                <div class="media-card" *ngFor="let media of getVideos()">
+                    <div class="media-preview video-preview">
+                        <video controls preload="metadata" poster="/assets/video-placeholder.png">
+                            <source [src]="media.url" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <div class="media-info">
+                        <h3 class="media-title">{{ getDisplayName(media) }}</h3>
+                        <p class="media-description">{{ media.description || 'No description available' }}</p>
+                        <div class="media-meta">
+                            <span class="badge type video">VIDEO</span>
+                            <span class="media-size">{{ formatFileSize(media.size) }}</span>
+                            <span class="media-type" *ngIf="!media.projectId">📌 Standalone</span>
+                        </div>
+                    </div>
+                    <div class="media-actions">
+                        <a [href]="media.url" target="_blank" class="action-btn view">👁️ View</a>
+                        <button class="action-btn download" (click)="downloadFile(media)">📥 Download</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="media-section" *ngIf="hasCategory('audio')">
+            <h2 class="section-title">🎵 Audio</h2>
+            <div class="media-grid audio-grid">
+                <div class="media-card audio-card" *ngFor="let media of getAudio()">
+                    <div class="audio-player">
+                        <div class="audio-icon-large">🎵</div>
+                        <div class="audio-info">
+                            <span class="audio-title">{{ getDisplayName(media) }}</span>
+                            <span class="audio-size">{{ formatFileSize(media.size) }}</span>
+                            <span class="media-type" *ngIf="!media.projectId">📌 Standalone</span>
+                        </div>
+                        <audio controls class="audio-controls">
+                            <source [src]="getSafeAudioUrl(media.url)" type="audio/mpeg">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+                    <div class="media-info">
+                        <p class="media-description">{{ media.description || 'No description available' }}</p>
+                        <div class="media-meta">
+                            <span class="badge type audio">AUDIO</span>
+                            <span class="media-size">{{ formatFileSize(media.size) }}</span>
+                            <span class="media-type" *ngIf="!media.projectId">📌 Standalone</span>
+                        </div>
+                    </div>
+                    <div class="media-actions">
+                        <button class="action-btn download" (click)="downloadFile(media)">📥 Download</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="media-section" *ngIf="hasCategory('pdfs')">
+            <h2 class="section-title">📄 PDF Documents</h2>
+            <div class="media-grid documents-grid">
+                <div class="media-card document-card" *ngFor="let media of getPDFs()">
+                    <div class="document-preview">
+                        <div class="document-icon">📕</div>
+                        <div class="document-info">
+                            <span class="document-name">{{ getDisplayName(media) }}</span>
+                            <div class="document-meta">
+                                <span class="badge type pdf">PDF</span>
+                                <span class="media-size">{{ formatFileSize(media.size) }}</span>
+                                <span class="media-type" *ngIf="!media.projectId">📌 Standalone</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="media-info">
+                        <p class="media-description">{{ media.description || 'No description available' }}</p>
+                    </div>
+                    <div class="media-actions">
+                        <a [href]="media.url" target="_blank" class="action-btn view">👁️ View</a>
+                        <button class="action-btn download" (click)="downloadFile(media)">📥 Download</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="media-section" *ngIf="hasCategory('certificates')">
+            <h2 class="section-title">🏆 Certificates</h2>
+            <div class="media-grid documents-grid">
+                <div class="media-card document-card" *ngFor="let media of getCertificates()">
+                    <div class="document-preview">
+                        <div class="document-icon">🏆</div>
+                        <div class="document-info">
+                            <span class="document-name">{{ getDisplayName(media) }}</span>
+                            <div class="document-meta">
+                                <span class="badge type certificate">CERTIFICATE</span>
+                                <span class="media-size">{{ formatFileSize(media.size) }}</span>
+                                <span class="media-type" *ngIf="!media.projectId">📌 Standalone</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="media-info">
+                        <p class="media-description">{{ media.description || 'No description available' }}</p>
+                    </div>
+                    <div class="media-actions">
+                        <a [href]="media.url" target="_blank" class="action-btn view">👁️ View</a>
+                        <button class="action-btn download" (click)="downloadFile(media)">📥 Download</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="media-section" *ngIf="hasCategory('cvs')">
+            <h2 class="section-title">📋 CV / Resume</h2>
+            <div class="media-grid documents-grid">
+                <div class="media-card document-card" *ngFor="let media of getCVs()">
+                    <div class="document-preview">
+                        <div class="document-icon">📋</div>
+                        <div class="document-info">
+                            <span class="document-name">{{ getDisplayName(media) }}</span>
+                            <div class="document-meta">
+                                <span class="badge type cv">CV</span>
+                                <span class="media-size">{{ formatFileSize(media.size) }}</span>
+                                <span class="media-type" *ngIf="!media.projectId">📌 Standalone</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="media-info">
+                        <p class="media-description">{{ media.description || 'No description available' }}</p>
+                    </div>
+                    <div class="media-actions">
+                        <a [href]="media.url" target="_blank" class="action-btn view">👁️ View</a>
+                        <button class="action-btn download" (click)="downloadFile(media)">📥 Download</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="empty-state" *ngIf="!hasAnyMedia()">
+            <span class="empty-icon">🖼️</span>
+            <h3>No Public Media Available</h3>
+            <p>There are no public media files available at the moment.</p>
+            <p class="sub-text">Check back later or explore other sections.</p>
+            <a routerLink="/projects" class="btn-primary">Browse Projects</a>
+        </div>
+
+    </div>
+
+</div>

@@ -14,7 +14,7 @@ export interface ActivityEvent {
   targetId?: string;
   createdAt?: Date;
   read: boolean;
-  userNotification?: boolean;  
+  userNotification?: boolean;
 }
 
 @Injectable({

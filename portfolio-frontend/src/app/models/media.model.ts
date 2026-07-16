@@ -1,6 +1,6 @@
 export interface Media {
     id?: string;
-    projectId: string;
+    projectId: string | null;
     title: string;
     description: string;
     url: string;

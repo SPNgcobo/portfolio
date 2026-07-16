@@ -30,108 +30,108 @@ public class EmailService {
     /*
      * CONTACT EMAIL TO ADMIN
      */
-    public void sendContactEmail(ContactMessageRequest request) {
-        try {
-            CreateEmailOptions params = CreateEmailOptions.builder()
-                    .from(fromEmail)
-                    .to(adminEmail)
-                    .subject("Portfolio Contact: " + request.getSubject())
-                    .html(buildContactEmailHtml(request))
-                    .build();
+    public void sendContactEmail(ContactMessageRequest request) throws ResendException {
+        CreateEmailOptions params = CreateEmailOptions.builder()
+                .from(fromEmail)
+                .to(adminEmail)
+                .subject("Portfolio Contact: " + request.getSubject())
+                .html(buildContactEmailHtml(request))
+                .build();
 
-            resend.emails().send(params);
-            log.info("Contact email sent from: {}", request.getEmail());
-
-        } catch (ResendException e) {
-            log.error("Failed to send contact email: {}", e.getMessage());
-            throw new RuntimeException("Failed to send contact email");
-        }
+        resend.emails().send(params);
+        log.info("✅ Contact email sent from: {}", request.getEmail());
     }
 
     /*
      * AUTO REPLY TO USER
      */
-    public void sendAutoReply(ContactMessageRequest request) {
-        try {
-            CreateEmailOptions params = CreateEmailOptions.builder()
-                    .from(fromEmail)
-                    .to(request.getEmail())
-                    .subject("Thank you for contacting me")
-                    .html(buildAutoReplyHtml(request))
-                    .build();
+    public void sendAutoReply(ContactMessageRequest request) throws ResendException {
+        CreateEmailOptions params = CreateEmailOptions.builder()
+                .from(fromEmail)
+                .to(request.getEmail())
+                .subject("Thank you for contacting me")
+                .html(buildAutoReplyHtml(request))
+                .build();
 
-            resend.emails().send(params);
-            log.info("Auto-reply sent to: {}", request.getEmail());
-
-        } catch (ResendException e) {
-            log.error("Failed to send auto reply to {}: {}", request.getEmail(), e.getMessage());
-            throw new RuntimeException("Failed to send auto reply");
-        }
+        resend.emails().send(params);
+        log.info("✅ Auto-reply sent to: {}", request.getEmail());
     }
 
     /*
      * COMMENT MODERATION ALERT TO ADMIN
      */
-    public void sendModerationAlert(String content, String authorEmail, String projectTitle) {
-        try {
-            CreateEmailOptions params = CreateEmailOptions.builder()
-                    .from(fromEmail)
-                    .to(adminEmail)
-                    .subject("New Comment Awaiting Moderation")
-                    .html(buildModerationAlertHtml(content, authorEmail, projectTitle))
-                    .build();
+    public void sendModerationAlert(String content, String authorEmail, String projectTitle) throws ResendException {
+        CreateEmailOptions params = CreateEmailOptions.builder()
+                .from(fromEmail)
+                .to(adminEmail)
+                .subject("New Comment Awaiting Moderation")
+                .html(buildModerationAlertHtml(content, authorEmail, projectTitle))
+                .build();
 
-            resend.emails().send(params);
-            log.info("Moderation alert sent for comment by: {}", authorEmail);
+        resend.emails().send(params);
+        log.info("✅ Moderation alert sent for comment by: {}", authorEmail);
+    }
 
-        } catch (ResendException e) {
-            log.error("Failed to send moderation alert: {}", e.getMessage());
-            throw new RuntimeException("Failed to send moderation alert");
-        }
+    /*
+     * ACCOUNT DELETION CONFIRMATION EMAIL TO USER
+     */
+    public void sendAccountDeletionConfirmation(String email, String username) throws ResendException {
+        CreateEmailOptions params = CreateEmailOptions.builder()
+                .from(fromEmail)
+                .to(email)
+                .subject("Account Deletion Confirmation - Samkelo Ngcobo Portfolio")
+                .html(buildAccountDeletionHtml(username))
+                .build();
+
+        resend.emails().send(params);
+        log.info("✅ Account deletion confirmation sent to: {}", email);
+    }
+
+    /*
+     * ACCOUNT DELETION NOTIFICATION TO ADMIN
+     */
+    public void sendAccountDeletionNotification(String email, String username, String reason, String feedback) throws ResendException {
+        CreateEmailOptions params = CreateEmailOptions.builder()
+                .from(fromEmail)
+                .to(adminEmail)
+                .subject("Account Deleted: " + email)
+                .html(buildAccountDeletionNotificationHtml(username, email, reason, feedback))
+                .build();
+
+        resend.emails().send(params);
+        log.info("✅ Account deletion notification sent to admin for: {}", email);
     }
 
     /*
      * PASSWORD RESET EMAIL TO USER
      */
-    public void sendPasswordResetEmail(String email, String resetToken) {
-        try {
-            String resetUrl = webappUrl + "/reset-password?token=" + resetToken;
+    public void sendPasswordResetEmail(String email, String resetToken) throws ResendException {
+        String resetUrl = webappUrl + "/reset-password?token=" + resetToken;
 
-            CreateEmailOptions params = CreateEmailOptions.builder()
-                    .from(fromEmail)
-                    .to(email)
-                    .subject("Reset Your Password - Samkelo Ngcobo Portfolio")
-                    .html(buildPasswordResetHtml(resetUrl))
-                    .build();
+        CreateEmailOptions params = CreateEmailOptions.builder()
+                .from(fromEmail)
+                .to(email)
+                .subject("Reset Your Password - Samkelo Ngcobo Portfolio")
+                .html(buildPasswordResetHtml(resetUrl))
+                .build();
 
-            resend.emails().send(params);
-            log.info("Password reset email sent to: {}", email);
-
-        } catch (ResendException e) {
-            log.error("Failed to send password reset email to {}: {}", email, e.getMessage());
-            throw new RuntimeException("Failed to send password reset email");
-        }
+        resend.emails().send(params);
+        log.info("✅ Password reset email sent to: {}", email);
     }
 
     /*
      * WELCOME EMAIL TO NEW USER
      */
-    public void sendWelcomeEmail(String email, String username) {
-        try {
-            CreateEmailOptions params = CreateEmailOptions.builder()
-                    .from(fromEmail)
-                    .to(email)
-                    .subject("Welcome to Samkelo Ngcobo's Portfolio!")
-                    .html(buildWelcomeEmailHtml(username))
-                    .build();
+    public void sendWelcomeEmail(String email, String username) throws ResendException {
+        CreateEmailOptions params = CreateEmailOptions.builder()
+                .from(fromEmail)
+                .to(email)
+                .subject("Welcome to Samkelo Ngcobo's Portfolio!")
+                .html(buildWelcomeEmailHtml(username))
+                .build();
 
-            resend.emails().send(params);
-            log.info("Welcome email sent to: {}", email);
-
-        } catch (ResendException e) {
-            log.error("Failed to send welcome email to {}: {}", email, e.getMessage());
-            // Don't throw - welcome email is non-critical
-        }
+        resend.emails().send(params);
+        log.info("✅ Welcome email sent to: {}", email);
     }
 
     // ==================== HTML BUILDERS ====================
@@ -153,6 +153,9 @@ public class EmailService {
                 </div>
                 <p style="color: #6b7280; font-size: 12px; margin-top: 20px;">
                     Sent from the portfolio contact form.
+                </p>
+                <p style="color: #6b7280; font-size: 12px;">
+                    — Samkelo Ngcobo Portfolio
                 </p>
             </body>
             </html>
@@ -216,12 +219,70 @@ public class EmailService {
                         Review Comment
                     </a>
                 </p>
+                <p style="color: #6b7280; font-size: 12px;">
+                    — Samkelo Ngcobo Portfolio
+                </p>
             </body>
             </html>
             """.formatted(
                 escapeHtml(projectTitle),
                 escapeHtml(authorEmail),
                 escapeHtml(content)
+        );
+    }
+
+    private String buildAccountDeletionHtml(String username) {
+        return """
+            <!DOCTYPE html>
+            <html>
+            <head><meta charset="UTF-8"></head>
+            <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #6366f1;">Account Deletion Confirmation</h2>
+                <p>Hello %s,</p>
+                <p>This email confirms that your account has been successfully deleted from the <strong>Samkelo Ngcobo Portfolio</strong> website.</p>
+                <div style="background: #fef3c7; padding: 15px; border-radius: 12px; margin: 20px 0;">
+                    <p style="margin: 0; color: #92400e;">
+                        <strong>⚠️ Important:</strong> All your personal data has been permanently removed from our systems.
+                    </p>
+                </div>
+                <p>If you did not request this deletion, please contact us immediately.</p>
+                <hr style="margin: 30px 0 20px 0;">
+                <p style="color: #6b7280; font-size: 12px;">
+                    Best regards,<br>
+                    <strong>Samkelo Ngcobo</strong><br>
+                    Full-stack Developer
+                </p>
+            </body>
+            </html>
+            """.formatted(escapeHtml(username));
+    }
+
+    private String buildAccountDeletionNotificationHtml(String username, String email, String reason, String feedback) {
+        return """
+            <!DOCTYPE html>
+            <html>
+            <head><meta charset="UTF-8"></head>
+            <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #ef4444;">🗑️ Account Deleted</h2>
+                <div style="background: #f3f4f6; padding: 20px; border-radius: 12px;">
+                    <p><strong>User:</strong> %s</p>
+                    <p><strong>Email:</strong> %s</p>
+                    <p><strong>Reason:</strong> %s</p>
+                    %s
+                </div>
+                <p style="color: #6b7280; font-size: 12px; margin-top: 20px;">
+                    This account was permanently deleted from the system.
+                </p>
+                <p style="color: #6b7280; font-size: 12px;">
+                    — Samkelo Ngcobo Portfolio
+                </p>
+            </body>
+            </html>
+            """.formatted(
+                escapeHtml(username),
+                escapeHtml(email),
+                escapeHtml(reason),
+                feedback.isEmpty() ? "" : "<p><strong>Feedback:</strong> " + escapeHtml(feedback) + "</p>"
         );
     }
 
@@ -285,7 +346,6 @@ public class EmailService {
             """.formatted(escapeHtml(username));
     }
 
-    // Helper method to prevent XSS in emails
     private String escapeHtml(String text) {
         if (text == null) return "";
         return text
