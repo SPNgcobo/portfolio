@@ -48,7 +48,7 @@ export class NotificationWebSocketService {
     this.client = new Client({
       brokerURL: `${environment.socketUrl}/websocket`,
       reconnectDelay: 5000,
-      debug: (str) => {
+      debug: (str: string) => {
 
       },
       onConnect: () => {
