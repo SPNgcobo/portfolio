@@ -28,9 +28,8 @@ public class AuthController {
     private final CurrentUserService currentUserService;
     private final UserRepository userRepository;
 
-
     // COOKIE ENV CONTROL (LOCAL vs PROD)
-    @Value("${app.cookie.secure}")
+    @Value("${app.cookie.secure:false}")
     private boolean secureCookie;
 
     public AuthController(
@@ -51,11 +50,9 @@ public class AuthController {
             @RequestBody RegisterRequest request,
             HttpServletResponse response
     ) {
-
+        System.out.println("📝 Register request for: " + request.getEmail());
         AuthResponse auth = authService.register(request);
-
         setCookies(response, auth);
-
         return new ApiResponse<>(true, "Registration successful", null);
     }
 
@@ -67,12 +64,20 @@ public class AuthController {
             @RequestBody LoginRequest request,
             HttpServletResponse response
     ) {
-
-        AuthResponse auth = authService.login(request);
-
-        setCookies(response, auth);
-
-        return new ApiResponse<>(true, "Login successful", null);
+        System.out.println("🔑 Login attempt for: " + request.getEmail());
+        try {
+            AuthResponse auth = authService.login(request);
+            setCookies(response, auth);
+            System.out.println("✅ Login successful for: " + request.getEmail());
+            return new ApiResponse<>(true, "Login successful", null);
+        } catch (AuthenticationException e) {
+            System.err.println("❌ Login failed for " + request.getEmail() + ": " + e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            System.err.println("❌ Unexpected error for " + request.getEmail() + ": " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     /*
@@ -80,15 +85,12 @@ public class AuthController {
      */
     @GetMapping("/me")
     public ApiResponse<UserInfoResponse> me() {
-
         User user = currentUserService.getCurrentUser();
-
         UserInfoResponse response = new UserInfoResponse(
                 user.getEmail(),
                 user.getRole().name(),
                 user.getUsername()
         );
-
         return new ApiResponse<>(true, "User fetched", response);
     }
 
@@ -97,7 +99,6 @@ public class AuthController {
      */
     @GetMapping("/profile")
     public ApiResponse<UserProfileResponse> getProfile() {
-
         User user = currentUserService.getCurrentUser();
 
         Date createdAt = user.getCreatedAt();
@@ -128,7 +129,6 @@ public class AuthController {
     public ApiResponse<UserProfileResponse> updateUsername(
             @RequestBody UpdateUsernameRequest request
     ) {
-
         User user = currentUserService.getCurrentUser();
         User updatedUser = authService.updateUsername(user, request.getUsername());
 
@@ -152,10 +152,8 @@ public class AuthController {
     public ApiResponse<Void> changePassword(
             @RequestBody ChangePasswordRequest request
     ) {
-
         User user = currentUserService.getCurrentUser();
         authService.changePassword(user, request);
-
         return new ApiResponse<>(true, "Password changed successfully", null);
     }
 
@@ -167,11 +165,10 @@ public class AuthController {
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-
         String refreshToken = extractCookie(request, "refresh_token");
+        System.out.println("🔄 Refresh token request: " + (refreshToken != null ? "Token present" : "No token"));
 
         AuthResponse auth = authService.refresh(refreshToken);
-
         setCookies(response, auth);
 
         return new ApiResponse<>(true, "Token refreshed", null);
@@ -185,13 +182,9 @@ public class AuthController {
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-
         String refreshToken = extractCookie(request, "refresh_token");
-
         authService.logout(refreshToken);
-
         clearCookies(response);
-
         return new ApiResponse<>(true, "Logged out successfully", null);
     }
 
@@ -202,9 +195,7 @@ public class AuthController {
     public ApiResponse<Object> forgotPassword(
             @RequestBody ForgotPasswordRequest request
     ) {
-
         authService.forgotPassword(request);
-
         return new ApiResponse<>(
                 true,
                 "Password reset email sent",
@@ -221,7 +212,6 @@ public class AuthController {
     ) {
         System.out.println("🔑 Reset password request received");
         System.out.println("📝 Token: " + request.getToken());
-        System.out.println("📝 New Password: " + (request.getNewPassword() != null ? "***" : "null"));
 
         try {
             authService.resetPassword(request);
@@ -260,40 +250,40 @@ public class AuthController {
     ) {
         User user = currentUserService.getCurrentUser();
         authService.deleteAccount(user, request, httpRequest);
-
         clearCookies(response);
-
         return new ApiResponse<>(true, "Account deleted successfully", null);
     }
 
     // ================= COOKIE HELPERS =================
 
     private void setCookies(HttpServletResponse response, AuthResponse auth) {
+        boolean isSecure = secureCookie;
 
         ResponseCookie accessCookie =
                 ResponseCookie.from("access_token", auth.getToken())
                         .httpOnly(true)
-                        .secure(secureCookie)
+                        .secure(isSecure)
                         .path("/")
                         .maxAge(15 * 60)
-                        .sameSite("Lax")
+                        .sameSite(isSecure ? "None" : "Lax")
                         .build();
 
         ResponseCookie refreshCookie =
                 ResponseCookie.from("refresh_token", auth.getRefreshToken())
                         .httpOnly(true)
-                        .secure(secureCookie)
+                        .secure(isSecure)
                         .path("/")
                         .maxAge(7 * 24 * 60 * 60)
-                        .sameSite("Lax")
+                        .sameSite(isSecure ? "None" : "Lax")
                         .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
+        System.out.println("🍪 Cookie settings - Secure: " + isSecure + ", SameSite: " + (isSecure ? "None" : "Lax"));
     }
 
     private void clearCookies(HttpServletResponse response) {
-
         ResponseCookie accessCookie =
                 ResponseCookie.from("access_token", "")
                         .path("/")
@@ -311,7 +301,6 @@ public class AuthController {
     }
 
     private String extractCookie(HttpServletRequest request, String name) {
-
         if (request.getCookies() == null) return null;
 
         return Arrays.stream(request.getCookies())

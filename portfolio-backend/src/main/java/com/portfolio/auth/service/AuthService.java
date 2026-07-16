@@ -149,8 +149,16 @@ public class AuthService {
      * LOGIN
      */
     public AuthResponse login(LoginRequest request) {
+        System.out.println("🔑 Login attempt for email: " + request.getEmail());
+
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new AuthenticationException("Invalid credentials"));
+                .orElseThrow(() -> {
+                    System.out.println("❌ User not found: " + request.getEmail());
+                    return new AuthenticationException("Invalid credentials");
+                });
+
+        System.out.println("✅ User found: " + user.getEmail());
+        System.out.println("🔐 Stored password hash length: " + (user.getPassword() != null ? user.getPassword().length() : 0));
 
         if (user.isAccountLocked()) {
             if (user.getLockoutEndTime() != null
@@ -162,6 +170,7 @@ public class AuthService {
         }
 
         boolean matches = passwordEncoder.matches(request.getPassword(), user.getPassword());
+        System.out.println("🔑 Password matches: " + matches);
 
         if (!matches) {
             processFailedLogin(user);
@@ -187,6 +196,8 @@ public class AuthService {
         user.setUpdatedAt(new Date());
 
         userRepository.save(user);
+
+        System.out.println("✅ Login successful for: " + user.getEmail());
 
         return new AuthResponse(jwt, refreshToken, user.getRole().name());
     }
